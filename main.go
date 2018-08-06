@@ -41,9 +41,10 @@ func main() {
 	go db.Heartbeat()
 
 	r := mux.NewRouter()
+
 	r.HandleFunc("/admin", AdminHandler)
-	r.HandleFunc("/admin/users", AdminUsersHandler)
-	r.HandleFunc("/admin/pages", AdminPagesHandler)
+	r.HandleFunc("/admin/users", UsersAdmin)
+	r.HandleFunc("/admin/pages", PagesAdmin)
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
@@ -67,7 +68,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	// w.WriteString([]byte()))
 }
 
-func AdminUsersHandler(w http.ResponseWriter, r *http.Request) {
+func UsersAdmin(w http.ResponseWriter, r *http.Request) {
 
 	usernames := make([]string, 0)
 
@@ -100,7 +101,7 @@ func AdminUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(renderedContent))
 }
 
-func AdminPagesHandler(w http.ResponseWriter, r *http.Request) {
+func PagesAdmin(w http.ResponseWriter, r *http.Request) {
 	pageroutes := make([]string, 0)
 
 	pt := db.PagesTable{}
