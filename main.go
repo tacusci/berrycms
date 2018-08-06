@@ -4,18 +4,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/gobuffalo/plush"
-
-	"github.com/gorilla/mux"
-
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/handling"
 	"github.com/tacusci/logging"
 )
 
@@ -43,97 +39,19 @@ func main() {
 	db.CreateTestData()
 	go db.Heartbeat()
 
-	r := mux.NewRouter()
-
-	r.HandleFunc("/admin", AdminHandler)
-	r.HandleFunc("/admin/users", UsersAdmin)
-	r.HandleFunc("/admin/pages", PagesAdmin)
+	rs := &handling.MutableRouter{}
+	rs.Reload()
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      r,
+		Handler:      rs.Root,
 	}
 
 	go listenForStopSig(srv)
 	srv.ListenAndServe()
-}
-
-func AdminHandler(w http.ResponseWriter, r *http.Request) {
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.html")
-	if err != nil {
-		logging.Error("Unable to find resources folder...")
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-	}
-	w.Write(content)
-	// w.WriteString([]byte()))
-}
-
-func UsersAdmin(w http.ResponseWriter, r *http.Request) {
-
-	usernames := make([]string, 0)
-
-	ut := db.UsersTable{}
-	row, err := ut.Select(db.Conn, "username", "")
-
-	if err != nil {
-		logging.ErrorAndExit(err.Error())
-	}
-
-	for row.Next() {
-		u := &db.User{}
-		row.Scan(&u.Username)
-		usernames = append(usernames, u.Username)
-	}
-
-	pctx := plush.NewContext()
-	pctx.Set("names", usernames)
-
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.users.html")
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-	}
-	renderedContent, err := plush.Render(string(content), pctx)
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-	}
-	w.Write([]byte(renderedContent))
-}
-
-func PagesAdmin(w http.ResponseWriter, r *http.Request) {
-	pageroutes := make([]string, 0)
-
-	pt := db.PagesTable{}
-	row, err := pt.Select(db.Conn, "route", "")
-
-	if err != nil {
-		logging.ErrorAndExit(err.Error())
-	}
-
-	for row.Next() {
-		p := &db.Page{}
-		row.Scan(&p.Route)
-		pageroutes = append(pageroutes, p.Route)
-	}
-
-	pctx := plush.NewContext()
-	pctx.Set("names", pageroutes)
-
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.pages.html")
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-	}
-	renderedContent, err := plush.Render(string(content), pctx)
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-	}
-	w.Write([]byte(renderedContent))
 }
 
 func listenForStopSig(srv *http.Server) {
