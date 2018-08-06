@@ -41,13 +41,22 @@ func Close() {
 //CreateTestData fill database with known test data for development/testing purposes
 func CreateTestData() {
 	usersTable := &UsersTable{}
-	usersTable.Insert(Conn, User{
+	err := usersTable.Insert(Conn, User{
 		FirstName: "John",
 		LastName:  "Doe",
 		Username:  "jdoe",
 		AuthHash:  util.HashAndSalt([]byte("iamjohndoe")),
 		Email:     "person@place.com",
 	})
+	pagesTable := &PagesTable{}
+	err = pagesTable.Insert(Conn, Page{
+		Title:   "Test Page",
+		Route:   "/test",
+		Content: "<h2>Testing testing 123</h2>",
+	})
+	if err != nil {
+		logging.Error(err.Error())
+	}
 }
 
 func Heartbeat() {
@@ -98,5 +107,5 @@ func createTables(db *sql.DB) {
 }
 
 func getTables() []Table {
-	return []Table{&UsersTable{}, &AuthTable{}, &UserRolesTable{}}
+	return []Table{&UsersTable{}, &UserRolesTable{}, &PagesTable{}}
 }

@@ -192,48 +192,6 @@ func (ut *UsersTable) buildInsertStatement(m Model) string {
 
 // ******** End UserTable ********
 
-// ******** AuthTable ********
-
-//AuthTable describes the table structure for AuthTable in db
-type AuthTable struct {
-	Authid int    `tbl:"PKNNAIUI"`
-	UUID   string `tbl:"NNUI"`
-	Userid int    `tbl:"NNUI"`
-}
-
-//Init initialises the auth table with default data
-func (at *AuthTable) Init(db *sql.DB) {}
-
-//Name gets the table name, have to implement to make AuthTable inherit Table
-func (at *AuthTable) Name() string {
-	return "auth"
-}
-
-//Insert inserts parsed auth model into the auth table
-func (at *AuthTable) Insert(db *sql.DB, a Auth) error {
-	newUUID, err := uuid.NewV4()
-	if err != nil {
-		return err
-	}
-	a.uuid = newUUID.String()
-	insertStatement := at.buildInsertStatement(&a)
-	_, err = db.Exec(insertStatement)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (at *AuthTable) buildFields() []Field {
-	return buildFieldsFromTable(at)
-}
-
-func (at *AuthTable) buildInsertStatement(m Model) string {
-	return buildInsertStatementFromTable(at, m)
-}
-
-// ******** End AuthTable ********
-
 // ******** Start User Roles Table ********
 
 //UserRolesTable describes the table structure for UserRolesTable in db
@@ -284,6 +242,59 @@ func (urt *UserRolesTable) buildInsertStatement(m Model) string {
 }
 
 // ******** End User Roles Table ********
+
+// ******** Start Pages Table ********
+type PagesTable struct {
+	Pageid  int    `tbl:"PKNNAIUI"`
+	UUID    string `tbl:"NNUI"`
+	Title   string `tbl:"NNUI"`
+	Route   string `tbl:"NNUI"`
+	Content string `tbl:"NN"`
+}
+
+func (pt *PagesTable) Init(db *sql.DB) {}
+
+func (pt *PagesTable) Name() string {
+	return "pages"
+}
+
+func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
+	if p.UUID != "" {
+		return fmt.Errorf("Page to insert already has UUID %s", p.UUID)
+	}
+
+	if p.UUID == "" {
+		newUUID, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		p.UUID = newUUID.String()
+		insertStatement := pt.buildInsertStatement(&p)
+		_, err = db.Exec(insertStatement)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, pt.Name(), whereClause))
+	} else {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, pt.Name()))
+	}
+}
+
+func (pt *PagesTable) buildFields() []Field {
+	return buildFieldsFromTable(pt)
+}
+
+func (pt *PagesTable) buildInsertStatement(m Model) string {
+	return buildInsertStatementFromTable(pt, m)
+}
+
+// ******** End Pages Table ********
 
 // ****************************************** END TABLES ******************************************
 /////////////////////////////////////////////////////////////////////////////////
@@ -365,42 +376,6 @@ func (u *User) Validate() error {
 	return nil
 }
 
-//Contact describes the content of a contact, it should match the columns present in the contact table
-type Contact struct {
-	contactid int `tbl:"AI"`
-	uuid      string
-	firstname string
-	lastname  string
-	email     string
-}
-
-//TableName gets the name of the contacts table
-func (c *Contact) TableName() string {
-	return "contacts"
-}
-
-//BuildFields generates a list of fields generated from the fields of the contact struct
-func (c *Contact) BuildFields() []Field {
-	return buildFieldsFromModel(c)
-}
-
-//Auth describes the content of an auth entry, it should match the columns present in the auth table
-type Auth struct {
-	authid int `tbl:"AI"`
-	uuid   string
-	userid int
-}
-
-//TableName gets the name of the auth table
-func (a *Auth) TableName() string {
-	return "auth"
-}
-
-//BuildFields generates a list of fields generated from the fields of the auth struct
-func (a *Auth) BuildFields() []Field {
-	return buildFieldsFromModel(a)
-}
-
 //UserRole describes the content of a userrole entry, it should match the columns present in the userrole table
 type UserRole struct {
 	Userroleid int `tbl:"AI"`
@@ -415,6 +390,22 @@ func (ur *UserRole) TableName() string {
 //BuildFields generates a list of fields generated from the fields of the userrole struct
 func (ur *UserRole) BuildFields() []Field {
 	return buildFieldsFromModel(ur)
+}
+
+type Page struct {
+	PageId  int    `tbl:"AI" json:"pageid"`
+	UUID    string `json:"UUID"`
+	Title   string `json:"title"`
+	Route   string `json:"route"`
+	Content string `json:"content"`
+}
+
+func (p *Page) TableName() string {
+	return "pages"
+}
+
+func (p *Page) BuildFields() []Field {
+	return buildFieldsFromModel(p)
 }
 
 // ****************************************** END MODELS ******************************************

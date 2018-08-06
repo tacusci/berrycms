@@ -43,6 +43,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/admin", AdminHandler)
 	r.HandleFunc("/admin/users", AdminUsersHandler)
+	r.HandleFunc("/admin/pages", AdminPagesHandler)
 
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
@@ -87,6 +88,38 @@ func AdminUsersHandler(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("names", usernames)
 
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.users.html")
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+	}
+	renderedContent, err := plush.Render(string(content), pctx)
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+	}
+	w.Write([]byte(renderedContent))
+}
+
+func AdminPagesHandler(w http.ResponseWriter, r *http.Request) {
+	pageroutes := make([]string, 0)
+
+	pt := db.PagesTable{}
+	row, err := pt.Select(db.Conn, "route", "")
+
+	if err != nil {
+		logging.ErrorAndExit(err.Error())
+	}
+
+	for row.Next() {
+		p := &db.Page{}
+		row.Scan(&p.Route)
+		pageroutes = append(pageroutes, p.Route)
+	}
+
+	pctx := plush.NewContext()
+	pctx.Set("names", pageroutes)
+
+	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.pages.html")
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
