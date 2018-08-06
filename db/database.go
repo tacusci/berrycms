@@ -1,9 +1,11 @@
-package database
+package db
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"github.com/tacusci/berrycms/util"
 
 	"github.com/tacusci/logging"
 
@@ -13,11 +15,9 @@ import (
 
 var SchemaName string
 var Conn *sql.DB
-var AppName string
 
 //Connect connects to database
-func Connect(appName string, sqlDriver string, dbRoute string, schemaName string) {
-	AppName = appName
+func Connect(sqlDriver string, dbRoute string, schemaName string) {
 	SchemaName = schemaName
 	db, err := sql.Open(sqlDriver, dbRoute+SchemaName)
 	if err != nil {
@@ -42,12 +42,11 @@ func Close() {
 func CreateTestData() {
 	usersTable := &UsersTable{}
 	usersTable.Insert(Conn, User{
-		FirstName:   "John",
-		LastName:    "Doe",
-		Username:    "jdoe",
-		AuthHash:    util.HashAndSalt([]byte("iamjohndoe")),
-		Email:       "person@place.com",
-		PhoneNumber: "0449488484",
+		FirstName: "John",
+		LastName:  "Doe",
+		Username:  "jdoe",
+		AuthHash:  util.HashAndSalt([]byte("iamjohndoe")),
+		Email:     "person@place.com",
 	})
 }
 

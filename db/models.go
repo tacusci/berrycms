@@ -1,4 +1,4 @@
-package database
+package db
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
 
@@ -109,14 +110,12 @@ func (ut *UsersTable) Init(db *sql.DB) {
 		if !resultRows.Next() {
 			logging.Debug("Creating default root user account...")
 			err = ut.Insert(db, User{
-				Username:    "root",
-				UserroleId:  int(ROOT),
-				AuthHash:    util.HashAndSalt([]byte("iamroot")),
-				FirstName:   "Root",
-				LastName:    "User",
-				Email:       "none",
-				PhoneNumber: "none",
-				BillOverdue: false,
+				Username:   "root",
+				UserroleId: int(ROOT),
+				AuthHash:   util.HashAndSalt([]byte("iamroot")),
+				FirstName:  "Root",
+				LastName:   "User",
+				Email:      "none",
 			})
 			if err != nil {
 				logging.ErrorAndExit(err.Error())
@@ -304,16 +303,14 @@ type Model interface {
 
 //User describes the content of a user, it should match the columns present in the users table
 type User struct {
-	UserId      int    `tbl:"AI" json:"userid"`
-	UserroleId  int    `json:"userroleid"`
-	UUID        string `json:"UUID"`
-	Username    string `json:"username"`
-	AuthHash    string `json:"authhash"`
-	FirstName   string `json:"firstname"`
-	LastName    string `json:"lastname"`
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phonenumber"`
-	BillOverdue bool   `json:"billoverdue"`
+	UserId     int    `tbl:"AI" json:"userid"`
+	UserroleId int    `json:"userroleid"`
+	UUID       string `json:"UUID"`
+	Username   string `json:"username"`
+	AuthHash   string `json:"authhash"`
+	FirstName  string `json:"firstname"`
+	LastName   string `json:"lastname"`
+	Email      string `json:"email"`
 }
 
 //Login takes the current username and authhash values of self and tries
