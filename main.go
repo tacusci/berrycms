@@ -34,6 +34,9 @@ func setLoggingLevel() {
 
 func main() {
 	setLoggingLevel()
+
+	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
+
 	db.Connect("mysql", "berryadmin:Password12345@/", "berrycms")
 	db.Wipe()
 	db.Setup()
@@ -61,7 +64,7 @@ func main() {
 func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.html")
 	if err != nil {
-		logging.Error(err.Error())
+		logging.Error("Unable to find resources folder...")
 		w.Write([]byte("<h1>500 Server Error</h1>"))
 	}
 	w.Write(content)
