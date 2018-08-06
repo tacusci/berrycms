@@ -91,16 +91,14 @@ type Table interface {
 
 //UsersTable describes the table structure for UsersTable in db
 type UsersTable struct {
-	Userid      int    `tbl:"PKNNAIUI"`
-	Userroleid  int    `tbl:"NN"`
-	UUID        string `tbl:"NNUI"`
-	Username    string `tbl:"NNUI"`
-	Authhash    string `tbl:"NN"`
-	Firstname   string `tbl:"NN"`
-	Lastname    string `tbl:"NN"`
-	Email       string `tbl:"NNUI"`
-	Phonenumber string `tbl:"NN"`
-	Billoverdue bool   `tbl:"NN"`
+	Userid     int    `tbl:"PKNNAIUI"`
+	Userroleid int    `tbl:"NN"`
+	UUID       string `tbl:"NNUI"`
+	Username   string `tbl:"NNUI"`
+	Authhash   string `tbl:"NN"`
+	Firstname  string `tbl:"NN"`
+	Lastname   string `tbl:"NN"`
+	Email      string `tbl:"NNUI"`
 }
 
 //Init carries out default data entry
@@ -176,7 +174,11 @@ func (ut *UsersTable) Insert(db *sql.DB, u User) error {
 
 //Select returns table rows from a select using the passed where condition
 func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
-	return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ut.Name(), whereClause))
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ut.Name(), whereClause))
+	} else {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, ut.Name()))
+	}
 }
 
 //BuildFields takes the table struct and maps all of the struct fields to their own struct

@@ -1,0 +1,11 @@
+<html>
+<%= if (names && len(names) > 0) { %>
+	<ul>
+		<%= for (n) in names { %>
+			<li><%= n %></li>
+		<% } %>
+	</ul>
+<% } else { %>
+	<h1>Sorry, no names. :(</h1>
+<% } %>
+</html>
