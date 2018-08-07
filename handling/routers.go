@@ -131,7 +131,7 @@ func (ph *PagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for row.Next() {
-		p := &db.Page{}
+		p := db.Page{}
 		row.Scan(&p.Route)
 		pageroutes = append(pageroutes, p.Route)
 	}
