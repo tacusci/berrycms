@@ -143,11 +143,13 @@ func (ph *PagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
 	}
 	renderedContent, err := plush.Render(string(content), pctx)
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
 	}
 	w.Write([]byte(renderedContent))
 }
@@ -168,5 +170,13 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	for row.Next() {
 		row.Scan(&p.Content)
 	}
-	w.Write([]byte(p.Content))
+
+	ctx := plush.NewContext()
+	html, err := plush.Render(p.Content, ctx)
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
+	}
+	w.Write([]byte(html))
 }
