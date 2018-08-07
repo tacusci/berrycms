@@ -38,6 +38,7 @@ func (mr *MutableRouter) Reload() {
 	r.HandleFunc("/admin/pages", pagesHandler.Get)
 
 	mr.MapSavedPageRoutes(r)
+	mr.MapStaticDir(r, "static")
 
 	mr.Swap(r)
 }
@@ -56,6 +57,19 @@ func (mr *MutableRouter) MapSavedPageRoutes(r *mux.Router) {
 		rows.Scan(&p.Route)
 		r.HandleFunc(p.Route, savedPageHandler.Get)
 	}
+}
+
+func (mr *MutableRouter) MapStaticDir(r *mux.Router, sd string) {
+	fs, err := ioutil.ReadDir(sd)
+	if err != nil {
+		logging.Error("Unable to find static folder...")
+		return
+	}
+	for _, f := range fs {
+		pathPrefix := fmt.Sprintf("%s%s%s", string(os.PathSeparator), f.Name(), string(os.PathSeparator))
+		r.PathPrefix(pathPrefix).Handler(http.StripPrefix(pathPrefix, http.FileServer(http.Dir(sd+pathPrefix))))
+	}
+	// r.PathPrefix("/styles/").Handler(http.StripPrefix("/styles/", http.FileServer(http.Dir(sd+"/styles/"))))
 }
 
 //LoginHandler contains response functions for admin login

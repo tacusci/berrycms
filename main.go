@@ -51,6 +51,7 @@ func main() {
 	}
 
 	go listenForStopSig(srv)
+
 	srv.ListenAndServe()
 }
 
