@@ -1,6 +1,7 @@
 package handling
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,48 +13,74 @@ import (
 	"github.com/tacusci/logging"
 )
 
+//MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
 	mu   sync.Mutex
 	Root *mux.Router
 }
 
+//Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
 func (mr *MutableRouter) Swap(root *mux.Router) {
 	mr.mu.Lock()
 	mr.Root = root
 	mr.mu.Unlock()
 }
 
+//Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
 	r := mux.NewRouter()
 
-	loginHandler := &LoginHandler{}
-	r.HandleFunc("/admin", loginHandler.Handle)
-	usersHandler := &UsersHandler{}
-	r.HandleFunc("/admin/users", usersHandler.Handle)
-	pagesHandler := &PagesHandler{}
-	r.HandleFunc("/admin/pages", pagesHandler.Handle)
+	loginHandler := &LoginHandler{Router: mr}
+	r.HandleFunc("/admin", loginHandler.Get)
+	usersHandler := &UsersHandler{Router: mr}
+	r.HandleFunc("/admin/users", usersHandler.Get)
+	pagesHandler := &PagesHandler{Router: mr}
+	r.HandleFunc("/admin/pages", pagesHandler.Get)
+
+	mr.MapSavedPageRoutes(r)
 
 	mr.Swap(r)
 }
 
-type Handler struct{}
+func (mr *MutableRouter) MapSavedPageRoutes(r *mux.Router) {
+	savedPageHandler := &SavedPageHandler{Router: mr}
 
-func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {}
+	pt := db.PagesTable{}
+	rows, err := pt.Select(db.Conn, "route", "")
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
+	for rows.Next() {
+		p := db.Page{}
+		rows.Scan(&p.Route)
+		r.HandleFunc(p.Route, savedPageHandler.Get)
+	}
+}
 
-type LoginHandler struct{}
+//LoginHandler contains response functions for admin login
+type LoginHandler struct {
+	Router *MutableRouter
+}
 
-func (lh *LoginHandler) Handle(w http.ResponseWriter, r *http.Request) {
+//Get takes the web request and writes response to session
+func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.html")
 	if err != nil {
 		logging.Error("Unable to find resources folder...")
 		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
 	}
 	w.Write(content)
 }
 
-type UsersHandler struct{}
+//UsersHandler contains response functions for users admin page
+type UsersHandler struct {
+	Router *MutableRouter
+}
 
-func (uh *UsersHandler) Handle(w http.ResponseWriter, r *http.Request) {
+//Get takes the web request and writes response to session
+func (uh *UsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	usernames := make([]string, 0)
 
 	ut := db.UsersTable{}
@@ -76,18 +103,24 @@ func (uh *UsersHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
 	}
 	renderedContent, err := plush.Render(string(content), pctx)
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
 	}
 	w.Write([]byte(renderedContent))
 }
 
-type PagesHandler struct{}
+//PagesHandler contains response functions for pages admin page
+type PagesHandler struct {
+	Router *MutableRouter
+}
 
-func (ph *PagesHandler) Handle(w http.ResponseWriter, r *http.Request) {
+//Get takes the web request and writes response to session
+func (ph *PagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pageroutes := make([]string, 0)
 
 	pt := db.PagesTable{}
@@ -117,4 +150,23 @@ func (ph *PagesHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("<h1>500 Server Error</h1>"))
 	}
 	w.Write([]byte(renderedContent))
+}
+
+type SavedPageHandler struct {
+	Router *MutableRouter
+}
+
+func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
+	pt := db.PagesTable{}
+	row, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
+	}
+	p := db.Page{}
+	for row.Next() {
+		row.Scan(&p.Content)
+	}
+	w.Write([]byte(p.Content))
 }
