@@ -66,10 +66,10 @@ func (mr *MutableRouter) MapStaticDir(r *mux.Router, sd string) {
 		return
 	}
 	for _, f := range fs {
-		pathPrefix := fmt.Sprintf("%s%s%s", string(os.PathSeparator), f.Name(), string(os.PathSeparator))
-		r.PathPrefix(pathPrefix).Handler(http.StripPrefix(pathPrefix, http.FileServer(http.Dir(sd+pathPrefix))))
+		pathPrefixLocation := fmt.Sprintf("%s%s%s", string(os.PathSeparator), f.Name(), string(os.PathSeparator))
+		pathPrefixAddress := fmt.Sprintf("/%s/", f.Name())
+		r.PathPrefix(pathPrefixAddress).Handler(http.StripPrefix(pathPrefixAddress, http.FileServer(http.Dir(sd+pathPrefixLocation))))
 	}
-	// r.PathPrefix("/styles/").Handler(http.StripPrefix("/styles/", http.FileServer(http.Dir(sd+"/styles/"))))
 }
 
 //LoginHandler contains response functions for admin login
