@@ -15,6 +15,10 @@ import (
 	"github.com/tacusci/logging"
 )
 
+const (
+	VERSION = "v0.0.1a"
+)
+
 func setLoggingLevel() {
 	debugLevel := flag.Bool("d", false, "Set logging to debug")
 	flag.Parse()
@@ -30,6 +34,8 @@ func setLoggingLevel() {
 
 func main() {
 	setLoggingLevel()
+
+	fmt.Printf("🍒 Berry CMS %s 🍒\n", VERSION)
 
 	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
 
@@ -66,7 +72,7 @@ func listenForStopSig(srv *http.Server) {
 	logging.Info("Closing DB connection...")
 	db.Close()
 	logging.Info("Stopping HTTP server...")
-	logging.Info("Shutting down... BYE!")
+	logging.Info("Shutting down... BYE! 👋")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	srv.Shutdown(ctx)
