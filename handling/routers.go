@@ -34,6 +34,8 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 func (mr *MutableRouter) Reload() {
 	r := mux.NewRouter()
 
+	logging.Debug("Mapping default admin routes...")
+
 	loginHandler := &LoginHandler{Router: mr}
 	r.HandleFunc("/admin", loginHandler.Get)
 	usersHandler := &UsersHandler{Router: mr}
@@ -60,6 +62,7 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 	for rows.Next() {
 		p := db.Page{}
 		rows.Scan(&p.Route)
+		logging.Debug(fmt.Sprintf("Mapping database page route %s", p.Route))
 		r.HandleFunc(p.Route, savedPageHandler.Get)
 	}
 }
@@ -73,6 +76,7 @@ func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
 	for _, f := range fs {
 		pathPrefixLocation := fmt.Sprintf("%s%s%s", string(os.PathSeparator), f.Name(), string(os.PathSeparator))
 		pathPrefixAddress := fmt.Sprintf("/%s/", f.Name())
+		logging.Debug(fmt.Sprintf("Serving dir (%s)'s files...", f.Name()))
 		r.PathPrefix(pathPrefixAddress).Handler(http.StripPrefix(pathPrefixAddress, http.FileServer(http.Dir(sd+pathPrefixLocation))))
 	}
 }

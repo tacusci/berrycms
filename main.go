@@ -53,6 +53,7 @@ func main() {
 
 	go listenForStopSig(srv)
 
+	logging.Info(fmt.Sprintf("Starting http server @ %s...", srv.Addr))
 	srv.ListenAndServe()
 }
 

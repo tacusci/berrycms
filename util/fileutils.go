@@ -22,6 +22,7 @@ func (w *RecursiveDirWatch) WatchDir(sd string) {
 	for {
 		select {
 		case <-w.Stop:
+			logging.Debug("Stopping directory structure monitoring...")
 			return
 		default:
 			if time.Since(startTime).Seconds() > 5 {
