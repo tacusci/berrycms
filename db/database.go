@@ -50,9 +50,9 @@ func CreateTestData() {
 	})
 	pagesTable := &PagesTable{}
 	err = pagesTable.Insert(Conn, Page{
-		Title:   "Test Page",
-		Route:   "/test",
-		Content: "<html><body><h2>Testing testing 123</h2></body></html>",
+		Title:   "Add New",
+		Route:   "/addnew",
+		Content: "<html><body><h2>Adding Carbonite page...</h2></body></html>",
 	})
 	if err != nil {
 		logging.Error(err.Error())

@@ -10,19 +10,23 @@ import (
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
 
 //MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
-	mu   sync.Mutex
-	Root *mux.Router
+	Server *http.Server
+	mu     sync.Mutex
+	Root   *mux.Router
+	dw     *util.RecursiveDirWatch
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
 func (mr *MutableRouter) Swap(root *mux.Router) {
 	mr.mu.Lock()
 	mr.Root = root
+	mr.Server.Handler = mr.Root
 	mr.mu.Unlock()
 }
 
@@ -37,13 +41,14 @@ func (mr *MutableRouter) Reload() {
 	pagesHandler := &PagesHandler{Router: mr}
 	r.HandleFunc("/admin/pages", pagesHandler.Get)
 
-	mr.MapSavedPageRoutes(r)
-	mr.MapStaticDir(r, "static")
+	mr.mapSavedPageRoutes(r)
+	mr.mapStaticDir(r, "static")
+	go mr.monitorStatic("static")
 
 	mr.Swap(r)
 }
 
-func (mr *MutableRouter) MapSavedPageRoutes(r *mux.Router) {
+func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 	savedPageHandler := &SavedPageHandler{Router: mr}
 
 	pt := db.PagesTable{}
@@ -59,7 +64,7 @@ func (mr *MutableRouter) MapSavedPageRoutes(r *mux.Router) {
 	}
 }
 
-func (mr *MutableRouter) MapStaticDir(r *mux.Router, sd string) {
+func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
 	fs, err := ioutil.ReadDir(sd)
 	if err != nil {
 		logging.Error("Unable to find static folder...")
@@ -70,6 +75,19 @@ func (mr *MutableRouter) MapStaticDir(r *mux.Router, sd string) {
 		pathPrefixAddress := fmt.Sprintf("/%s/", f.Name())
 		r.PathPrefix(pathPrefixAddress).Handler(http.StripPrefix(pathPrefixAddress, http.FileServer(http.Dir(sd+pathPrefixLocation))))
 	}
+}
+
+func (mr *MutableRouter) monitorStatic(sd string) {
+	mr.dw = &util.RecursiveDirWatch{Change: make(chan bool), Stop: make(chan bool)}
+	go mr.dw.WatchDir(sd)
+	for {
+		if <-mr.dw.Change {
+			logging.Debug("Change detected in static dir...")
+			break
+		}
+	}
+	mr.dw.Stop <- true
+	mr.Reload()
 }
 
 //LoginHandler contains response functions for admin login
@@ -174,6 +192,15 @@ type SavedPageHandler struct {
 
 func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pt := db.PagesTable{}
+	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
+	if r.RequestURI == "/addnew" {
+		pt.Insert(db.Conn, db.Page{
+			Title:   "Carbon",
+			Route:   "/carbonite",
+			Content: "<h2>Carbonite</h2>",
+		})
+		sph.Router.Reload()
+	}
 	row, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
 	if err != nil {
 		logging.Error(err.Error())
