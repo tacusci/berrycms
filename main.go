@@ -65,10 +65,10 @@ func listenForStopSig(srv *http.Server) {
 	logging.Error(fmt.Sprintf("Caught sig: %+v (Shutting down and cleaning up...)", sig))
 	logging.Info("Closing DB connection...")
 	db.Close()
+	logging.Info("Stopping HTTP server...")
+	logging.Info("Shutting down... BYE!")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
-	logging.Info("Stopping HTTP server...")
 	srv.Shutdown(ctx)
-	logging.Info("Shutting down... BYE!")
 	os.Exit(0)
 }
