@@ -68,7 +68,7 @@ func listenForStopSig(srv *http.Server) {
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)
 	sig := <-gracefulStop
-	logging.Error(fmt.Sprintf("☠️ Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
+	logging.Error(fmt.Sprintf("☠️  Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
 	logging.Info("Closing DB connection...")
 	db.Close()
 	logging.Info("Stopping HTTP server...")
