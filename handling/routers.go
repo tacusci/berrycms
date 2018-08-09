@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/gobuffalo/plush"
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/util"
@@ -52,8 +53,6 @@ func (mr *MutableRouter) Reload() {
 	go mr.monitorStatic("static")
 
 	amw := authMiddleware{}
-	amw.Populate()
-
 	r.Use(amw.Middleware)
 
 	mr.Swap(r)
@@ -107,11 +106,6 @@ type authMiddleware struct {
 	userTokens map[string]string
 }
 
-func (amw *authMiddleware) Populate() {
-	amw.userTokens = make(map[string]string)
-	amw.userTokens["000000"] = "root"
-}
-
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if amw.HasPermissions(w, r) {
@@ -123,11 +117,9 @@ func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 }
 
 func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request) bool {
-	sessionToken := r.Header.Get("X-Session-Token")
+	user := context.Get(r, "user")
 	if strings.HasPrefix(r.RequestURI, "/admin") {
-		if _, found := amw.userTokens[sessionToken]; found {
-			return true
-		}
+		return user != nil
 	} else {
 		pt := db.PagesTable{}
 		requestedPage, err := pt.SelectByRoute(db.Conn, r.RequestURI)
@@ -135,11 +127,7 @@ func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request
 			return true
 		}
 		if requestedPage.Roleprotected {
-			if _, found := amw.userTokens[sessionToken]; found {
-				return true
-			} else {
-				return false
-			}
+			return user != nil
 		} else {
 			return true
 		}
@@ -173,7 +161,21 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
-	logging.Info("Recieved post request for login...")
+	r.ParseForm()
+	ut := db.UsersTable{}
+	user, err := ut.SelectByUsername(db.Conn, r.PostFormValue("username"))
+	if err != nil {
+		context.Set(r, "user", nil)
+	} else {
+		user.AuthHash = r.PostFormValue("authhash")
+		if user.Login() {
+			logging.Debug("Login successful...")
+			context.Set(r, "user", user)
+		} else {
+			logging.Debug("Login unsuccessful...")
+			context.Set(r, "user", nil)
+		}
+	}
 	r.Method = "GET"
 	lh.Get(w, r)
 }

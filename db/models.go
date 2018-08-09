@@ -181,6 +181,23 @@ func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	}
 }
 
+func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error) {
+	u := User{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE username = '%s'", SchemaName, ut.Name(), username))
+	if err != nil {
+		return u, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&u.UserId, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
+		if err != nil {
+			return u, err
+		}
+	}
+
+	return u, nil
+}
+
 //BuildFields takes the table struct and maps all of the struct fields to their own struct
 func (ut *UsersTable) buildFields() []Field {
 	return buildFieldsFromTable(ut)
@@ -299,27 +316,16 @@ type User struct {
 //using them to authenticate/login. A successful login will return/generate
 //a JWT token for further use in any subsequent API request
 func (u *User) Login() bool {
-	p := u.AuthHash
 	ut := &UsersTable{}
-	row, err := ut.Select(Conn, "userid, userroleid, uuid, username, authhash", fmt.Sprintf("username = '%s'", u.Username))
+	user, err := ut.SelectByUsername(Conn, u.Username)
+
 	if err != nil {
 		logging.Error(err.Error())
 		return false
 	}
-	defer row.Close()
-	for row.Next() {
-		u := &User{}
-		err := row.Scan(&u.UserId, &u.UserroleId,
-			&u.UUID, &u.Username, &u.AuthHash)
-		if err != nil {
-			logging.Error(err.Error())
-			return false
-		}
-		logging.Info(fmt.Sprintf("UserID: %d", u.UserId))
-		err = bcrypt.CompareHashAndPassword([]byte(u.AuthHash), []byte(p))
-		if err == nil {
-			return true
-		}
+	err = bcrypt.CompareHashAndPassword([]byte(user.AuthHash), []byte(u.AuthHash))
+	if err == nil {
+		return true
 	}
 	return false
 }
