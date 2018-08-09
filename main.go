@@ -35,7 +35,7 @@ func setLoggingLevel() {
 func main() {
 	setLoggingLevel()
 
-	fmt.Printf("🍓  Berry CMS %s 🍓\n", VERSION)
+	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
 	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
 
