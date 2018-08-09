@@ -48,11 +48,21 @@ func CreateTestData() {
 		AuthHash:  util.HashAndSalt([]byte("iamjohndoe")),
 		Email:     "person@place.com",
 	})
+	rootUser := User{}
+	rows, err := usersTable.Select(Conn, "UUID", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))
+	if err != nil {
+		logging.Error("Unable to fetch root user...")
+		return
+	}
+	for rows.Next() {
+		rows.Scan(&rootUser.UUID)
+	}
 	pagesTable := &PagesTable{}
 	err = pagesTable.Insert(Conn, Page{
-		Title:   "Add New",
-		Route:   "/addnew",
-		Content: "<html><body><h2>Adding Carbonite page...</h2></body></html>",
+		AuthorUUID: rootUser.UUID,
+		Title:      "Add New",
+		Route:      "/addnew",
+		Content:    "<html><body><h2>Adding Carbonite page...</h2></body></html>",
 	})
 	if err != nil {
 		logging.Error(err.Error())
@@ -107,5 +117,5 @@ func createTables(db *sql.DB) {
 }
 
 func getTables() []Table {
-	return []Table{&UsersTable{}, &UserRolesTable{}, &PagesTable{}}
+	return []Table{&UsersTable{}, &PagesTable{}}
 }

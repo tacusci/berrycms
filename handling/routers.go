@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/gobuffalo/plush"
@@ -37,15 +38,23 @@ func (mr *MutableRouter) Reload() {
 	logging.Debug("Mapping default admin routes...")
 
 	loginHandler := &LoginHandler{Router: mr}
-	r.HandleFunc("/admin", loginHandler.Get)
+	r.HandleFunc("/login", loginHandler.Get).Methods("GET")
+	r.HandleFunc("/login", loginHandler.Post).Methods("POST")
+	adminHandler := &AdminHandler{Router: mr}
+	r.HandleFunc("/admin", adminHandler.Get).Methods("GET")
 	usersHandler := &UsersHandler{Router: mr}
-	r.HandleFunc("/admin/users", usersHandler.Get)
+	r.HandleFunc("/admin/users", usersHandler.Get).Methods("GET")
 	pagesHandler := &PagesHandler{Router: mr}
-	r.HandleFunc("/admin/pages", pagesHandler.Get)
+	r.HandleFunc("/admin/pages", pagesHandler.Get).Methods("GET")
 
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
+
+	amw := authMiddleware{}
+	amw.Populate()
+
+	r.Use(amw.Middleware)
 
 	mr.Swap(r)
 }
@@ -94,6 +103,50 @@ func (mr *MutableRouter) monitorStatic(sd string) {
 	mr.Reload()
 }
 
+type authMiddleware struct {
+	userTokens map[string]string
+}
+
+func (amw *authMiddleware) Populate() {
+	amw.userTokens = make(map[string]string)
+	amw.userTokens["000000"] = "root"
+}
+
+func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if amw.HasPermissions(w, r) {
+			next.ServeHTTP(w, r)
+		} else {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+		}
+	})
+}
+
+func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request) bool {
+	sessionToken := r.Header.Get("X-Session-Token")
+	if strings.HasPrefix(r.RequestURI, "/admin") {
+		if _, found := amw.userTokens[sessionToken]; found {
+			return true
+		}
+	} else {
+		pt := db.PagesTable{}
+		requestedPage, err := pt.SelectByRoute(db.Conn, r.RequestURI)
+		if err != nil {
+			return true
+		}
+		if requestedPage.Roleprotected {
+			if _, found := amw.userTokens[sessionToken]; found {
+				return true
+			} else {
+				return false
+			}
+		} else {
+			return true
+		}
+	}
+	return false
+}
+
 //LoginHandler contains response functions for admin login
 type LoginHandler struct {
 	Router *MutableRouter
@@ -101,6 +154,35 @@ type LoginHandler struct {
 
 //Get takes the web request and writes response to session
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
+	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "login.html")
+	if err != nil {
+		logging.Error("Unable to find resources folder...")
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
+	}
+	pctx := plush.NewContext()
+	pctx.Set("formname", "loginform")
+	pctx.Set("formhash", "fjei4ijiorgrig4ijio34ofj4ig34i4j3i")
+
+	renderedContent, err := plush.Render(string(content), pctx)
+	if err != nil {
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return
+	}
+	w.Write([]byte(renderedContent))
+}
+
+func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
+	logging.Info("Recieved post request for login...")
+	r.Method = "GET"
+	lh.Get(w, r)
+}
+
+type AdminHandler struct {
+	Router *MutableRouter
+}
+
+func (ah *AdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.html")
 	if err != nil {
 		logging.Error("Unable to find resources folder...")
@@ -199,9 +281,10 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
 	if r.RequestURI == "/addnew" {
 		pt.Insert(db.Conn, db.Page{
-			Title:   "Carbon",
-			Route:   "/carbonite",
-			Content: "<h2>Carbonite</h2>",
+			Title:         "Carbon",
+			Route:         "/carbonite",
+			Content:       "<h2>Carbonite</h2>",
+			Roleprotected: true,
 		})
 		sph.Router.Reload()
 	}

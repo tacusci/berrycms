@@ -103,7 +103,7 @@ type UsersTable struct {
 
 //Init carries out default data entry
 func (ut *UsersTable) Init(db *sql.DB) {
-	resultRows, err := ut.Select(db, "*", "userid = 1")
+	resultRows, err := ut.Select(db, "*", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))
 	if err == nil {
 		if !resultRows.Next() {
 			logging.Debug("Creating default root user account...")
@@ -192,64 +192,15 @@ func (ut *UsersTable) buildInsertStatement(m Model) string {
 
 // ******** End UserTable ********
 
-// ******** Start User Roles Table ********
-
-//UserRolesTable describes the table structure for UserRolesTable in db
-type UserRolesTable struct {
-	Userrolesid int    `tbl:"PKNNAIUI"`
-	Rolename    string `tbl:"NN"`
-}
-
-//Init initialises the UserRolesTable table with default data
-func (urt *UserRolesTable) Init(db *sql.DB) {
-	urt.Insert(db, UserRole{
-		Rolename: "super",
-	})
-	urt.Insert(db, UserRole{
-		Rolename: "admin",
-	})
-	urt.Insert(db, UserRole{
-		Rolename: "moderator",
-	})
-	urt.Insert(db, UserRole{
-		Rolename: "guest",
-	})
-}
-
-//Name gets the table name, have to implement to make UserRolesTable inherit Table
-func (urt *UserRolesTable) Name() string {
-	return "userroles"
-}
-
-//Insert inserts parsed UserRole model into the user role table
-func (urt *UserRolesTable) Insert(db *sql.DB, ur UserRole) error {
-	if ur.Rolename != "" {
-		insertStatement := urt.buildInsertStatement(&ur)
-		_, err := db.Exec(insertStatement)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (urt *UserRolesTable) buildFields() []Field {
-	return buildFieldsFromTable(urt)
-}
-
-func (urt *UserRolesTable) buildInsertStatement(m Model) string {
-	return buildInsertStatementFromTable(urt, m)
-}
-
-// ******** End User Roles Table ********
-
 // ******** Start Pages Table ********
 type PagesTable struct {
-	Pageid  int    `tbl:"PKNNAIUI"`
-	UUID    string `tbl:"NNUI"`
-	Title   string `tbl:"NNUI"`
-	Route   string `tbl:"NNUI"`
-	Content string `tbl:"NN"`
+	Pageid        int    `tbl:"PKNNAIUI"`
+	UUID          string `tbl:"NNUI"`
+	Roleprotected bool   `tbl:NN`
+	AuthorUUID    string `tbl:NN`
+	Title         string `tbl:"NNUI"`
+	Route         string `tbl:"NNUI"`
+	Content       string `tbl:"NN"`
 }
 
 func (pt *PagesTable) Init(db *sql.DB) {}
@@ -284,6 +235,24 @@ func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	} else {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, pt.Name()))
 	}
+}
+
+func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
+	p := Page{}
+
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE route = '%s'", SchemaName, pt.Name(), route))
+	if err != nil {
+		return p, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&p.PageId, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
+		if err != nil {
+			return p, err
+		}
+	}
+
+	return p, nil
 }
 
 func (pt *PagesTable) buildFields() []Field {
@@ -393,11 +362,13 @@ func (ur *UserRole) BuildFields() []Field {
 }
 
 type Page struct {
-	PageId  int    `tbl:"AI" json:"pageid"`
-	UUID    string `json:"UUID"`
-	Title   string `json:"title"`
-	Route   string `json:"route"`
-	Content string `json:"content"`
+	PageId        int    `tbl:"AI" json:"pageid"`
+	UUID          string `json:"UUID"`
+	Roleprotected bool   `json:"roleprotected"`
+	AuthorUUID    string `json:"authoruuid"`
+	Title         string `json:"title"`
+	Route         string `json:"route"`
+	Content       string `json:"content"`
 }
 
 func (p *Page) TableName() string {

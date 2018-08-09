@@ -1,0 +1,16 @@
+
+<html>
+    <head>
+        <link rel="stylesheet" href="/styles/core.css">
+    </head>
+    <body>
+        <h2>Login</h2>
+        <form action="/login" method="POST">
+            <input type="hidden" formname=<%= formname %>>
+            <input type="hidden" hashid=<%= formhash %>>
+            <label>Username</label><input id="username" type="text"><br>
+            <label>Password</label><input id="password" type="password"><br>
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+</html>
