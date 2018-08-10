@@ -38,9 +38,9 @@ func (mr *MutableRouter) Reload() {
 
 	logging.Debug("Mapping default admin routes...")
 
-	loginHandler := &LoginHandler{Router: mr}
-	r.HandleFunc("/login", loginHandler.Get).Methods("GET")
-	r.HandleFunc("/login", loginHandler.Post).Methods("POST")
+	loginHandler := &LoginHandler{Router: mr, route: "/login"}
+	r.HandleFunc(loginHandler.route, loginHandler.Get).Methods("GET")
+	r.HandleFunc(loginHandler.route, loginHandler.Post).Methods("POST")
 	adminHandler := &AdminHandler{Router: mr}
 	r.HandleFunc("/admin", adminHandler.Get).Methods("GET")
 	usersHandler := &UsersHandler{Router: mr}
@@ -138,6 +138,7 @@ func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request
 //LoginHandler contains response functions for admin login
 type LoginHandler struct {
 	Router *MutableRouter
+	route  string
 }
 
 //Get takes the web request and writes response to session
@@ -176,8 +177,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			context.Set(r, "user", nil)
 		}
 	}
-	r.Method = "GET"
-	lh.Get(w, r)
+	http.Redirect(w, r, lh.route, http.StatusFound)
 }
 
 type AdminHandler struct {
