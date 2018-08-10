@@ -9,8 +9,10 @@ import (
 	"sync"
 
 	"github.com/gobuffalo/plush"
+	"github.com/gobuffalo/uuid"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
@@ -22,6 +24,7 @@ type MutableRouter struct {
 	mu     sync.Mutex
 	Root   *mux.Router
 	dw     *util.RecursiveDirWatch
+	store  *sessions.CookieStore
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -34,6 +37,15 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
+
+	if mr.store == nil {
+		newUUID, err := uuid.NewV4()
+		if err != nil {
+			logging.ErrorAndExit(err.Error())
+		}
+		mr.store = sessions.NewCookieStore(newUUID.Bytes())
+	}
+
 	r := mux.NewRouter()
 
 	logging.Debug("Mapping default admin routes...")
@@ -52,7 +64,7 @@ func (mr *MutableRouter) Reload() {
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
 
-	amw := authMiddleware{}
+	amw := authMiddleware{Router: mr}
 	r.Use(amw.Middleware)
 
 	mr.Swap(r)
@@ -103,7 +115,7 @@ func (mr *MutableRouter) monitorStatic(sd string) {
 }
 
 type authMiddleware struct {
-	userTokens map[string]string
+	Router *MutableRouter
 }
 
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
@@ -117,9 +129,13 @@ func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 }
 
 func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request) bool {
-	user := context.Get(r, "user")
+	authSession, err := amw.Router.store.Get(r, "auth")
+	defer authSession.Save(r, w)
+	if err != nil {
+		return false
+	}
 	if strings.HasPrefix(r.RequestURI, "/admin") {
-		return user != nil
+		return authSession.Values["user"] != nil
 	} else {
 		pt := db.PagesTable{}
 		requestedPage, err := pt.SelectByRoute(db.Conn, r.RequestURI)
@@ -127,7 +143,7 @@ func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request
 			return true
 		}
 		if requestedPage.Roleprotected {
-			return user != nil
+			return authSession.Values["user"] != nil
 		} else {
 			return true
 		}
@@ -165,12 +181,12 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ut := db.UsersTable{}
 	user, err := ut.SelectByUsername(db.Conn, r.PostFormValue("username"))
 	if err != nil {
-		context.Set(r, "user", nil)
+
 	} else {
 		user.AuthHash = r.PostFormValue("authhash")
 		if user.Login() {
 			logging.Debug("Login successful...")
-			context.Set(r, "user", user)
+			lh.Router.store.Get(r, "auth")
 		} else {
 			logging.Debug("Login unsuccessful...")
 			context.Set(r, "user", nil)
