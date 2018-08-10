@@ -1,4 +1,4 @@
-package handling
+package web
 
 import (
 	"fmt"
@@ -27,9 +27,9 @@ type MutableRouter struct {
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
 func (mr *MutableRouter) Swap(root *mux.Router) {
 	mr.mu.Lock()
+	defer mr.mu.Unlock()
 	mr.Root = root
 	mr.Server.Handler = mr.Root
-	mr.mu.Unlock()
 }
 
 //Reload map all admin/default page routes and load saved page routes from DB

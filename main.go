@@ -11,13 +11,16 @@ import (
 	"time"
 
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/berrycms/handling"
+	"github.com/tacusci/berrycms/web"
+	"github.com/tacusci/berrycms/web/session"
 	"github.com/tacusci/logging"
 )
 
 const (
 	VERSION = "v0.0.1a"
 )
+
+var webSessions *session.Manager
 
 func setLoggingLevel() {
 	debugLevel := flag.Bool("d", false, "Set logging to debug")
@@ -45,6 +48,8 @@ func main() {
 	db.CreateTestData()
 	go db.Heartbeat()
 
+	webSessions, err := session.NewManager("memory", "gosessionid", 3600)
+
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: time.Second * 15,
@@ -52,7 +57,7 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 	}
 
-	rs := handling.MutableRouter{
+	rs := web.MutableRouter{
 		Server: srv,
 	}
 	rs.Reload()
