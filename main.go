@@ -12,15 +12,12 @@ import (
 
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/web"
-	"github.com/tacusci/berrycms/web/session"
 	"github.com/tacusci/logging"
 )
 
 const (
 	VERSION = "v0.0.1a"
 )
-
-var webSessions *session.Manager
 
 func setLoggingLevel() {
 	debugLevel := flag.Bool("d", false, "Set logging to debug")
@@ -48,8 +45,6 @@ func main() {
 	db.CreateTestData()
 	go db.Heartbeat()
 
-	webSessions, err := session.NewManager("memory", "gosessionid", 3600)
-
 	srv := &http.Server{
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: time.Second * 15,
@@ -65,7 +60,11 @@ func main() {
 	go listenForStopSig(srv)
 
 	logging.Info(fmt.Sprintf("Starting http server @ %s 🌏 ...", srv.Addr))
-	srv.ListenAndServe()
+	err := srv.ListenAndServe()
+
+	if err != nil {
+		logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+	}
 }
 
 func listenForStopSig(srv *http.Server) {

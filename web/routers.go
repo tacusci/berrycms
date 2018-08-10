@@ -150,6 +150,11 @@ func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request
 	}
 }
 
+type Handler interface {
+	Get(w http.ResponseWriter, r *http.Request)
+	Post(w http.ResponseWriter, r *http.Request)
+}
+
 //LoginHandler contains response functions for admin login
 type LoginHandler struct {
 	Router *MutableRouter
@@ -186,7 +191,11 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 		user.AuthHash = r.PostFormValue("authhash")
 		if user.Login() {
 			logging.Debug("Login successful...")
-			lh.Router.store.Get(r, "auth")
+			authSession, err := lh.Router.store.Get(r, "auth")
+			if err == nil {
+				defer authSession.Save(r, w)
+				authSession.Values["user"] = user
+			}
 		} else {
 			logging.Debug("Login unsuccessful...")
 			context.Set(r, "user", nil)
