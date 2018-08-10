@@ -132,7 +132,6 @@ func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request
 			return true
 		}
 	}
-	return false
 }
 
 //LoginHandler contains response functions for admin login
