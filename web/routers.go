@@ -50,19 +50,15 @@ func (mr *MutableRouter) Reload() {
 
 	for _, handler := range GetDefaultHandlers(mr) {
 		if handler.HandlesGet() {
+			logging.Debug(fmt.Sprintf("Mapping default GET route %s", handler.Route()))
 			r.HandleFunc(handler.Route(), handler.Get).Methods("GET")
 		}
-	}
 
-	loginHandler := &LoginHandler{Router: mr, route: "/login"}
-	r.HandleFunc(loginHandler.route, loginHandler.Get).Methods("GET")
-	r.HandleFunc(loginHandler.route, loginHandler.Post).Methods("POST")
-	adminHandler := &AdminHandler{Router: mr}
-	r.HandleFunc("/admin", adminHandler.Get).Methods("GET")
-	usersHandler := &AdminUsersHandler{Router: mr}
-	r.HandleFunc("/admin/users", usersHandler.Get).Methods("GET")
-	pagesHandler := &AdminPagesHandler{Router: mr}
-	r.HandleFunc("/admin/pages", pagesHandler.Get).Methods("GET")
+		if handler.HandlesPost() {
+			logging.Debug(fmt.Sprintf("Mapping default POST route %s", handler.Route()))
+			r.HandleFunc(handler.Route(), handler.Post).Methods("POST")
+		}
+	}
 
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
@@ -124,11 +120,12 @@ type authMiddleware struct {
 
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if amw.HasPermissions(w, r) {
-			next.ServeHTTP(w, r)
-		} else {
-			http.Error(w, "Forbidden", http.StatusForbidden)
+		authSession, err := amw.Router.store.Get(r, "auth")
+		if err == nil {
+			defer authSession.Save(r, w)
+			logging.Info(fmt.Sprintf("User unserialized: %t", authSession.Values["user"] != nil))
 		}
+		next.ServeHTTP(w, r)
 	})
 }
 

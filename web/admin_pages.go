@@ -17,7 +17,7 @@ type AdminPagesHandler struct {
 }
 
 //Get takes the web request and writes response to session
-func (ph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pageroutes := make([]string, 0)
 
 	pt := db.PagesTable{}
@@ -51,9 +51,9 @@ func (ph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(renderedContent))
 }
 
-func (ph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}
+func (aph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
-func (ph *AdminPagesHandler) Route() string { return ph.route }
+func (aph *AdminPagesHandler) Route() string { return aph.route }
 
-func (ph *AdminPagesHandler) HandlesGet() bool  { return true }
-func (ph *AdminPagesHandler) HandlesPost() bool { return false }
+func (aph *AdminPagesHandler) HandlesGet() bool  { return true }
+func (aph *AdminPagesHandler) HandlesPost() bool { return false }
