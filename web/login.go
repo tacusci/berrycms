@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gobuffalo/plush"
-	"github.com/gorilla/context"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 )
@@ -45,17 +44,18 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	} else {
 		user.AuthHash = r.PostFormValue("authhash")
-		if user.Login() {
-			logging.Debug("Login successful...")
-			authSession, err := lh.Router.store.Get(r, "auth")
-			if err == nil {
-				defer authSession.Save(r, w)
-				authSession.Values["user"] = user
+
+		authSession, err := lh.Router.store.Get(r, "auth")
+		if err == nil {
+			if user.Login() {
+				logging.Debug("Login successful...")
+				authSession.Values["isloggedin"] = true
+			} else {
+				logging.Debug("Login unsuccessful...")
+				authSession.Values["isloggedin"] = false
 			}
-		} else {
-			logging.Debug("Login unsuccessful...")
-			context.Set(r, "user", nil)
 		}
+		authSession.Save(r, w)
 	}
 	http.Redirect(w, r, lh.route, http.StatusFound)
 }

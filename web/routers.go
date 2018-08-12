@@ -120,33 +120,39 @@ type authMiddleware struct {
 
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authSession, err := amw.Router.store.Get(r, "auth")
-		if err == nil {
-			defer authSession.Save(r, w)
-			logging.Info(fmt.Sprintf("User unserialized: %t", authSession.Values["user"] != nil))
+		if amw.HasPermissions(r) {
+			next.ServeHTTP(w, r)
+		} else {
+			http.Error(w, "Access denied", http.StatusForbidden)
 		}
-		next.ServeHTTP(w, r)
 	})
 }
 
-func (amw *authMiddleware) HasPermissions(w http.ResponseWriter, r *http.Request) bool {
-	authSession, err := amw.Router.store.Get(r, "auth")
-	defer authSession.Save(r, w)
-	if err != nil {
-		return false
-	}
-	if strings.HasPrefix(r.RequestURI, "/admin") {
-		return authSession.Values["user"] != nil
-	} else {
+func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
+	var routeIsProtected bool
+
+	routeIsProtected = strings.HasPrefix(r.RequestURI, "/admin")
+
+	if !routeIsProtected {
 		pt := db.PagesTable{}
-		requestedPage, err := pt.SelectByRoute(db.Conn, r.RequestURI)
-		if err != nil {
-			return true
+		page, err := pt.SelectByRoute(db.Conn, r.RequestURI)
+		if err == nil {
+			routeIsProtected = page.Roleprotected
 		}
-		if requestedPage.Roleprotected {
-			return authSession.Values["user"] != nil
-		} else {
-			return true
+	}
+
+	var isLoggedIn bool
+
+	authSession, err := amw.Router.store.Get(r, "auth")
+	if err == nil {
+		if authSession.Values["isloggedin"] != nil {
+			isLoggedIn = authSession.Values["isloggedin"].(bool)
 		}
+	}
+
+	if routeIsProtected {
+		return isLoggedIn
+	} else {
+		return true
 	}
 }
