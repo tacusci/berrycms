@@ -81,9 +81,7 @@ func Heartbeat() {
 
 //Wipe drops all database tables
 func Wipe() error {
-	tablesToDrop := getTables()
-	for i := range tablesToDrop {
-		tableToDrop := tablesToDrop[i]
+	for _, tableToDrop := range getTables() {
 		dropSmt := fmt.Sprintf("DROP TABLE %s;", tableToDrop.Name())
 		_, err := Conn.Exec(dropSmt)
 		if err != nil {
@@ -105,8 +103,7 @@ func Setup() {
 func createTables(db *sql.DB) {
 	logging.Debug("Creating all database tables...")
 	tablesToCreate := getTables()
-	for i := range tablesToCreate {
-		tableToCreate := tablesToCreate[i]
+	for _, tableToCreate := range tablesToCreate {
 		tableCreateStatement := createStatement(tableToCreate)
 
 		logging.Debug(fmt.Sprintf("Creating table %s...", tableToCreate.Name()))
@@ -122,5 +119,5 @@ func createTables(db *sql.DB) {
 }
 
 func getTables() []Table {
-	return []Table{&UsersTable{}, &PagesTable{}}
+	return []Table{&UsersTable{}, &PagesTable{}, &AuthSessionsTable{}}
 }

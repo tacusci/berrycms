@@ -4,8 +4,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gobuffalo/plush"
+	"github.com/gobuffalo/uuid"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 )
@@ -37,26 +39,68 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+
+	err := r.ParseForm()
+
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
 	ut := db.UsersTable{}
 	user, err := ut.SelectByUsername(db.Conn, r.PostFormValue("username"))
+
 	if err != nil {
-
-	} else {
-		user.AuthHash = r.PostFormValue("authhash")
-
-		authSession, err := lh.Router.store.Get(r, "auth")
-		if err == nil {
-			if user.Login() {
-				logging.Debug("Login successful...")
-				authSession.Values["isloggedin"] = true
-			} else {
-				logging.Debug("Login unsuccessful...")
-				authSession.Values["isloggedin"] = false
-			}
-		}
-		authSession.Save(r, w)
+		Error(w, err)
+		return
 	}
+
+	user.AuthHash = r.PostFormValue("authhash")
+
+	if user.Login() {
+		logging.Debug("Login successful...")
+
+		v4UUID, err := uuid.NewV4()
+
+		if err != nil {
+			Error(w, err)
+			return
+		}
+
+		authSessionsTable := db.AuthSessionsTable{}
+
+		if _, err := authSessionsTable.SelectByUserUUID(db.Conn, user.UUID); err == nil {
+			sessionUUID := v4UUID.String()
+			authSessionsTable.Insert(db.Conn, db.AuthSession{
+				SessionUUID: sessionUUID,
+				UserUUID:    user.UUID,
+			})
+
+			authSessionStore, err := lh.Router.store.Get(r, "auth")
+			defer authSessionStore.Save(r, w)
+
+			if err != nil {
+				Error(w, err)
+				return
+			}
+
+			authSessionStore.Values["createddatetime"] = time.Now()
+			authSessionStore.Values["sessionuuid"] = sessionUUID
+		} else {
+			Error(w, err)
+		}
+	} else {
+		authSessionStore, err := lh.Router.store.Get(r, "auth")
+		defer authSessionStore.Save(r, w)
+		if err != nil {
+			Error(w, err)
+			return
+		}
+		logging.Debug("Login unsuccessful...")
+		authSessionStore.Values["createddatetime"] = time.Now()
+		authSessionStore.Values["sessionuuid"] = ""
+	}
+
 	http.Redirect(w, r, lh.route, http.StatusFound)
 }
 

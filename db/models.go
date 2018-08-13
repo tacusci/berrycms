@@ -3,6 +3,7 @@ package db
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -127,9 +128,7 @@ func (ut *UsersTable) Init(db *sql.DB) {
 }
 
 //Name gets the table name, have to implement to make UsersTable inherit Table
-func (ut *UsersTable) Name() string {
-	return "users"
-}
+func (ut *UsersTable) Name() string { return "users" }
 
 //InsertMultiple takes a slice of user structs and passes them all to 'Insert'
 func (ut *UsersTable) InsertMultiple(db *sql.DB, us []User) error {
@@ -213,8 +212,8 @@ func (ut *UsersTable) buildInsertStatement(m Model) string {
 type PagesTable struct {
 	Pageid        int    `tbl:"PKNNAIUI"`
 	UUID          string `tbl:"NNUI"`
-	Roleprotected bool   `tbl:NN`
-	AuthorUUID    string `tbl:NN`
+	Roleprotected bool   `tbl:"NN"`
+	AuthorUUID    string `tbl:"NN"`
 	Title         string `tbl:"NNUI"`
 	Route         string `tbl:"NNUI"`
 	Content       string `tbl:"NN"`
@@ -281,6 +280,95 @@ func (pt *PagesTable) buildInsertStatement(m Model) string {
 }
 
 // ******** End Pages Table ********
+
+// ******** Start Auth Table ********
+
+type AuthSessionsTable struct {
+	Authsessionid int    `tbl:"PKNNAIUI"`
+	UserUUID      string `tbl:"NNUI"`
+	SessionUUID   string `tbl:"NNUI"`
+}
+
+func (ast *AuthSessionsTable) Init(db *sql.DB) {}
+
+func (ast *AuthSessionsTable) Name() string { return "authsessions" }
+
+func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
+	if as.Validate() {
+		insertStatement := ast.buildInsertStatement(&as)
+		_, err := db.Exec(insertStatement)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
+	}
+}
+
+func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ast.Name(), whereClause))
+	} else {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, ast.Name()))
+	}
+}
+
+func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
+	as := AuthSession{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
+	if err != nil {
+		return as, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+		if err != nil {
+			return as, err
+		}
+	}
+
+	return as, nil
+}
+
+func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
+	as := AuthSession{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE useruuid = '%s'", SchemaName, ast.Name(), userUUID))
+	if err != nil {
+		return as, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+		if err != nil {
+			return as, err
+		}
+	}
+
+	return as, nil
+}
+
+func (ast *AuthSessionsTable) DeleteBySessionUUID(db *sql.DB, sessionUUID string) error {
+	if len(sessionUUID) > 0 {
+		_, err := db.Exec("DELETE FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New("Session UUID to delete by is blank")
+}
+
+//BuildFields takes the table struct and maps all of the struct fields to their own struct
+func (ast *AuthSessionsTable) buildFields() []Field {
+	return buildFieldsFromTable(ast)
+}
+
+func (ast *AuthSessionsTable) buildInsertStatement(m Model) string {
+	return buildInsertStatementFromTable(ast, m)
+}
+
+// ******** End Auth Table ********
 
 // ****************************************** END TABLES ******************************************
 /////////////////////////////////////////////////////////////////////////////////
@@ -383,6 +471,24 @@ func (p *Page) TableName() string {
 
 func (p *Page) BuildFields() []Field {
 	return buildFieldsFromModel(p)
+}
+
+type AuthSession struct {
+	Authsessionid int    `tbl:"AI" json:"authsessionid"`
+	UserUUID      string `json:"userUUID"`
+	SessionUUID   string `json:"sessionUUID"`
+}
+
+func (as *AuthSession) TableName() string {
+	return "authsessions"
+}
+
+func (as *AuthSession) BuildFields() []Field {
+	return buildFieldsFromModel(as)
+}
+
+func (as *AuthSession) Validate() bool {
+	return len(as.UserUUID) > 0 && len(as.SessionUUID) > 0
 }
 
 // ****************************************** END MODELS ******************************************

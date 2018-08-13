@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gobuffalo/uuid"
 	"github.com/gorilla/mux"
@@ -42,6 +43,11 @@ func (mr *MutableRouter) Reload() {
 			logging.ErrorAndExit(err.Error())
 		}
 		mr.store = sessions.NewCookieStore(newUUID.Bytes())
+		mr.store.Options = &sessions.Options{
+			HttpOnly: true,
+			MaxAge:   0,
+			Secure:   true,
+		}
 	}
 
 	r := mux.NewRouter()
@@ -143,10 +149,21 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 
 	var isLoggedIn bool
 
-	authSession, err := amw.Router.store.Get(r, "auth")
+	authSessionStore, err := amw.Router.store.Get(r, "auth")
 	if err == nil {
-		if authSession.Values["isloggedin"] != nil {
-			isLoggedIn = authSession.Values["isloggedin"].(bool)
+		authSessionsTable := db.AuthSessionsTable{}
+		if authSessionCreatedTime := authSessionStore.Values["createddatetime"]; authSessionCreatedTime != nil {
+			if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
+				authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
+				if err == nil {
+					if time.Since(authSessionCreatedTime.(time.Time)).Seconds() < 60 {
+						isLoggedIn = len(authSession.UserUUID) > 0
+					} else {
+						authSessionsTable.DeleteBySessionUUID(db.Conn, authSessionUUID.(string))
+						authSessionStore.Options.MaxAge = -1
+					}
+				}
+			}
 		}
 	}
 
@@ -155,4 +172,10 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 	} else {
 		return true
 	}
+}
+
+func Error(w http.ResponseWriter, err error) {
+	logging.Error(err.Error())
+	http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+	return
 }
