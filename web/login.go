@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -40,6 +41,8 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
+	logging.Debug("Recieved login form POST submission...")
+
 	err := r.ParseForm()
 
 	if err != nil {
@@ -67,38 +70,59 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		sessionUUID := v4UUID.String()
+
 		authSessionsTable := db.AuthSessionsTable{}
 
 		if _, err := authSessionsTable.SelectByUserUUID(db.Conn, user.UUID); err == nil {
-			sessionUUID := v4UUID.String()
-			authSessionsTable.Insert(db.Conn, db.AuthSession{
+			logging.Debug(fmt.Sprintf("There's no existing session uuid for user: %s of UUID: %s, creating session of UUID: %s...", user.Username, user.UUID, sessionUUID))
+			err := authSessionsTable.Insert(db.Conn, db.AuthSession{
 				SessionUUID: sessionUUID,
 				UserUUID:    user.UUID,
 			})
-
-			authSessionStore, err := lh.Router.store.Get(r, "auth")
-			defer authSessionStore.Save(r, w)
 
 			if err != nil {
 				Error(w, err)
 				return
 			}
-
-			authSessionStore.Values["createddatetime"] = time.Now()
-			authSessionStore.Values["sessionuuid"] = sessionUUID
 		} else {
-			Error(w, err)
+			logging.Debug(fmt.Sprintf("Existing session for uuid for user: %s of UUID: %s, updating...", user.Username, user.UUID))
+			err := authSessionsTable.Update(db.Conn, db.AuthSession{
+				SessionUUID: sessionUUID,
+				UserUUID:    user.UUID,
+			})
+			if err != nil {
+				Error(w, err)
+				return
+			}
 		}
-	} else {
+
 		authSessionStore, err := lh.Router.store.Get(r, "auth")
-		defer authSessionStore.Save(r, w)
+
 		if err != nil {
 			Error(w, err)
 			return
 		}
+
+		authSessionStore.Values["createddatetime"] = time.Now().String()
+		authSessionStore.Values["sessionuuid"] = sessionUUID
+
+		logging.Debug("Updated session store with new session UUID and added created date/timestamp")
+
+		authSessionStore.Save(r, w)
+	} else {
+		authSessionStore, err := lh.Router.store.Get(r, "auth")
+
+		if err != nil {
+			Error(w, err)
+			return
+		}
+
 		logging.Debug("Login unsuccessful...")
-		authSessionStore.Values["createddatetime"] = time.Now()
+		authSessionStore.Values["createddatetime"] = time.Now().String()
 		authSessionStore.Values["sessionuuid"] = ""
+
+		authSessionStore.Save(r, w)
 	}
 
 	http.Redirect(w, r, lh.route, http.StatusFound)

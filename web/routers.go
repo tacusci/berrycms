@@ -165,17 +165,17 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 				}
 			}
 		}
+	} else {
+		logging.Debug(fmt.Sprintf("Error trying to read existing session \"auth\" -> %s", err.Error()))
 	}
 
 	if routeIsProtected {
 		return isLoggedIn
-	} else {
-		return true
 	}
+	return true
 }
 
 func Error(w http.ResponseWriter, err error) {
 	logging.Error(err.Error())
 	http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-	return
 }

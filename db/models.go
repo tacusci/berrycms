@@ -306,6 +306,20 @@ func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 	}
 }
 
+//Update - Takes auth session to update existing user session entry session UUID
+func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
+	if as.Validate() {
+		updateStatement := fmt.Sprintf("UPDATE %s SET sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.SessionUUID, as.UserUUID)
+		_, err := db.Exec(updateStatement)
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
+	}
+}
+
 func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ast.Name(), whereClause))
