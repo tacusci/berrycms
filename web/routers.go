@@ -7,9 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/gobuffalo/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/tacusci/berrycms/db"
@@ -38,15 +36,13 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 func (mr *MutableRouter) Reload() {
 
 	if mr.store == nil {
-		newUUID, err := uuid.NewV4()
-		if err != nil {
-			logging.ErrorAndExit(err.Error())
-		}
-		mr.store = sessions.NewCookieStore(newUUID.Bytes())
+		mr.store = sessions.NewCookieStore([]byte("e9r23ueuf283feiu2jfie2"))
 		mr.store.Options = &sessions.Options{
 			HttpOnly: true,
 			MaxAge:   0,
 			Secure:   true,
+			Domain:   "localhost",
+			Path:     "/",
 		}
 	}
 
@@ -152,17 +148,17 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 	authSessionStore, err := amw.Router.store.Get(r, "auth")
 	if err == nil {
 		authSessionsTable := db.AuthSessionsTable{}
-		if authSessionCreatedTime := authSessionStore.Values["createddatetime"]; authSessionCreatedTime != nil {
-			if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
-				authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
-				if err == nil {
-					if time.Since(authSessionCreatedTime.(time.Time)).Seconds() < 60 {
-						isLoggedIn = len(authSession.UserUUID) > 0
-					} else {
-						authSessionsTable.DeleteBySessionUUID(db.Conn, authSessionUUID.(string))
-						authSessionStore.Options.MaxAge = -1
-					}
+		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != "" && authSessionUUID != nil {
+			authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
+			if err == nil {
+				if len(authSession.UserUUID) > 0 {
+					isLoggedIn = true
+				} else {
+					authSessionsTable.DeleteBySessionUUID(db.Conn, authSessionUUID.(string))
+					authSessionStore.Options.MaxAge = -1
 				}
+			} else {
+				logging.Error(err.Error())
 			}
 		}
 	} else {

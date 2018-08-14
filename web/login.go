@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/gobuffalo/uuid"
@@ -104,12 +103,10 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		authSessionStore.Values["createddatetime"] = time.Now().String()
 		authSessionStore.Values["sessionuuid"] = sessionUUID
+		authSessionStore.Save(r, w)
 
 		logging.Debug("Updated session store with new session UUID and added created date/timestamp")
-
-		authSessionStore.Save(r, w)
 	} else {
 		authSessionStore, err := lh.Router.store.Get(r, "auth")
 
@@ -119,7 +116,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 		}
 
 		logging.Debug("Login unsuccessful...")
-		authSessionStore.Values["createddatetime"] = time.Now().String()
 		authSessionStore.Values["sessionuuid"] = ""
 
 		authSessionStore.Save(r, w)
