@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
@@ -21,7 +20,6 @@ type MutableRouter struct {
 	mu     sync.Mutex
 	Root   *mux.Router
 	dw     *util.RecursiveDirWatch
-	store  *sessions.CookieStore
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -34,17 +32,6 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
-
-	if mr.store == nil {
-		mr.store = sessions.NewCookieStore([]byte("e9r23ueuf283feiu2jfie2"))
-		mr.store.Options = &sessions.Options{
-			HttpOnly: true,
-			MaxAge:   0,
-			Secure:   true,
-			Domain:   "localhost",
-			Path:     "/",
-		}
-	}
 
 	r := mux.NewRouter()
 
@@ -145,10 +132,10 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 
 	var isLoggedIn bool
 
-	authSessionStore, err := amw.Router.store.Get(r, "auth")
+	authSessionStore, err := store.Get(r, "auth")
 	if err == nil {
 		authSessionsTable := db.AuthSessionsTable{}
-		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != "" && authSessionUUID != nil {
+		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
 			authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
 			if err == nil {
 				if len(authSession.UserUUID) > 0 {
