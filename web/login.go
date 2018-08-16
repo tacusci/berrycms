@@ -96,7 +96,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		authSessionStore, err := lh.Router.store.Get(r, "auth")
+		authSessionStore, err := sessionsstore.Get(r, "auth")
 
 		if err != nil {
 			Error(w, err)
@@ -108,7 +108,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 		logging.Debug("Updated session store with new session UUID and added created date/timestamp")
 	} else {
-		authSessionStore, err := lh.Router.store.Get(r, "auth")
+		authSessionStore, err := sessionsstore.Get(r, "auth")
 
 		if err != nil {
 			Error(w, err)

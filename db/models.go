@@ -330,35 +330,21 @@ func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClaus
 
 func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
 	as := AuthSession{}
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
+	err := row.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
-
-	for rows.Next() {
-		err = rows.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
-		if err != nil {
-			return as, err
-		}
-	}
-
 	return as, nil
 }
 
 func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
 	as := AuthSession{}
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE useruuid = '%s'", SchemaName, ast.Name(), userUUID))
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE useruuid = '%s'", SchemaName, ast.Name(), userUUID))
+	err := row.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
-
-	for rows.Next() {
-		err = rows.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
-		if err != nil {
-			return as, err
-		}
-	}
-
 	return as, nil
 }
 

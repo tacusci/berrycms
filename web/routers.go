@@ -132,7 +132,7 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 
 	var isLoggedIn bool
 
-	authSessionStore, err := store.Get(r, "auth")
+	authSessionStore, err := sessionsstore.Get(r, "auth")
 	if err == nil {
 		authSessionsTable := db.AuthSessionsTable{}
 		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
