@@ -81,7 +81,9 @@ func Heartbeat() {
 
 //Wipe drops all database tables
 func Wipe() error {
+	logging.Debug("Dropping/wiping all existing tables...")
 	for _, tableToDrop := range getTables() {
+		logging.Debug(fmt.Sprintf("Dropping %s table...", tableToDrop.Name()))
 		dropSmt := fmt.Sprintf("DROP TABLE %s;", tableToDrop.Name())
 		_, err := Conn.Exec(dropSmt)
 		if err != nil {
