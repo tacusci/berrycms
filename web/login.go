@@ -117,6 +117,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 		logging.Debug("Login unsuccessful...")
 		authSessionStore.Values["sessionuuid"] = ""
+		authSessionStore.Options.MaxAge = -1
 
 		authSessionStore.Save(r, w)
 	}

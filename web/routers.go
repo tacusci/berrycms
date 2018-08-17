@@ -145,7 +145,10 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 					authSessionStore.Options.MaxAge = -1
 				}
 			} else {
-				logging.Error(err.Error())
+				errString := err.Error()
+				if errString != "sql: no rows in result set" {
+					logging.Error(err.Error())
+				}
 			}
 		}
 	} else {

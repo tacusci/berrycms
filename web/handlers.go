@@ -18,6 +18,10 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			route:  "/login",
 			Router: router,
 		},
+		&LogoutHandler{
+			route:  "/logout",
+			Router: router,
+		},
 		&AdminHandler{
 			route:  "/admin",
 			Router: router,
