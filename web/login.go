@@ -44,9 +44,11 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if flashes := loginErrorStore.Flashes("errormessage"); len(flashes) > 0 {
-			logging.Debug(fmt.Sprintf("Login attempt error message: '%s'", flashes[0].(string)))
-			pctx.Set("loginerrormessage", flashes[0].(string))
+		if loginErrorMessage := loginErrorStore.Values["errormessage"]; loginErrorMessage != nil && loginErrorMessage != "" {
+			logging.Debug(fmt.Sprintf("Login attempt error message: '%s'", loginErrorMessage))
+			pctx.Set("loginerrormessage", loginErrorMessage)
+			loginErrorStore.Values["errormessage"] = ""
+			loginErrorStore.Save(r, w)
 		}
 
 		renderedContent, err := plush.Render(string(content), pctx)
@@ -150,7 +152,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		loginErrorStore.AddFlash("errormessage", "Username or password incorrect...")
+		loginErrorStore.Values["errormessage"] = "Username or password incorrect..."
 		loginErrorStore.Save(r, w)
 	}
 
