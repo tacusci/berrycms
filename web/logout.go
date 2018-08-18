@@ -55,5 +55,5 @@ func logout(w http.ResponseWriter, r *http.Request) error {
 
 func (lh *LogoutHandler) Route() string { return lh.route }
 
-func (lh *LogoutHandler) HandlesGet() bool  { return true }
+func (lh *LogoutHandler) HandlesGet() bool  { return false }
 func (lh *LogoutHandler) HandlesPost() bool { return true }

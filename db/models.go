@@ -350,7 +350,7 @@ func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (Aut
 
 func (ast *AuthSessionsTable) DeleteBySessionUUID(db *sql.DB, sessionUUID string) error {
 	if len(sessionUUID) > 0 {
-		_, err := db.Exec("DELETE FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID)
+		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
 		if err != nil {
 			return err
 		}
