@@ -109,7 +109,7 @@ type authMiddleware struct {
 
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if amw.HasPermissions(r) {
+		if amw.HasPermissionsForRoute(r) {
 			next.ServeHTTP(w, r)
 		} else {
 			http.Error(w, "Access denied", http.StatusForbidden)
@@ -117,7 +117,7 @@ func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	})
 }
 
-func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
+func (amw *authMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	var routeIsProtected bool
 
 	routeIsProtected = strings.HasPrefix(r.RequestURI, "/admin")
@@ -130,6 +130,13 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 		}
 	}
 
+	if routeIsProtected {
+		return amw.IsLoggedIn(r)
+	}
+	return true
+}
+
+func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
 	var isLoggedIn bool
 
 	authSessionStore, err := sessionsstore.Get(r, "auth")
@@ -154,11 +161,7 @@ func (amw *authMiddleware) HasPermissions(r *http.Request) bool {
 	} else {
 		logging.Debug(fmt.Sprintf("Error trying to read existing session \"auth\" -> %s", err.Error()))
 	}
-
-	if routeIsProtected {
-		return isLoggedIn
-	}
-	return true
+	return isLoggedIn
 }
 
 func Error(w http.ResponseWriter, err error) {

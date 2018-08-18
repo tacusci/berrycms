@@ -7,10 +7,11 @@
         <h2>Login</h2>
         <form action="/login" method="POST">
             <input type="hidden" name="formname" value=<%= formname %>>
-            <input type="hidden" name="hashid" value=<%= formhash%>
+            <input type="hidden" name="hashid" value=<%= formhash%>>
             <label>Username</label><input name="username" type="text"><br>
             <label>Password</label><input name="authhash" type="password"><br>
             <input type="submit" value="Submit">
         </form>
+        <%= loginerrormessage%>
     </body>
 </html>

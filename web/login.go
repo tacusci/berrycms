@@ -20,22 +20,44 @@ type LoginHandler struct {
 
 //Get takes the web request and writes response to session
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "login.html")
-	if err != nil {
-		logging.Error("Unable to find resources folder...")
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
-	}
-	pctx := plush.NewContext()
-	pctx.Set("formname", "loginform")
-	pctx.Set("formhash", "fjei4ijiorgrig4ijio34ofj4ig34i4j3i")
 
-	renderedContent, err := plush.Render(string(content), pctx)
-	if err != nil {
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
+	amw := authMiddleware{}
+
+	if !amw.IsLoggedIn(r) {
+		content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "login.html")
+		if err != nil {
+			logging.Error("Unable to find resources folder...")
+			w.Write([]byte("<h1>500 Server Error</h1>"))
+			return
+		}
+
+		pctx := plush.NewContext()
+
+		pctx.Set("formname", "loginform")
+		pctx.Set("formhash", "fjei4ijiorgrig4ijio34ofj4ig34i4j3i")
+		pctx.Set("loginerrormessage", "")
+
+		loginErrorStore, err := sessionsstore.Get(r, "passerrmsg")
+
+		if err != nil {
+			Error(w, err)
+			return
+		}
+
+		if flashes := loginErrorStore.Flashes("errormessage"); len(flashes) > 0 {
+			logging.Debug(fmt.Sprintf("Login attempt error message: '%s'", flashes[0].(string)))
+			pctx.Set("loginerrormessage", flashes[0].(string))
+		}
+
+		renderedContent, err := plush.Render(string(content), pctx)
+		if err != nil {
+			w.Write([]byte("<h1>500 Server Error</h1>"))
+			return
+		}
+		w.Write([]byte(renderedContent))
+	} else {
+		http.Redirect(w, r, "/admin", http.StatusFound)
 	}
-	w.Write([]byte(renderedContent))
 }
 
 func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +142,16 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 		authSessionStore.Options.MaxAge = -1
 
 		authSessionStore.Save(r, w)
+
+		loginErrorStore, err := sessionsstore.Get(r, "passerrmsg")
+
+		if err != nil {
+			Error(w, err)
+			return
+		}
+
+		loginErrorStore.AddFlash("errormessage", "Username or password incorrect...")
+		loginErrorStore.Save(r, w)
 	}
 
 	http.Redirect(w, r, lh.route, http.StatusFound)
