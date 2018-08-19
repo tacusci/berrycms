@@ -60,10 +60,11 @@ func CreateTestData() {
 	}
 	pagesTable := &PagesTable{}
 	err = pagesTable.Insert(Conn, Page{
-		AuthorUUID: rootUser.UUID,
-		Title:      "Add New",
-		Route:      "/addnew",
-		Content:    "<html><body><h2>Adding Carbonite page...</h2></body></html>",
+		CreatedDateTime: time.Now().Unix(),
+		AuthorUUID:      rootUser.UUID,
+		Title:           "Add New",
+		Route:           "/addnew",
+		Content:         "<html><body><h2>Adding Carbonite page...</h2></body></html>",
 	})
 	if err != nil {
 		logging.Error(err.Error())

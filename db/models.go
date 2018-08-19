@@ -227,13 +227,14 @@ func (ut *UsersTable) buildInsertStatement(m Model) string {
 
 // ******** Start Pages Table ********
 type PagesTable struct {
-	Pageid        int    `tbl:"PKNNAIUI"`
-	UUID          string `tbl:"NNUI"`
-	Roleprotected bool   `tbl:"NN"`
-	AuthorUUID    string `tbl:"NN"`
-	Title         string `tbl:"NNUI"`
-	Route         string `tbl:"NNUI"`
-	Content       string `tbl:"NN"`
+	Pageid          int    `tbl:"PKNNAIUI"`
+	CreatedDateTime int64  `tbl:"NNDT"`
+	UUID            string `tbl:"NNUI"`
+	Roleprotected   bool   `tbl:"NN"`
+	AuthorUUID      string `tbl:"NN"`
+	Title           string `tbl:"NNUI"`
+	Route           string `tbl:"NNUI"`
+	Content         string `tbl:"NN"`
 }
 
 func (pt *PagesTable) Init(db *sql.DB) {}
@@ -301,9 +302,10 @@ func (pt *PagesTable) buildInsertStatement(m Model) string {
 // ******** Start Auth Table ********
 
 type AuthSessionsTable struct {
-	Authsessionid int    `tbl:"PKNNAIUI"`
-	UserUUID      string `tbl:"NNUI"`
-	SessionUUID   string `tbl:"NNUI"`
+	Authsessionid   int    `tbl:"PKNNAIUI"`
+	CreatedDateTime int64  `tbl:"NNDT"`
+	UserUUID        string `tbl:"NNUI"`
+	SessionUUID     string `tbl:"NNUI"`
 }
 
 func (ast *AuthSessionsTable) Init(db *sql.DB) {}
@@ -326,7 +328,7 @@ func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 //Update - Takes auth session to update existing user session entry session UUID
 func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
 	if as.Validate() {
-		updateStatement := fmt.Sprintf("UPDATE %s SET sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.SessionUUID, as.UserUUID)
+		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.CreatedDateTime, as.SessionUUID, as.UserUUID)
 		_, err := db.Exec(updateStatement)
 		if err != nil {
 			return err
@@ -348,7 +350,7 @@ func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClaus
 func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
 	as := AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
-	err := row.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
@@ -358,7 +360,7 @@ func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string
 func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
 	as := AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE useruuid = '%s'", SchemaName, ast.Name(), userUUID))
-	err := row.Scan(&as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
@@ -474,13 +476,14 @@ func (ur *UserRole) BuildFields() []Field {
 }
 
 type Page struct {
-	PageId        int    `tbl:"AI" json:"pageid"`
-	UUID          string `json:"UUID"`
-	Roleprotected bool   `json:"roleprotected"`
-	AuthorUUID    string `json:"authoruuid"`
-	Title         string `json:"title"`
-	Route         string `json:"route"`
-	Content       string `json:"content"`
+	PageId          int    `tbl:"AI" json:"pageid"`
+	CreatedDateTime int64  `json:"createddatetime"`
+	UUID            string `json:"UUID"`
+	Roleprotected   bool   `json:"roleprotected"`
+	AuthorUUID      string `json:"authoruuid"`
+	Title           string `json:"title"`
+	Route           string `json:"route"`
+	Content         string `json:"content"`
 }
 
 func (p *Page) TableName() string {
@@ -492,9 +495,10 @@ func (p *Page) BuildFields() []Field {
 }
 
 type AuthSession struct {
-	Authsessionid int    `tbl:"AI" json:"authsessionid"`
-	UserUUID      string `json:"userUUID"`
-	SessionUUID   string `json:"sessionUUID"`
+	Authsessionid   int    `tbl:"AI" json:"authsessionid"`
+	CreatedDateTime int64  `json:"createddatetime"`
+	UserUUID        string `json:"userUUID"`
+	SessionUUID     string `json:"sessionUUID"`
 }
 
 func (as *AuthSession) TableName() string {
