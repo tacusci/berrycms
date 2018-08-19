@@ -42,11 +42,12 @@ func Close() {
 func CreateTestData() {
 	usersTable := &UsersTable{}
 	err := usersTable.Insert(Conn, User{
-		FirstName: "John",
-		LastName:  "Doe",
-		Username:  "jdoe",
-		AuthHash:  util.HashAndSalt([]byte("iamjohndoe")),
-		Email:     "person@place.com",
+		Username:        "jdoe",
+		CreatedDateTime: time.Now().Unix(),
+		FirstName:       "John",
+		LastName:        "Doe",
+		AuthHash:        util.HashAndSalt([]byte("iamjohndoe")),
+		Email:           "person@place.com",
 	})
 	rootUser := User{}
 	rows, err := usersTable.Select(Conn, "UUID", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))

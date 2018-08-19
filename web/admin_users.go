@@ -1,9 +1,11 @@
 package web
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -21,7 +23,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	usernames := make([]string, 0)
 
 	ut := db.UsersTable{}
-	row, err := ut.Select(db.Conn, "username", "")
+	row, err := ut.Select(db.Conn, "createddatetime, username", "")
 
 	if err != nil {
 		logging.ErrorAndExit(err.Error())
@@ -29,7 +31,9 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	for row.Next() {
 		u := &db.User{}
-		row.Scan(&u.Username)
+		row.Scan(&u.CreatedDateTime, &u.Username)
+		createdDateTime := time.Unix(u.CreatedDateTime, 0)
+		logging.Debug(fmt.Sprintf("User created/date time -> %s", createdDateTime.String()))
 		usernames = append(usernames, u.Username)
 	}
 

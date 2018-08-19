@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -28,6 +29,7 @@ type Field struct {
 	AutoIncrement bool
 	PrimaryKey    bool
 	UniqueIndex   bool
+	IsDateTime    bool
 	NotNull       bool
 	Name          string
 	Type          string
@@ -52,6 +54,10 @@ func (f *Field) parseFlagTags() {
 	if strings.Contains(fieldTagString, "UI") {
 		f.UniqueIndex = true
 	}
+
+	if strings.Contains(fieldTagString, "DT") {
+		f.IsDateTime = true
+	}
 }
 
 func (f *Field) translateTypes() {
@@ -62,8 +68,15 @@ func (f *Field) translateTypes() {
 		//f.Type = "BOOLEAN"
 		f.Type = "BIT(1)"
 	case "uint32":
-		f.Type = "LONG"
+		f.Type = "INT"
+	case "uint64":
+		f.Type = "BIGINT"
 	}
+
+	if f.IsDateTime {
+		f.Type = "BIGINT"
+	}
+
 	f.Type = strings.ToUpper(f.Type)
 }
 
@@ -72,6 +85,8 @@ func (f *Field) getFormatString() string {
 	case reflect.Bool:
 		return "%t"
 	case reflect.Int:
+		return "%d"
+	case reflect.Int64:
 		return "%d"
 	default:
 		return "%s"
@@ -92,14 +107,15 @@ type Table interface {
 
 //UsersTable describes the table structure for UsersTable in db
 type UsersTable struct {
-	Userid     int    `tbl:"PKNNAIUI"`
-	Userroleid int    `tbl:"NN"`
-	UUID       string `tbl:"NNUI"`
-	Username   string `tbl:"NNUI"`
-	Authhash   string `tbl:"NN"`
-	Firstname  string `tbl:"NN"`
-	Lastname   string `tbl:"NN"`
-	Email      string `tbl:"NNUI"`
+	Userid          int    `tbl:"PKNNAIUI"`
+	CreatedDateTime int64  `tbl:"NNDT"`
+	Userroleid      int    `tbl:"NN"`
+	UUID            string `tbl:"NNUI"`
+	Username        string `tbl:"NNUI"`
+	Authhash        string `tbl:"NN"`
+	Firstname       string `tbl:"NN"`
+	Lastname        string `tbl:"NN"`
+	Email           string `tbl:"NNUI"`
 }
 
 //Init carries out default data entry
@@ -109,12 +125,13 @@ func (ut *UsersTable) Init(db *sql.DB) {
 		if !resultRows.Next() {
 			logging.Debug("Creating default root user account...")
 			err = ut.Insert(db, User{
-				Username:   "root",
-				UserroleId: int(ROOT),
-				AuthHash:   util.HashAndSalt([]byte("iamroot")),
-				FirstName:  "Root",
-				LastName:   "User",
-				Email:      "none",
+				Username:        "root",
+				CreatedDateTime: time.Now().Unix(),
+				UserroleId:      int(ROOT),
+				AuthHash:        util.HashAndSalt([]byte("iamroot")),
+				FirstName:       "Root",
+				LastName:        "User",
+				Email:           "none",
 			})
 			if err != nil {
 				logging.ErrorAndExit(err.Error())
@@ -188,7 +205,7 @@ func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&u.UserId, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
+		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
 		if err != nil {
 			return u, err
 		}
@@ -390,14 +407,15 @@ type Model interface {
 
 //User describes the content of a user, it should match the columns present in the users table
 type User struct {
-	UserId     int    `tbl:"AI" json:"userid"`
-	UserroleId int    `json:"userroleid"`
-	UUID       string `json:"UUID"`
-	Username   string `json:"username"`
-	AuthHash   string `json:"authhash"`
-	FirstName  string `json:"firstname"`
-	LastName   string `json:"lastname"`
-	Email      string `json:"email"`
+	UserId          int    `tbl:"AI" json:"userid"`
+	CreatedDateTime int64  `json:"createddatetime"`
+	UserroleId      int    `json:"userroleid"`
+	UUID            string `json:"UUID"`
+	Username        string `json:"username"`
+	AuthHash        string `json:"authhash"`
+	FirstName       string `json:"firstname"`
+	LastName        string `json:"lastname"`
+	Email           string `json:"email"`
 }
 
 //Login takes the current username and authhash values of self and tries
@@ -518,7 +536,7 @@ func buildInsertStatementFromTable(t Table, m Model) string {
 		modelField := modelFields[i]
 		if !modelField.AutoIncrement {
 			formatString := modelField.getFormatString()
-			if modelField.Type != "boolean" && modelField.Type != "BIT(1)" {
+			if modelField.Type != "boolean" && modelField.Type != "BIT(1)" && modelField.Type != "BIGINT" {
 				formatString = fmt.Sprintf("'%s'", formatString)
 			}
 			insertStatementBuilder.WriteString(fmt.Sprintf(formatString, modelField.Value))
