@@ -5,7 +5,6 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/logging"
 )
 
 var (
@@ -28,7 +27,6 @@ func ClearOldSessions(stop *chan bool) {
 			return
 		default:
 			if time.Since(startTime).Seconds() > 60 {
-				logging.Debug("Clearing old sessions, (older than 20 minutes)...")
 				rows, err := authSessionsTable.Select(db.Conn, "*", "")
 				if err != nil {
 					for rows.Next() {
