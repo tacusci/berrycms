@@ -21,7 +21,7 @@ const (
 
 func parseCmdArgs() *bool {
 	debugLevel := flag.Bool("db", false, "Set logging to debug")
-	devMode := flag.Bool("dm", false, "Turn on development mode")
+	devMode := flag.Bool("dev", false, "Turn on development mode")
 
 	flag.Parse()
 
