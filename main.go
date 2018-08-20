@@ -57,7 +57,9 @@ func main() {
 	}
 	rs.Reload()
 
-	go listenForStopSig(srv)
+	clearOldSessionsStop := make(chan bool)
+	go web.ClearOldSessions(&clearOldSessionsStop)
+	go listenForStopSig(srv, &clearOldSessionsStop)
 
 	logging.Info(fmt.Sprintf("Starting http server @ %s 🌏 ...", srv.Addr))
 	err := srv.ListenAndServe()
@@ -67,11 +69,12 @@ func main() {
 	}
 }
 
-func listenForStopSig(srv *http.Server) {
+func listenForStopSig(srv *http.Server, wc *chan bool) {
 	var gracefulStop = make(chan os.Signal)
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)
 	sig := <-gracefulStop
+	*wc <- true
 	logging.Error(fmt.Sprintf("☠️  Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
 	logging.Info("Closing DB connection...")
 	db.Close()

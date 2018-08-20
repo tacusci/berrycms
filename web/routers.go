@@ -164,6 +164,7 @@ func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
 	return isLoggedIn
 }
 
+//Error writes HTTP error message to web response and add error message to log
 func Error(w http.ResponseWriter, err error) {
 	logging.Error(err.Error())
 	http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
