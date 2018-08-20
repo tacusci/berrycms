@@ -10,7 +10,8 @@ import (
 	"github.com/tacusci/logging"
 
 	//blank import to make sure right SQL driver is used to talk to DB
-	_ "github.com/go-sql-driver/mysql"
+	// _ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var SchemaName string
@@ -18,6 +19,8 @@ var Conn *sql.DB
 var Type DBType
 
 const (
+	dbFileName string = "./berrycms.db"
+
 	MySQL  DBType = iota
 	SQLITE DBType = iota
 )
@@ -37,7 +40,14 @@ func (dt *DBType) DriverName() string {
 func Connect(dbType DBType, dbRoute string, schemaName string) {
 	SchemaName = schemaName
 	Type = dbType
-	db, err := sql.Open(Type.DriverName(), dbRoute+SchemaName)
+	var dbLoc string
+	switch dbType {
+	case MySQL:
+		dbLoc = dbRoute + SchemaName
+	case SQLITE:
+		dbLoc = dbFileName
+	}
+	db, err := sql.Open(Type.DriverName(), dbLoc)
 	if err != nil {
 		logging.ErrorNnl(fmt.Sprintf(" DB error: %s\n", err.Error()))
 	}

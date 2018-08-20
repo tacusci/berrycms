@@ -28,7 +28,7 @@ func ClearOldSessions(stop *chan bool) {
 		default:
 			if time.Since(startTime).Seconds() > 60 {
 				rows, err := authSessionsTable.Select(db.Conn, "*", "")
-				if err != nil {
+				if err != nil && rows != nil {
 					for rows.Next() {
 						authSession := db.AuthSession{}
 						err := rows.Scan(&authSession.Authsessionid, &authSession.CreatedDateTime, &authSession.UserUUID, &authSession.SessionUUID)
