@@ -70,6 +70,7 @@ func main() {
 	rs.Reload()
 
 	clearOldSessionsStop := make(chan bool)
+
 	go web.ClearOldSessions(&clearOldSessionsStop)
 	go listenForStopSig(srv, &clearOldSessionsStop)
 
@@ -77,9 +78,7 @@ func main() {
 	err := srv.ListenAndServe()
 
 	if err != nil {
-		if !<-clearOldSessionsStop {
-			logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
-		}
+		logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
 	}
 }
 
