@@ -40,6 +40,7 @@ func Close() {
 
 //CreateTestData fill database with known test data for development/testing purposes
 func CreateTestData() {
+	logging.Debug("Creating test user...")
 	usersTable := &UsersTable{}
 	err := usersTable.Insert(Conn, User{
 		Username:        "jdoe",
@@ -58,6 +59,7 @@ func CreateTestData() {
 	for rows.Next() {
 		rows.Scan(&rootUser.UUID)
 	}
+	logging.Debug("Creating test page...")
 	pagesTable := &PagesTable{}
 	err = pagesTable.Insert(Conn, Page{
 		CreatedDateTime: time.Now().Unix(),

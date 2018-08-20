@@ -19,30 +19,42 @@ const (
 	VERSION = "v0.0.1a"
 )
 
-func setLoggingLevel() {
-	debugLevel := flag.Bool("d", false, "Set logging to debug")
+func parseCmdArgs() *bool {
+	debugLevel := flag.Bool("db", false, "Set logging to debug")
+	devMode := flag.Bool("dm", false, "Turn on development mode")
+
 	flag.Parse()
 
 	loggingLevel := logging.InfoLevel
 
 	if *debugLevel {
 		logging.SetLevel(logging.DebugLevel)
-		return
+		return devMode
 	}
 	logging.SetLevel(loggingLevel)
+
+	return devMode
 }
 
 func main() {
-	setLoggingLevel()
+	devMode := parseCmdArgs()
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
 	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
 
 	db.Connect("mysql", "berryadmin:Password12345@/", "berrycms")
-	db.Wipe()
+
+	if *devMode {
+		db.Wipe()
+	}
+
 	db.Setup()
-	db.CreateTestData()
+
+	if *devMode {
+		db.CreateTestData()
+	}
+
 	go db.Heartbeat()
 
 	srv := &http.Server{
