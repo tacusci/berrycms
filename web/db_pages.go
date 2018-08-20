@@ -26,15 +26,16 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		})
 		sph.Router.Reload()
 	}
-	row, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
+	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
+	defer rows.Close()
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))
 		return
 	}
 	p := db.Page{}
-	for row.Next() {
-		row.Scan(&p.Content)
+	for rows.Next() {
+		rows.Scan(&p.Content)
 	}
 
 	ctx := plush.NewContext()

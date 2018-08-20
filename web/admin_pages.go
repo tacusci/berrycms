@@ -21,15 +21,16 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pageroutes := make([]string, 0)
 
 	pt := db.PagesTable{}
-	row, err := pt.Select(db.Conn, "route", "")
+	rows, err := pt.Select(db.Conn, "route", "")
+	defer rows.Close()
 
 	if err != nil {
 		logging.ErrorAndExit(err.Error())
 	}
 
-	for row.Next() {
+	for rows.Next() {
 		p := db.Page{}
-		row.Scan(&p.Route)
+		rows.Scan(&p.Route)
 		pageroutes = append(pageroutes, p.Route)
 	}
 

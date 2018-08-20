@@ -67,10 +67,24 @@ func (f *Field) translateTypes() {
 	case "bool":
 		//f.Type = "BOOLEAN"
 		f.Type = "BIT(1)"
+	case "int":
+		if Type == MySQL {
+			f.Type = "INT"
+		} else if Type == SQLITE {
+			f.Type = "INTEGER"
+		}
 	case "uint32":
-		f.Type = "INT"
+		if Type == MySQL {
+			f.Type = "INT"
+		} else if Type == SQLITE {
+			f.Type = "INTEGER"
+		}
 	case "uint64":
-		f.Type = "BIGINT"
+		if Type == MySQL {
+			f.Type = "BIGINT"
+		} else if Type == SQLITE {
+			f.Type = "INTEGER"
+		}
 	}
 
 	if f.IsDateTime {
@@ -121,6 +135,7 @@ type UsersTable struct {
 //Init carries out default data entry
 func (ut *UsersTable) Init(db *sql.DB) {
 	resultRows, err := ut.Select(db, "*", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))
+	defer resultRows.Close()
 	if err == nil {
 		if !resultRows.Next() {
 			logging.Debug("Creating default root user account...")
@@ -200,6 +215,7 @@ func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string
 func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error) {
 	u := User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE username = '%s'", ut.Name(), username))
+	defer rows.Close()
 	if err != nil {
 		return u, err
 	}
@@ -275,6 +291,7 @@ func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
 	p := Page{}
 
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE route = '%s'", pt.Name(), route))
+	defer rows.Close()
 	if err != nil {
 		return p, err
 	}
@@ -618,21 +635,33 @@ func createStatement(t Table) string {
 		field := tableFields[j]
 		stringBulder.WriteString(fmt.Sprintf("`%s` %s", field.Name, field.Type))
 		if field.PrimaryKey {
-			pkFieldCount++
-			if pkFieldCount > 1 {
-				logging.ErrorAndExit(fmt.Sprintf("Error creating %s table: More than one PK field found...", t.Name()))
+			if Type == MySQL {
+				pkFieldCount++
+				if pkFieldCount > 1 {
+					logging.ErrorAndExit(fmt.Sprintf("Error creating %s table: More than one PK field found...", t.Name()))
+				}
+			} else if Type == SQLITE {
+				stringBulder.WriteString(" PRIMARY KEY")
 			}
 			pkField = field
 		}
 		if field.AutoIncrement {
-			stringBulder.WriteString(" AUTO_INCREMENT")
+			if Type == MySQL {
+				stringBulder.WriteString(" AUTO_INCREMENT")
+			} else if Type == SQLITE {
+				stringBulder.WriteString(" AUTOINCREMENT")
+			}
 		}
 		if field.NotNull {
 			stringBulder.WriteString(" NOT NULL")
 		}
 		if field.UniqueIndex {
-			uniqueIndexFields = append(uniqueIndexFields, field)
-			uniqueIndexFieldsCount++
+			if Type == MySQL {
+				uniqueIndexFields = append(uniqueIndexFields, field)
+				uniqueIndexFieldsCount++
+			} else if Type == SQLITE {
+				stringBulder.WriteString(" UNIQUE")
+			}
 		}
 		if j+1 < tableFieldsCount || pkFieldCount > 0 {
 			stringBulder.WriteString(",")

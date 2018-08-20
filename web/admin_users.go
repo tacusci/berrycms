@@ -21,15 +21,16 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	usernames := make([]string, 0)
 
 	ut := db.UsersTable{}
-	row, err := ut.Select(db.Conn, "createddatetime, username", "")
+	rows, err := ut.Select(db.Conn, "createddatetime, username", "")
+	defer rows.Close()
 
 	if err != nil {
 		logging.ErrorAndExit(err.Error())
 	}
 
-	for row.Next() {
+	for rows.Next() {
 		u := &db.User{}
-		row.Scan(&u.CreatedDateTime, &u.Username)
+		rows.Scan(&u.CreatedDateTime, &u.Username)
 		usernames = append(usernames, u.Username)
 	}
 
