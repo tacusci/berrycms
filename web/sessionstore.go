@@ -25,7 +25,6 @@ func ClearOldSessions(stop *chan bool) {
 	for {
 		select {
 		case <-*stop:
-			logging.Debug("Stopping clearing old sessions...")
 			return
 		default:
 			if time.Since(startTime).Seconds() > 60 {

@@ -74,6 +74,8 @@ func listenForStopSig(srv *http.Server, wc *chan bool) {
 	signal.Notify(gracefulStop, syscall.SIGTERM)
 	signal.Notify(gracefulStop, syscall.SIGINT)
 	sig := <-gracefulStop
+	logging.Debug("Stopping clearing old sessions...")
+	//send a terminate command to the session clearing goroutine's channel
 	*wc <- true
 	logging.Error(fmt.Sprintf("☠️  Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
 	logging.Info("Closing DB connection...")
