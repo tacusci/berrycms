@@ -77,7 +77,9 @@ func main() {
 	err := srv.ListenAndServe()
 
 	if err != nil {
-		logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+		if !<-clearOldSessionsStop {
+			logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+		}
 	}
 }
 
