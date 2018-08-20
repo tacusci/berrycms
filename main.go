@@ -43,7 +43,7 @@ func main() {
 
 	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
 
-	db.Connect("mysql", "berryadmin:Password12345@/", "berrycms")
+	db.Connect(db.MySQL, "berryadmin:Password12345@/", "berrycms")
 
 	if *devMode {
 		db.Wipe()

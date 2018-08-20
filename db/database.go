@@ -15,11 +15,29 @@ import (
 
 var SchemaName string
 var Conn *sql.DB
+var Type DBType
+
+const (
+	MySQL  DBType = iota
+	SQLITE DBType = iota
+)
+
+type DBType int
+
+func (dt *DBType) DriverName() string {
+	if *dt == MySQL {
+		return "mysql"
+	} else if *dt == SQLITE {
+		return "sqlite3"
+	}
+	return ""
+}
 
 //Connect connects to database
-func Connect(sqlDriver string, dbRoute string, schemaName string) {
+func Connect(dbType DBType, dbRoute string, schemaName string) {
 	SchemaName = schemaName
-	db, err := sql.Open(sqlDriver, dbRoute+SchemaName)
+	Type = dbType
+	db, err := sql.Open(Type.DriverName(), dbRoute+SchemaName)
 	if err != nil {
 		logging.ErrorNnl(fmt.Sprintf(" DB error: %s\n", err.Error()))
 	}
