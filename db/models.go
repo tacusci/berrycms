@@ -191,15 +191,15 @@ func (ut *UsersTable) Insert(db *sql.DB, u User) error {
 //Select returns table rows from a select using the passed where condition
 func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ut.Name(), whereClause))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, ut.Name(), whereClause))
 	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, ut.Name()))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, ut.Name()))
 	}
 }
 
 func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error) {
 	u := User{}
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE username = '%s'", SchemaName, ut.Name(), username))
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE username = '%s'", ut.Name(), username))
 	if err != nil {
 		return u, err
 	}
@@ -265,16 +265,16 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 
 func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, pt.Name(), whereClause))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, pt.Name(), whereClause))
 	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, pt.Name()))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, pt.Name()))
 	}
 }
 
 func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
 	p := Page{}
 
-	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s.%s WHERE route = '%s'", SchemaName, pt.Name(), route))
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE route = '%s'", pt.Name(), route))
 	if err != nil {
 		return p, err
 	}
@@ -341,15 +341,15 @@ func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
 
 func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s WHERE %s", whatToSelect, SchemaName, ast.Name(), whereClause))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, ast.Name(), whereClause))
 	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s.%s", whatToSelect, SchemaName, ast.Name()))
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, ast.Name()))
 	}
 }
 
 func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
 	as := AuthSession{}
-	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE sessionuuid = '%s'", ast.Name(), sessionUUID))
 	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
@@ -359,7 +359,7 @@ func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string
 
 func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
 	as := AuthSession{}
-	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s.%s WHERE useruuid = '%s'", SchemaName, ast.Name(), userUUID))
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE useruuid = '%s'", ast.Name(), userUUID))
 	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
@@ -369,7 +369,7 @@ func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (Aut
 
 func (ast *AuthSessionsTable) DeleteBySessionUUID(db *sql.DB, sessionUUID string) error {
 	if len(sessionUUID) > 0 {
-		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s.%s WHERE sessionuuid = '%s'", SchemaName, ast.Name(), sessionUUID))
+		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE sessionuuid = '%s'", ast.Name(), sessionUUID))
 		if err != nil {
 			return err
 		}
@@ -603,7 +603,7 @@ func buildFieldsFromTable(t Table) []Field {
 
 func createStatement(t Table) string {
 	var stringBulder bytes.Buffer
-	stringBulder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s`.`%s` (", SchemaName, t.Name()))
+	stringBulder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (", t.Name()))
 
 	tableFields := t.buildFields()
 	tableFieldsCount := len(tableFields)
