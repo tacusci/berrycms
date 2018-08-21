@@ -1,7 +1,10 @@
 package web
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/tacusci/logging"
 
 	"github.com/gorilla/sessions"
 	"github.com/tacusci/berrycms/db"
@@ -27,18 +30,30 @@ func ClearOldSessions(stop *chan bool) {
 			return
 		default:
 			if time.Since(startTime).Seconds() > 60 {
-				rows, err := authSessionsTable.Select(db.Conn, "*", "")
-				if err != nil && rows != nil {
-					for rows.Next() {
-						authSession := db.AuthSession{}
-						err := rows.Scan(&authSession.Authsessionid, &authSession.CreatedDateTime, &authSession.UserUUID, &authSession.SessionUUID)
-						if err != nil {
-							if time.Since(time.Unix(authSession.CreatedDateTime, 0)).Minutes() >= 20 {
-								authSessionsTable.DeleteBySessionUUID(db.Conn, authSession.SessionUUID)
-							}
-						}
-					}
+				authSessionsToRemove := make([]db.AuthSession, 0)
+				rows, err := authSessionsTable.Select(db.Conn, "sessionuuid", fmt.Sprintf("createddatetime + %d =< %d", 60*20, time.Now().Unix()))
+
+				if err != nil {
+					logging.Error(err.Error())
+					continue
 				}
+
+				for rows.Next() {
+					authSessionToRemove := db.AuthSession{}
+					err := rows.Scan(&authSessionToRemove.SessionUUID)
+					if err != nil {
+						logging.Error(err.Error())
+						continue
+					}
+					authSessionsToRemove = append(authSessionsToRemove, authSessionToRemove)
+				}
+
+				rows.Close()
+
+				for _, as := range authSessionsToRemove {
+					authSessionsTable.DeleteBySessionUUID(db.Conn, as.SessionUUID)
+				}
+
 				startTime = time.Now()
 			}
 		}
