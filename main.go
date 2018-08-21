@@ -41,8 +41,6 @@ func main() {
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
-	logging.InfoNnl("Connecting to mysql:localhost/berrycms schema...")
-
 	db.Connect(db.SQLITE, "berryadmin:Password12345@/", "berrycms")
 
 	if *devMode {

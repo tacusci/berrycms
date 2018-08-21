@@ -47,6 +47,7 @@ func Connect(dbType DBType, dbRoute string, schemaName string) {
 	case SQLITE:
 		dbLoc = dbFileName
 	}
+	logging.InfoNnl(fmt.Sprintf("Connecting to %s:%s schema...", Type.DriverName(), dbLoc))
 	db, err := sql.Open(Type.DriverName(), dbLoc)
 	if err != nil {
 		logging.ErrorNnl(fmt.Sprintf(" DB error: %s\n", err.Error()))
