@@ -54,7 +54,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 		renderedContent, err := plush.Render(string(content), pctx)
 		if err != nil {
-			w.Write([]byte("<h1>500 Server Error</h1>"))
+			Error(w, err)
 			return
 		}
 		w.Write([]byte(renderedContent))
@@ -76,7 +76,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	logging.Debug(fmt.Sprintf("Submitted form hash -> %s, hash in DB -> %s", lh.fetchFormHash(w, r, r.PostFormValue("formname"))))
 
-	if lh.fetchFormHash(w, r, r.PostFormValue("formname")) == r.PostFormValue("formhash") {
+	if lh.fetchFormHash(w, r, r.PostFormValue("formname")) == r.PostFormValue("hashid") {
 
 		ut := db.UsersTable{}
 		user, err := ut.SelectByUsername(db.Conn, r.PostFormValue("username"))
@@ -201,8 +201,8 @@ func (lh *LoginHandler) fetchFormHash(w http.ResponseWriter, r *http.Request, fo
 	}
 
 	var formUUID string
-	if formUUID := formSessionStore.Values[formName]; formUUID != nil {
-		formUUID = formUUID.(string)
+	if formSessionStore.Values[formName] != nil {
+		formUUID = formSessionStore.Values[formName].(string)
 	}
 
 	return formUUID
