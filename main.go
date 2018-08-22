@@ -41,8 +41,8 @@ func main() {
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
-	db.Connect(db.SQLITE, "", "berrycms")
-	// db.Connect(db.MySQL, "berryadmin:Password12345@/", "berrycms")
+	// db.Connect(db.SQLITE, "", "berrycms")
+	db.Connect(db.MySQL, "berryadmin:Password12345@/", "berrycms")
 
 	if *devMode {
 		db.Wipe()
