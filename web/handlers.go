@@ -14,6 +14,10 @@ type Handler interface {
 
 func GetDefaultHandlers(router *MutableRouter) []Handler {
 	return []Handler{
+		&IndexHandler{
+			route:  "/",
+			Router: router,
+		},
 		&LoginHandler{
 			route:  "/login",
 			Router: router,
