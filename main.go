@@ -35,6 +35,7 @@ func parseCmdArgs() {
 
 	if *debugLevel {
 		logging.SetLevel(logging.DebugLevel)
+		return
 	}
 	logging.SetLevel(loggingLevel)
 }
