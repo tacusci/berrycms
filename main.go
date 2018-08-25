@@ -19,9 +19,15 @@ const (
 	VERSION = "v0.0.1a"
 )
 
-func parseCmdArgs() *bool {
+var devMode *bool
+var port *int
+var addr *string
+
+func parseCmdArgs() {
 	debugLevel := flag.Bool("db", false, "Set logging to debug")
-	devMode := flag.Bool("dev", false, "Turn on development mode")
+	devMode = flag.Bool("dev", false, "Turn on development mode")
+	port = flag.Int("p", 8080, "Port to listen for HTTP requests on")
+	addr = flag.String("a", "0.0.0.0", "IP address to listen against if multiple network adapters")
 
 	flag.Parse()
 
@@ -29,15 +35,12 @@ func parseCmdArgs() *bool {
 
 	if *debugLevel {
 		logging.SetLevel(logging.DebugLevel)
-		return devMode
 	}
 	logging.SetLevel(loggingLevel)
-
-	return devMode
 }
 
 func main() {
-	devMode := parseCmdArgs()
+	parseCmdArgs()
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
@@ -57,7 +60,7 @@ func main() {
 	go db.Heartbeat()
 
 	srv := &http.Server{
-		Addr:         "0.0.0.0:8080",
+		Addr:         fmt.Sprintf("%s:%d", *addr, *port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
