@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -19,10 +20,11 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
 	if r.RequestURI == "/addnew" {
 		pt.Insert(db.Conn, db.Page{
-			Title:         "Carbon",
-			Route:         "/carbonite",
-			Content:       "<h2>Carbonite</h2>",
-			Roleprotected: true,
+			CreatedDateTime: time.Now().Unix(),
+			Title:           "Carbon",
+			Route:           "/carbonite",
+			Content:         "<h2>Carbonite</h2>",
+			Roleprotected:   true,
 		})
 		sph.Router.Reload()
 	}

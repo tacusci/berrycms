@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -18,10 +19,10 @@ type AdminPagesHandler struct {
 
 //Get takes the web request and writes response to session
 func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
-	pageroutes := make([]string, 0)
+	pages := make([]db.Page, 0)
 
 	pt := db.PagesTable{}
-	rows, err := pt.Select(db.Conn, "route", "")
+	rows, err := pt.Select(db.Conn, "createddatetime, title, route", "")
 	defer rows.Close()
 
 	if err != nil {
@@ -30,12 +31,15 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		p := db.Page{}
-		rows.Scan(&p.Route)
-		pageroutes = append(pageroutes, p.Route)
+		rows.Scan(&p.CreatedDateTime, &p.Title, &p.Route)
+		pages = append(pages, p)
 	}
 
 	pctx := plush.NewContext()
-	pctx.Set("names", pageroutes)
+	pctx.Set("unixtostring", func(unix int64) string {
+		return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
+	})
+	pctx.Set("pages", pages)
 
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.pages.html")
 	if err != nil {
@@ -50,6 +54,10 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte(renderedContent))
+}
+
+func unixToTime(unixTime int64) string {
+	return time.Unix(unixTime, 0).String()
 }
 
 func (aph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}

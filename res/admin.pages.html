@@ -1,11 +1,52 @@
-<html>
-<%= if (names && len(names) > 0) { %>
-	<ul>
-		<%= for (n) in names { %>
-			<li><%= n %></li>
-		<% } %>
-	</ul>
-<% } else { %>
-	<h1>Sorry, no names. :(</h1>
-<% } %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Pages</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/css/font.css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+
+</head>
+<body>
+	<table class="u-full-width">
+		<thead>
+			<tr>
+				<th></th>
+				<th>Date/Time</th>
+				<th>Title</th>
+				<th>Route</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<%= if (len(pages) > 0) { %>
+				<%= for (page) in pages { %>
+					<tr>
+						<td></td>
+						<td><%= unixtostring(page.CreatedDateTime) %></td>
+						<td><%= page.Title %></td>
+						<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
+						<td></td>
+					</tr>
+				<% } %>
+			<% } %>
+		</tbody>
+	</table>
+</body>
 </html>

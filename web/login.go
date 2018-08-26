@@ -74,8 +74,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logging.Debug(fmt.Sprintf("Submitted form hash -> %s, hash in DB -> %s", lh.fetchFormHash(w, r, r.PostFormValue("formname"))))
-
 	if lh.fetchFormHash(w, r, r.PostFormValue("formname")) == r.PostFormValue("hashid") {
 
 		ut := db.UsersTable{}
