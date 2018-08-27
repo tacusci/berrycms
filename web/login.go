@@ -2,9 +2,7 @@ package web
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gobuffalo/plush"
@@ -25,16 +23,11 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 	amw := authMiddleware{}
 
 	if !amw.IsLoggedIn(r) {
-		content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "login.html")
-		if err != nil {
-			logging.Error("Unable to find resources folder...")
-			w.Write([]byte("<h1>500 Server Error</h1>"))
-			return
-		}
 
 		pctx := plush.NewContext()
 
 		pctx.Set("formname", "loginform")
+		pctx.Set("title", "Dashboard Login")
 		pctx.Set("formhash", lh.mapFormToHash(w, r, "loginform"))
 		pctx.Set("loginerrormessage", "")
 
@@ -52,12 +45,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 			loginErrorStore.Save(r, w)
 		}
 
-		renderedContent, err := plush.Render(string(content), pctx)
-		if err != nil {
-			Error(w, err)
-			return
-		}
-		w.Write([]byte(renderedContent))
+		Render(w, "login.html", pctx)
 	} else {
 		http.Redirect(w, r, "/admin", http.StatusFound)
 	}

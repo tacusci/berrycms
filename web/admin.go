@@ -1,11 +1,9 @@
 package web
 
 import (
-	"io/ioutil"
 	"net/http"
-	"os"
 
-	"github.com/tacusci/logging"
+	"github.com/gobuffalo/plush"
 )
 
 type AdminHandler struct {
@@ -14,13 +12,9 @@ type AdminHandler struct {
 }
 
 func (ah *AdminHandler) Get(w http.ResponseWriter, r *http.Request) {
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.html")
-	if err != nil {
-		logging.Error("Unable to find resources folder...")
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
-	}
-	w.Write(content)
+	pctx := plush.NewContext()
+	pctx.Set("title", "Dashboard")
+	Render(w, "admin.html", pctx)
 }
 
 func (ah *AdminHandler) Post(w http.ResponseWriter, r *http.Request) {}

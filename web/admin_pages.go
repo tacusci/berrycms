@@ -1,9 +1,7 @@
 package web
 
 import (
-	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -36,21 +34,10 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	pctx := plush.NewContext()
 	pctx.Set("unixtostring", UnixToTimeString)
+	pctx.Set("title", "Pages")
 	pctx.Set("pages", pages)
 
-	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.pages.html")
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
-	}
-	renderedContent, err := plush.Render(string(content), pctx)
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
-	}
-	w.Write([]byte(renderedContent))
+	Render(w, "admin.pages.html", pctx)
 }
 
 func (aph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}

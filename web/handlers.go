@@ -1,8 +1,13 @@
 package web
 
 import (
+	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
+
+	"github.com/gobuffalo/plush"
+	"github.com/tacusci/logging"
 )
 
 type Handler interface {
@@ -15,10 +20,6 @@ type Handler interface {
 
 func GetDefaultHandlers(router *MutableRouter) []Handler {
 	return []Handler{
-		&IndexHandler{
-			route:  "/",
-			Router: router,
-		},
 		&LoginHandler{
 			route:  "/login",
 			Router: router,
@@ -44,4 +45,31 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 
 func UnixToTimeString(unix int64) string {
 	return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
+}
+
+func Render(w http.ResponseWriter, template string, pctx *plush.Context) error {
+	header, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "header.snip")
+
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return err
+	}
+
+	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + template)
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return err
+	}
+
+	renderedContent, err := plush.Render(string(append(append(header, []byte("\n")...), content...))+"\n</html>", pctx)
+
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return err
+	}
+	_, err = w.Write([]byte(renderedContent))
+	return err
 }
