@@ -19,13 +19,15 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pt := db.PagesTable{}
 	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
 	if r.RequestURI == "/addnew" {
-		pt.Insert(db.Conn, db.Page{
-			CreatedDateTime: time.Now().Unix(),
-			Title:           "Carbon",
-			Route:           "/carbonite",
-			Content:         "<h2>Carbonite</h2>",
-			Roleprotected:   true,
-		})
+		for i := 0; i < 51; i++ {
+			pt.Insert(db.Conn, db.Page{
+				CreatedDateTime: time.Now().Unix(),
+				Title:           fmt.Sprintf("Carbon %d", i),
+				Route:           fmt.Sprintf("/carbonite-%d", i),
+				Content:         fmt.Sprintf("<h2>Carbonite %d</h2>", i),
+				Roleprotected:   true,
+			})
+		}
 		sph.Router.Reload()
 	}
 	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
