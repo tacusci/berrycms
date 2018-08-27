@@ -14,7 +14,7 @@ type AdminHandler struct {
 func (ah *AdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("title", "Dashboard")
-	Render(w, "admin.html", pctx)
+	RenderDefault(w, "admin.html", pctx)
 }
 
 func (ah *AdminHandler) Post(w http.ResponseWriter, r *http.Request) {}

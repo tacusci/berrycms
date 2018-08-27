@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/plush"
+	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 )
 
@@ -47,7 +48,7 @@ func UnixToTimeString(unix int64) string {
 	return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
 }
 
-func Render(w http.ResponseWriter, template string, pctx *plush.Context) error {
+func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) error {
 	header, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "header.snip")
 
 	if err != nil {
@@ -71,5 +72,16 @@ func Render(w http.ResponseWriter, template string, pctx *plush.Context) error {
 		return err
 	}
 	_, err = w.Write([]byte(renderedContent))
+	return err
+}
+
+func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
+	html, err := plush.Render(p.Content, ctx)
+	if err != nil {
+		logging.Error(err.Error())
+		w.Write([]byte("<h1>500 Server Error</h1>"))
+		return err
+	}
+	w.Write([]byte(html))
 	return err
 }

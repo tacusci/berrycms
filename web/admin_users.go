@@ -37,7 +37,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("title", "Users")
 	pctx.Set("unixtostring", UnixToTimeString)
 
-	Render(w, "admin.users.html", pctx)
+	RenderDefault(w, "admin.users.html", pctx)
 }
 
 func (uh *AdminUsersHandler) Post(w http.ResponseWriter, r *http.Request) {}

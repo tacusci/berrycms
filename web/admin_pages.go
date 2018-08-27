@@ -37,7 +37,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("title", "Pages")
 	pctx.Set("pages", pages)
 
-	Render(w, "admin.pages.html", pctx)
+	RenderDefault(w, "admin.pages.html", pctx)
 }
 
 func (aph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}

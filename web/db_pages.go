@@ -35,19 +35,13 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("<h1>500 Server Error</h1>"))
 		return
 	}
-	p := db.Page{}
+	p := &db.Page{}
 	for rows.Next() {
 		rows.Scan(&p.Content)
 	}
 
 	ctx := plush.NewContext()
-	html, err := plush.Render(p.Content, ctx)
-	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
-	}
-	w.Write([]byte(html))
+	Render(w, p, ctx)
 }
 
 func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}

@@ -45,7 +45,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 			loginErrorStore.Save(r, w)
 		}
 
-		Render(w, "login.html", pctx)
+		RenderDefault(w, "login.html", pctx)
 	} else {
 		http.Redirect(w, r, "/admin", http.StatusFound)
 	}
