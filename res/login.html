@@ -1,17 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-<html>
-    <head>
-        <link rel="stylesheet" href="/styles/core.css">
-    </head>
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Dashboard Login</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/css/font.css">
+  
+  <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/skeleton.css">
+    <link rel="stylesheet" href="/css/custom.css">
+
+</head>
     <body>
-        <h2>Login</h2>
-        <form action="/login" method="POST">
-            <input type="hidden" name="formname" value=<%= formname %>>
-            <input type="hidden" name="hashid" value=<%= formhash%>>
-            <label>Username</label><input name="username" type="text"><br>
-            <label>Password</label><input name="authhash" type="password"><br>
-            <input type="submit" value="Submit">
-        </form>
-        <%= loginerrormessage%>
+        <div class="container">
+            <form action="/login" method="POST">
+                <input type="hidden" name="formname" value=<%= formname %>>
+                <input type="hidden" name="hashid" value=<%= formhash%>>
+                <div class="row">
+                    <div class="twelve columns">
+                        <h4 class="u-full-width">Login</h4>
+                        <label>Username</label><input class="u-full-width" name="username" type="text">
+                        <label>Password</label><input class="u-full-width" name="authhash" type="password">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="twelve columns">
+                        <input class="button-primary u-full-width" type="submit" value="Login">
+                        <p class="error-message u-full-width"><%= loginerrormessage%></p>
+                    </div>
+                </div>
+            </form>
+        </div>
     </body>
 </html>

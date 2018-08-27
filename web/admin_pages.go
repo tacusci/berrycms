@@ -56,10 +56,6 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(renderedContent))
 }
 
-func unixToTime(unixTime int64) string {
-	return time.Unix(unixTime, 0).String()
-}
-
 func (aph *AdminPagesHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
 func (aph *AdminPagesHandler) Route() string { return aph.route }

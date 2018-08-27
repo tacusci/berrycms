@@ -1,11 +1,53 @@
-<html>
-<%= if (names && len(names) > 0) { %>
-	<ul>
-		<%= for (n) in names { %>
-			<li><%= n %></li>
-		<% } %>
-	</ul>
-<% } else { %>
-	<h1>Sorry, no names. :(</h1>
-<% } %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Users</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/css/font.css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <link rel="stylesheet" href="/css/custom.css">
+
+</head>
+<body>
+    <div class="container">
+      <table class="u-full-width">
+        <thead>
+          <tr>
+            <th>Date/Time</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= if (users && len(users) > 0) { %>
+            <%= for (user) in users { %>
+              <tr>
+                  <td><%= unixtostring(user.CreatedDateTime) %></td>
+                  <td><%= user.FirstName %> <%=user.LastName %></td>
+                  <td><%= user.Username %></td>
+                  <td><%= user.Email %></td>
+              </tr>
+            <% } %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+</body>
 </html>

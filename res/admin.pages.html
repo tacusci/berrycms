@@ -21,32 +21,31 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
+  <link rel="stylesheet" href="/css/custom.css">
 
 </head>
 <body>
-	<table class="u-full-width">
-		<thead>
-			<tr>
-				<th></th>
-				<th>Date/Time</th>
-				<th>Title</th>
-				<th>Route</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			<%= if (len(pages) > 0) { %>
-				<%= for (page) in pages { %>
-					<tr>
-						<td></td>
-						<td><%= unixtostring(page.CreatedDateTime) %></td>
-						<td><%= page.Title %></td>
-						<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
-						<td></td>
-					</tr>
+	<div class="container">
+		<table class="u-full-width">
+			<thead>
+				<tr>
+					<th>Date/Time</th>
+					<th>Title</th>
+					<th>Route</th>
+				</tr>
+			</thead>
+			<tbody>
+				<%= if (len(pages) > 0) { %>
+					<%= for (page) in pages { %>
+						<tr>
+							<td><%= unixtostring(page.CreatedDateTime) %></td>
+							<td><%= page.Title %></td>
+							<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
+						</tr>
+					<% } %>
 				<% } %>
-			<% } %>
-		</tbody>
-	</table>
+			</tbody>
+		</table>
+	</div>
 </body>
 </html>

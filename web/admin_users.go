@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -18,10 +19,10 @@ type AdminUsersHandler struct {
 
 //Get takes the web request and writes response to session
 func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
-	usernames := make([]string, 0)
+	users := make([]db.User, 0)
 
 	ut := db.UsersTable{}
-	rows, err := ut.Select(db.Conn, "createddatetime, username", "")
+	rows, err := ut.Select(db.Conn, "createddatetime, firstname, lastname, username, email", "")
 	defer rows.Close()
 
 	if err != nil {
@@ -29,13 +30,16 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for rows.Next() {
-		u := &db.User{}
-		rows.Scan(&u.CreatedDateTime, &u.Username)
-		usernames = append(usernames, u.Username)
+		u := db.User{}
+		rows.Scan(&u.CreatedDateTime, &u.FirstName, &u.LastName, &u.Username, &u.Email)
+		users = append(users, u)
 	}
 
 	pctx := plush.NewContext()
-	pctx.Set("names", usernames)
+	pctx.Set("users", users)
+	pctx.Set("unixtostring", func(unix int64) string {
+		return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
+	})
 
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.users.html")
 	if err != nil {
