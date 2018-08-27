@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -37,9 +36,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	pctx := plush.NewContext()
 	pctx.Set("users", users)
-	pctx.Set("unixtostring", func(unix int64) string {
-		return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
-	})
+	pctx.Set("unixtostring", UnixToTimeString)
 
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "admin.users.html")
 	if err != nil {

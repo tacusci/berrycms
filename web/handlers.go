@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"time"
 )
 
 type Handler interface {
@@ -39,4 +40,8 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			Router: router,
 		},
 	}
+}
+
+func UnixToTimeString(unix int64) string {
+	return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
 }
