@@ -5,24 +5,30 @@
 			<div class="container">
 				<ul class="navbar-list">
 					<li class="navbar-item"><a class="navbar-link" href="/admin">Dashboard</a></li>
+					<li class="navbar-item"><button class="button-primary navbar-button">New</button></li>
+					<li class="navbar-item"><button class="button-primary navbar-button">Delete</button></li>
 				</ul>
 			</div>
 		</nav>
 		<table class="u-full-width">
 			<thead>
 				<tr>
+					<th></th>
 					<th>Date/Time</th>
 					<th>Title</th>
 					<th>Route</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<%= if (len(pages) > 0) { %>
 					<%= for (page) in pages { %>
 						<tr>
+							<td><input type="checkbox"></td>
 							<td><%= unixtostring(page.CreatedDateTime) %></td>
 							<td><%= page.Title %></td>
 							<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
+							<td><button class="button-primary">Edit</button></td>
 						</tr>
 					<% } %>
 				<% } %>
