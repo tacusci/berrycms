@@ -19,7 +19,7 @@ type AdminPagesEditHandler struct {
 }
 
 //Get takes the web request and writes response to session
-func (aph *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	pt := db.PagesTable{}
 	pageToEdit, err := pt.SelectByUUID(db.Conn, vars["uuid"])
@@ -33,9 +33,9 @@ func (aph *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
 
-func (aph *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {}
+func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
-func (aph *AdminPagesEditHandler) Route() string { return aph.route }
+func (apeh *AdminPagesEditHandler) Route() string { return apeh.route }
 
-func (aph *AdminPagesEditHandler) HandlesGet() bool  { return true }
-func (aph *AdminPagesEditHandler) HandlesPost() bool { return false }
+func (apeh *AdminPagesEditHandler) HandlesGet() bool  { return true }
+func (apeh *AdminPagesEditHandler) HandlesPost() bool { return false }

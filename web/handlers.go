@@ -41,6 +41,10 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			route:  "/admin/pages",
 			Router: router,
 		},
+		&AdminPagesNewHandler{
+			route:  "/admin/pages/new",
+			Router: router,
+		},
 		&AdminPagesEditHandler{
 			route:  "/admin/pages/edit/{uuid}",
 			Router: router,
