@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
@@ -148,6 +149,8 @@ func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
 			if err == nil {
 				if len(authSession.UserUUID) > 0 {
 					isLoggedIn = true
+					authSession.LastActiveDateTime = time.Now().Unix()
+					authSessionsTable.Update(db.Conn, authSession)
 				} else {
 					authSessionsTable.DeleteBySessionUUID(db.Conn, authSessionUUID.(string))
 					authSessionStore.Options.MaxAge = -1

@@ -30,7 +30,7 @@ func ClearOldSessions(stop *chan bool) {
 			return
 		default:
 			if time.Since(startTime).Seconds() > 10 {
-				err := authSessionsTable.Delete(db.Conn, fmt.Sprintf("createddatetime + %d <= %d", 60*20, time.Now().Unix()))
+				err := authSessionsTable.Delete(db.Conn, fmt.Sprintf("lastactivedatetime + %d <= %d", 60*20, time.Now().Unix()))
 
 				if err != nil {
 					logging.Error(err.Error())

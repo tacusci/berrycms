@@ -329,10 +329,11 @@ func (pt *PagesTable) buildInsertStatement(m Model) string {
 // ******** Start Auth Table ********
 
 type AuthSessionsTable struct {
-	Authsessionid   int    `tbl:"PKNNAIUI"`
-	CreatedDateTime int64  `tbl:"NNDT"`
-	UserUUID        string `tbl:"NNUI"`
-	SessionUUID     string `tbl:"NNUI"`
+	Authsessionid      int    `tbl:"PKNNAIUI"`
+	CreatedDateTime    int64  `tbl:"NNDT"`
+	LastActiveDateTime int64  `tbl:"NNDT"`
+	UserUUID           string `tbl:"NNUI"`
+	SessionUUID        string `tbl:"NNUI"`
 }
 
 func (ast *AuthSessionsTable) Init(db *sql.DB) {}
@@ -355,7 +356,7 @@ func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 //Update - Takes auth session to update existing user session entry session UUID
 func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
 	if as.Validate() {
-		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.CreatedDateTime, as.SessionUUID, as.UserUUID)
+		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', lastactivedatetime = '%d', sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.CreatedDateTime, as.LastActiveDateTime, as.SessionUUID, as.UserUUID)
 		_, err := db.Exec(updateStatement)
 		if err != nil {
 			return err
@@ -377,7 +378,7 @@ func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClaus
 func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
 	as := AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE sessionuuid = '%s'", ast.Name(), sessionUUID))
-	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+	err := row.Scan(&as.Authsessionid, &as.CreatedDateTime, &as.LastActiveDateTime, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
@@ -387,7 +388,7 @@ func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string
 func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
 	as := AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE useruuid = '%s'", ast.Name(), userUUID))
-	err := row.Scan(&as.CreatedDateTime, &as.Authsessionid, &as.UserUUID, &as.SessionUUID)
+	err := row.Scan(&as.Authsessionid, &as.CreatedDateTime, &as.LastActiveDateTime, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
 		return as, err
 	}
@@ -533,10 +534,11 @@ func (p *Page) BuildFields() []Field {
 }
 
 type AuthSession struct {
-	Authsessionid   int    `tbl:"AI" json:"authsessionid"`
-	CreatedDateTime int64  `json:"createddatetime"`
-	UserUUID        string `json:"userUUID"`
-	SessionUUID     string `json:"sessionUUID"`
+	Authsessionid      int    `tbl:"AI" json:"authsessionid"`
+	CreatedDateTime    int64  `json:"createddatetime"`
+	LastActiveDateTime int64  `json:"lastactivedatetime"`
+	UserUUID           string `json:"userUUID"`
+	SessionUUID        string `json:"sessionUUID"`
 }
 
 func (as *AuthSession) TableName() string {
