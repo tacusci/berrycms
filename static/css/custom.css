@@ -71,6 +71,18 @@ body {
       color: #222; }
     .navbar-link.active {
       color: #33C3F0; }
+    .navbar-input {
+      color: #222 !important;
+      padding: 0 0px !important;
+      margin-top: 1.35rem !important;
+      background-color: transparent !important;
+      border: none !important; }
+    .navbar-input:focus {
+      outline: none !important;
+      color: #0FA0CE !important; }
+    .navbar-input:hover {
+      outline: none !important;
+      color: #0FA0CE !important; }
     .has-docked-nav .navbar {
       position: fixed;
       top: 0;
