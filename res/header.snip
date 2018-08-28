@@ -49,6 +49,20 @@
 
 </head>
 
+<%= contentFor("navdashboardheader") { %>
+<div class="navbar-spacer"></div>
+        <nav class="navbar">
+          <div class="container">
+            <ul class="navbar-list">
+              <%= contentOf("navdashboardlinks") %>
+<% } %>
+
+<%= contentFor("navdashboardfooter") { %>
+</ul>
+          </div>
+        </nav>
+<% } %>
+
 <%= contentFor("navdashboardlinks") { %>
 <li class="navbar-item">
   <a class="navbar-link" href="/admin" data-popover="#dashboardPopover">Dashboard</a>

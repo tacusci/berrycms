@@ -1,15 +1,9 @@
 <body>
 	<div class="container">
-		<div class="navbar-spacer"></div>
-		<nav class="navbar">
-			<div class="container">
-				<ul class="navbar-list">
-					<%= contentOf("navdashboardlinks") %>
-					<li class="navbar-item"><a class="navbar-link" href="/admin/pages/new">New</a></li>
-					<li class="navbar-item"><button id="delete" class="navbar-input">Delete</button></li>
-				</ul>
-			</div>
-		</nav>
+		<%= contentOf("navdashboardheader") %>
+		<li class="navbar-item"><a class="navbar-link" href="/admin/pages/new">New</a></li>
+		<li class="navbar-item"><button id="delete" class="navbar-input">Delete</button></li>
+		<%= contentOf("navdashboardfooter") %>
 		<table class="u-full-width">
 			<thead>
 				<tr>
