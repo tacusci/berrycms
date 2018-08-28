@@ -15,6 +15,7 @@ type AdminPagesNewHandler struct {
 func (apnh *AdminPagesNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("title", "New Page")
+	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.new.html", pctx)
 }
 

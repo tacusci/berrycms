@@ -35,6 +35,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("title", "Pages")
+	pctx.Set("quillenabled", false)
 	pctx.Set("pages", pages)
 
 	RenderDefault(w, "admin.pages.html", pctx)

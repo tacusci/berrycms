@@ -22,10 +22,29 @@
   <link rel="stylesheet" href="/css/normalize.css">
   <link rel="stylesheet" href="/css/skeleton.css">
   <link rel="stylesheet" href="/css/custom.css">
+  <%= if (quillenabled) { %>
+  <link rel="stylesheet" href="/css/quill.core.css">
+  <link rel="stylesheet" href="/css/quill.snow.css">
+  <% } %>
 
   <!-- Scripts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <script src="/js/libs/jquery/2.1.1/jquery.min.js"></script>
+  <%= if (quillenabled) { %>
+  <script src="/js/libs/quill/quill.min.js"></script>
+  <% } %>
   <script src="/js/site.js"></script>
+
+  <%= if (quillenabled) { %>
+  <style>
+    body > #standalone-container {
+      margin: 50px auto;
+      max-width: 720px;
+    }
+    #editor-container {
+      height: 350px;
+    }
+  </style>
+  <% } %>
 
 </head>

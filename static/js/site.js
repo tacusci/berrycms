@@ -22,6 +22,15 @@ $(document).ready(function() {
       $popoverLink.on('click', openPopover)
       $document.on('click', closePopover)
       $('a[href^="#"]').on('click', smoothScroll)
+      var quill = new Quill('#editor-container', {
+        modules: {
+          formula: true,
+          syntax: true,
+          toolbar: '#toolbar-container'
+        },
+        placeholder: 'Compose an epic...',
+        theme: 'snow'
+      });
     }
   
     function smoothScroll(e) {

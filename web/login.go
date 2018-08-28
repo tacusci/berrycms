@@ -28,6 +28,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 		pctx.Set("formname", "loginform")
 		pctx.Set("title", "Dashboard Login")
+		pctx.Set("quillenabled", false)
 		pctx.Set("formhash", lh.mapFormToHash(w, r, "loginform"))
 		pctx.Set("loginerrormessage", "")
 

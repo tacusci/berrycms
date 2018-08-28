@@ -35,6 +35,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("users", users)
 	pctx.Set("title", "Users")
+	pctx.Set("quillenabled", false)
 	pctx.Set("unixtostring", UnixToTimeString)
 
 	RenderDefault(w, "admin.users.html", pctx)

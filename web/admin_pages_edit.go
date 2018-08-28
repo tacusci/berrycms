@@ -30,6 +30,7 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	pctx := plush.NewContext()
 	pctx.Set("title", fmt.Sprintf("Edit Page - %s", pageToEdit.Title))
+	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
 

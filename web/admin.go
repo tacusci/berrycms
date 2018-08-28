@@ -14,6 +14,7 @@ type AdminHandler struct {
 func (ah *AdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("title", "Dashboard")
+	pctx.Set("quillenabled", false)
 	RenderDefault(w, "admin.html", pctx)
 }
 
