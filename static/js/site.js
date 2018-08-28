@@ -22,7 +22,6 @@ $(document).ready(function() {
       $popoverLink.on('click', openPopover)
       $document.on('click', closePopover)
       $('a[href^="#"]').on('click', smoothScroll)
-      buildSnippets();
     }
   
     function smoothScroll(e) {
@@ -80,13 +79,9 @@ $(document).ready(function() {
       });
     }
   
-    function buildSnippets() {
-      $codeSnippets.each(function() {
-        var newContent = escapeHtml($(this).html())
-        $(this).html(newContent)
-      })
-    }
-  
+    $("#delete").click(function() {
+      alert("Deleting pages!");
+    })
   
     init();
   

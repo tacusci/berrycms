@@ -19,7 +19,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pages := make([]db.Page, 0)
 
 	pt := db.PagesTable{}
-	rows, err := pt.Select(db.Conn, "createddatetime, title, route", "")
+	rows, err := pt.Select(db.Conn, "createddatetime, uuid, title, route", "")
 	defer rows.Close()
 
 	if err != nil {
@@ -28,7 +28,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		p := db.Page{}
-		rows.Scan(&p.CreatedDateTime, &p.Title, &p.Route)
+		rows.Scan(&p.CreatedDateTime, &p.UUID, &p.Title, &p.Route)
 		pages = append(pages, p)
 	}
 
