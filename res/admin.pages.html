@@ -23,7 +23,7 @@
 				<%= if (len(pages) > 0) { %>
 					<%= for (page) in pages { %>
 						<tr>
-							<td class="td-nopadding"><input style="margin: 0.2rem;" type="checkbox"></td>
+							<td class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
 							<td class="td-nopadding"><%= unixtostring(page.CreatedDateTime) %></td>
 							<td class="td-nopadding"><%= page.Title %></td>
 							<td class="td-nopadding"><a href="<%= page.Route %>"><%= page.Route %></a></td>
