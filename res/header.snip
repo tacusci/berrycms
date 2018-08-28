@@ -48,3 +48,22 @@
   <% } %>
 
 </head>
+
+<%= contentFor("navdashboardlinks") { %>
+<li class="navbar-item">
+  <a class="navbar-link" href="/admin" data-popover="#dashboardPopover">Dashboard</a>
+  <div id="dashboardPopover" class="popover">
+  <ul class="popover-list">
+    <li class="popover-item">
+      <a class="popover-link" href="/admin">Home</a>
+    </li>
+    <li class="popover-item">
+      <a class="popover-link" href="/admin/pages">Pages</a>
+    </li>
+    <li class="popover-item">
+      <a class="popover-link" href="/admin/users">Users</a>
+    </li>
+  </ul>
+</div>
+</li>
+<% } %>

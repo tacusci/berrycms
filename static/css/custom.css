@@ -106,7 +106,6 @@ body {
       border: 1px solid #eee;
       border-radius: 4px;
       top: 92%;
-      left: -50%;
       -webkit-filter: drop-shadow(0 0 6px rgba(0,0,0,.1));
          -moz-filter: drop-shadow(0 0 6px rgba(0,0,0,.1));
               filter: drop-shadow(0 0 6px rgba(0,0,0,.1)); }
