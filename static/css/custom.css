@@ -6,6 +6,10 @@ body {
     font-size: 1.3em !important;
 }
 
+.td-nopadding {
+    padding: 0px 0px;
+}
+
 /* Larger than phone */
 @media (min-width: 550px) {
     .header {
@@ -65,10 +69,6 @@ body {
       text-decoration: none;
       line-height: 6.5rem;
       color: #222; }
-    .navbar-button {
-      margin-top: 1.3rem;
-      margin-right: 35px;
-    }
     .navbar-link.active {
       color: #33C3F0; }
     .has-docked-nav .navbar {

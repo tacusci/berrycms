@@ -5,8 +5,7 @@
 			<div class="container">
 				<ul class="navbar-list">
 					<li class="navbar-item"><a class="navbar-link" href="/admin">Dashboard</a></li>
-					<li class="navbar-item"><button class="button-primary navbar-button">New</button></li>
-					<li class="navbar-item"><button class="button-primary navbar-button">Delete</button></li>
+					<li class="navbar-item"><a class="navbar-link" href="/admin/pages/create">New</a></li>
 				</ul>
 			</div>
 		</nav>
@@ -24,11 +23,11 @@
 				<%= if (len(pages) > 0) { %>
 					<%= for (page) in pages { %>
 						<tr>
-							<td><input type="checkbox"></td>
-							<td><%= unixtostring(page.CreatedDateTime) %></td>
-							<td><%= page.Title %></td>
-							<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
-							<td><button class="button-primary">Edit</button></td>
+							<td class="td-nopadding"><input style="margin: 0.2rem;" type="checkbox"></td>
+							<td class="td-nopadding"><%= unixtostring(page.CreatedDateTime) %></td>
+							<td class="td-nopadding"><%= page.Title %></td>
+							<td class="td-nopadding"><a href="<%= page.Route %>"><%= page.Route %></a></td>
+							<td class="td-nopadding"><button class="button-primary" style="margin: 0.2rem;">Edit</button></td>
 						</tr>
 					<% } %>
 				<% } %>
