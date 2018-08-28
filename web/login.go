@@ -89,7 +89,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 			authSessionsTable := db.AuthSessionsTable{}
 
-			if _, err := authSessionsTable.SelectByUserUUID(db.Conn, user.UUID); err != nil {
+			if authSession, err := authSessionsTable.SelectByUserUUID(db.Conn, user.UUID); err != nil {
 				logging.Debug(fmt.Sprintf("There's no existing session uuid for user: %s of UUID: %s, creating session of UUID: %s...", user.Username, user.UUID, sessionUUID))
 				err := authSessionsTable.Insert(db.Conn, db.AuthSession{
 					CreatedDateTime:    time.Now().Unix(),
@@ -105,7 +105,7 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 			} else {
 				logging.Debug(fmt.Sprintf("Existing session for uuid for user: %s of UUID: %s, updating...", user.Username, user.UUID))
 				err := authSessionsTable.Update(db.Conn, db.AuthSession{
-					CreatedDateTime:    time.Now().Unix(),
+					CreatedDateTime:    authSession.CreatedDateTime,
 					LastActiveDateTime: time.Now().Unix(),
 					SessionUUID:        sessionUUID,
 					UserUUID:           user.UUID,
