@@ -2,7 +2,16 @@
     <div class="container">
         <%= contentOf("navdashboardheader") %>
         <%= contentOf("navdashboardfooter") %>
-        <div id="toolbar-container">
+        <form>
+          <div class="row">
+            <div class="six columns">
+              <label>Title</label><input class="u-full-width" name="title" type="text">
+            </div>
+            <div class="six columns">
+              <label>Route</label><input class="u-full-width" name="route" type="text">
+            </div>
+          </div>
+          <div id="toolbar-container">
             <span class="ql-formats">
               <select class="ql-font"></select>
               <select class="ql-size"></select>
@@ -48,5 +57,11 @@
             </span>
           </div>
         <div id="editor-container"></div>
+        <div class="row">
+          <div class="twelve columns">
+            <button class="button-primary" style="margin-top: 1.5rem" type="submit">Save</button>
+          </div>
+        </div>
+      </form>
     </div>
 </body>
