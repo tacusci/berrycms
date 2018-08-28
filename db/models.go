@@ -297,12 +297,22 @@ func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
 	}
 
 	for rows.Next() {
-		err = rows.Scan(&p.PageId, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
+		err = rows.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
 		if err != nil {
 			return p, err
 		}
 	}
 
+	return p, nil
+}
+
+func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (Page, error) {
+	p := Page{}
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", pt.Name(), uuid))
+	err := row.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
+	if err != nil {
+		return p, err
+	}
 	return p, nil
 }
 
