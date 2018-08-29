@@ -149,11 +149,38 @@ body {
       font-weight: 600;
       text-align: center;
       letter-spacing: .1rem; }
+    .popover-input {
+      display: block !important;
+      padding: 8px 20px !important;
+      color: #222 !important;
+      text-align: center !important;
+      font-size: 1.0rem !important;
+      font-weight: 600 !important;
+      line-height: 1.6 !important;
+      letter-spacing: .1rem !important;
+      text-transform: uppercase !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+      background-color: transparent !important;
+      border: none !important;
+      border-bottom: 1px solid #eee !important;
+      cursor: pointer !important;
+      margin-bottom: 0rem !important;
+      box-sizing: border-box !important; }
+    .popover-input:hover {
+      color: #fff !important;
+      background: #33C3F0 !important; }
     .popover-item:first-child .popover-link {
       border-radius: 4px 4px 0 0; }
     .popover-item:last-child .popover-link {
       border-radius: 0 0 4px 4px;
       border-bottom-width: 0; }
+    .popover-item:first-child .popover-input {
+      border-radius: 4px 4px 0px 0px !important;
+      border-bottom-width: 0 !important; }
+    .popover-item:last-child .popover-input {
+      border-radius: 0 0 4px 4px !important;
+      border-bottom-width: 0 !important; }
     .popover-link:hover {
       color: #fff;
       background: #33C3F0; }

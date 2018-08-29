@@ -52,6 +52,8 @@ func logout(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("Unable to read existing session UUID from cookie store")
 	}
 
+	http.Redirect(w, r, "/", http.StatusFound)
+
 	return nil
 }
 
