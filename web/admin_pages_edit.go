@@ -30,15 +30,27 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	pctx := plush.NewContext()
 	pctx.Set("title", fmt.Sprintf("Edit Page - %s", pageToEdit.Title))
+	pctx.Set("submitroute", r.RequestURI)
 	pctx.Set("pagetitle", pageToEdit.Title)
 	pctx.Set("pageroute", pageToEdit.Route)
 	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
 
-func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {}
+func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
+	logging.Debug(r.PostFormValue("route"))
+
+	http.Redirect(w, r, r.RequestURI, http.StatusFound)
+}
 
 func (apeh *AdminPagesEditHandler) Route() string { return apeh.route }
 
 func (apeh *AdminPagesEditHandler) HandlesGet() bool  { return true }
-func (apeh *AdminPagesEditHandler) HandlesPost() bool { return false }
+func (apeh *AdminPagesEditHandler) HandlesPost() bool { return true }

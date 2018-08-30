@@ -86,7 +86,7 @@
 <% } %>
 
 <%= contentFor("quilleditorform") { %>
-<form>
+<form action="<%= submitroute %>" method="POST">
           <div class="row">
             <div class="six columns">
               <label>Title</label><input class="u-full-width" name="title" type="text" value="<%= pagetitle %>">
