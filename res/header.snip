@@ -86,7 +86,7 @@
 <% } %>
 
 <%= contentFor("quilleditorform") { %>
-<form action="<%= submitroute %>" method="POST">
+<form id="pageeditorform" action="<%= submitroute %>" method="POST">
           <div class="row">
             <div class="six columns">
               <label>Title</label><input class="u-full-width" name="title" type="text" value="<%= pagetitle %>">
@@ -141,10 +141,19 @@
             </span>
           </div>
         <div id="editor-container"></div>
+        <input name="pagecontent" type="hidden">
         <div class="row">
           <div class="twelve columns">
-            <button class="button-primary" style="margin-top: 1.5rem" type="submit">Save</button>
+            <button class="button-primary" style="margin-top: 1.5rem" onclick="submitPageEditorForm()">Save</button>
           </div>
         </div>
       </form>
+
+<script>
+  function submitPageEditorForm() {
+    var pageEditorForm = document.forms["pageeditorform"]
+    pageEditorForm.elements["pagecontent"].value = JSON.stringify(quill.getContents());
+    pageeditorform.submit();
+  }
+</script>
 <% } %>

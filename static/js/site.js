@@ -15,6 +15,16 @@ $(document).ready(function() {
           "'": '&#39;',
           "/": '&#x2F;'
         }
+
+    var quill = new Quill('#editor-container', {
+      modules: {
+        formula: true,
+        syntax: true,
+        toolbar: '#toolbar-container'
+      },
+      placeholder: 'Compose an epic...',
+      theme: 'snow'
+    });
   
     function init() {
       $window.on('scroll', onScroll)
@@ -22,15 +32,6 @@ $(document).ready(function() {
       $popoverLink.on('click', openPopover)
       $document.on('click', closePopover)
       $('a[href^="#"]').on('click', smoothScroll)
-      var quill = new Quill('#editor-container', {
-        modules: {
-          formula: true,
-          syntax: true,
-          toolbar: '#toolbar-container'
-        },
-        placeholder: 'Compose an epic...',
-        theme: 'snow'
-      });
     }
   
     function smoothScroll(e) {

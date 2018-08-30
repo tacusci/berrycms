@@ -45,7 +45,9 @@ func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	logging.Debug(r.PostFormValue("route"))
+	logging.Debug(fmt.Sprintf("Edited page title -> %s", r.PostFormValue("title")))
+	logging.Debug(fmt.Sprintf("Edited page route -> %s", r.PostFormValue("route")))
+	logging.Debug(fmt.Sprintf("Edited page content -> %s", r.PostFormValue("pagecontent")))
 
 	http.Redirect(w, r, r.RequestURI, http.StatusFound)
 }
