@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -43,6 +44,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := plush.NewContext()
+	ctx.Set("pagecontent", template.HTML(p.Content))
 	Render(w, p, ctx)
 }
 

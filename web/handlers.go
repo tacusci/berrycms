@@ -84,7 +84,7 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 }
 
 func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
-	html, err := plush.Render(p.Content, ctx)
+	html, err := plush.Render("<html><%= pagecontent %></html>", ctx)
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("<h1>500 Server Error</h1>"))

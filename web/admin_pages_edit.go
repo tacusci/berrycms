@@ -2,7 +2,10 @@ package web
 
 import (
 	"fmt"
+	"html"
+	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/tacusci/logging"
 
@@ -33,7 +36,7 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("submitroute", r.RequestURI)
 	pctx.Set("pagetitle", pageToEdit.Title)
 	pctx.Set("pageroute", pageToEdit.Route)
-	pctx.Set("pagecontent", pageToEdit.Content)
+	pctx.Set("pagecontent", template.HTML(html.UnescapeString(pageToEdit.Content)))
 	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
@@ -56,6 +59,7 @@ func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) 
 	}
 
 	pageToEdit.Title = r.PostFormValue("title")
+	oldPageRoute := pageToEdit.Route
 	pageToEdit.Route = r.PostFormValue("route")
 	pageToEdit.Content = r.PostFormValue("pagecontent")
 
@@ -63,6 +67,11 @@ func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		logging.Error(err.Error())
+	}
+
+	//reloading all page routes is potentially really intensive, so only do this if the route has actually changed
+	if strings.Compare(oldPageRoute, pageToEdit.Route) != 0 {
+		apeh.Router.Reload()
 	}
 }
 

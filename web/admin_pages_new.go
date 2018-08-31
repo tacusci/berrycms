@@ -55,6 +55,8 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, r.RequestURI, http.StatusFound)
 	}
 
+	apnh.Router.Reload()
+
 	http.Redirect(w, r, fmt.Sprintf("/admin/pages/edit/%s", pageToCreate.UUID), http.StatusFound)
 }
 
