@@ -32,6 +32,20 @@
   <script src="/js/libs/jquery/2.1.1/jquery.min.js"></script>
   <%= if (quillenabled) { %>
   <script src="/js/libs/quill/quill.min.js"></script>
+  <script>
+        $(document).ready(function() {
+          var quill = new Quill('#editor-container', {
+          modules: {
+            toolbar: '#toolbar-container'
+          },
+          placeholder: 'Create your page content...',
+          theme: 'snow'
+          });
+          $("#pageeditorform").submit(function() {
+            document.querySelector('input[name=pagecontent]').value = quill.root.innerHTML;
+          });
+        });
+  </script>
   <% } %>
   <script src="/js/site.js"></script>
 
@@ -86,7 +100,7 @@
 <% } %>
 
 <%= contentFor("quilleditorform") { %>
-<form name="pageeditorform" action="<%= submitroute %>" onsubmit="submitPageEditorForm" method="POST">
+<form id="pageeditorform" action="<%= submitroute %>" method="POST">
           <div class="row">
             <div class="six columns">
               <label>Title</label><input class="u-full-width" name="title" type="text" value="<%= pagetitle %>">
@@ -140,24 +154,13 @@
               <button class="ql-clean"></button>
             </span>
           </div>
-        <div id="editor-container"></div>
+        <div id="editor-container">
+          <%= pagecontent %>
+        </div>
         <input name="pagecontent" type="hidden">
-        <script>
-        var quill = new Quill('#editor-container', {
-          modules: {
-          formula: true,
-          syntax: true,
-          toolbar: '#toolbar-container'
-        },
-        placeholder: 'Compose an epic...',
-        theme: 'snow'
-        });
-
-        var form = document.querySelector("")
-      </script>
         <div class="row">
           <div class="twelve columns">
-            <button id="page-editor-form-save" class="button-primary" style="margin-top: 1.5rem">Save</button>
+            <button class="button-primary" style="margin-top: 1.5rem" type="submit">Save</button>
           </div>
         </div>
       </form>

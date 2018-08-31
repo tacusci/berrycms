@@ -279,6 +279,15 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 	return nil
 }
 
+func (pt *PagesTable) Update(db *sql.DB, p Page) error {
+	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', uuid = '%s', roleprotected = '%t', authoruuid = '%s', title = '%s', route = '%s', content = '%s'", pt.Name(), p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content)
+	_, err := db.Exec(updateStatement)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, pt.Name(), whereClause))

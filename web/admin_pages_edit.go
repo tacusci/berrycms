@@ -33,23 +33,37 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("submitroute", r.RequestURI)
 	pctx.Set("pagetitle", pageToEdit.Title)
 	pctx.Set("pageroute", pageToEdit.Route)
+	pctx.Set("pagecontent", pageToEdit.Content)
 	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
 
 func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-
+	defer http.Redirect(w, r, r.RequestURI, http.StatusFound)
+	vars := mux.Vars(r)
+	pt := db.PagesTable{}
+	pageToEdit, err := pt.SelectByUUID(db.Conn, vars["uuid"])
 	if err != nil {
-		Error(w, err)
+		logging.Error(err.Error())
 		return
 	}
 
-	logging.Debug(fmt.Sprintf("Edited page title -> %s", r.PostFormValue("title")))
-	logging.Debug(fmt.Sprintf("Edited page route -> %s", r.PostFormValue("route")))
-	logging.Debug(fmt.Sprintf("Edited page content -> %s", r.PostFormValue("pagecontent")))
+	err = r.ParseForm()
 
-	http.Redirect(w, r, r.RequestURI, http.StatusFound)
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
+
+	pageToEdit.Title = r.PostFormValue("title")
+	pageToEdit.Route = r.PostFormValue("route")
+	pageToEdit.Content = r.PostFormValue("pagecontent")
+
+	err = pt.Update(db.Conn, pageToEdit)
+
+	if err != nil {
+		logging.Error(err.Error())
+	}
 }
 
 func (apeh *AdminPagesEditHandler) Route() string { return apeh.route }
