@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"html"
 	"html/template"
 	"net/http"
 	"strings"
@@ -36,7 +35,7 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("submitroute", r.RequestURI)
 	pctx.Set("pagetitle", pageToEdit.Title)
 	pctx.Set("pageroute", pageToEdit.Route)
-	pctx.Set("pagecontent", template.HTML(html.UnescapeString(pageToEdit.Content)))
+	pctx.Set("pagecontent", template.HTML(pageToEdit.Content))
 	pctx.Set("quillenabled", true)
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
