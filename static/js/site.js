@@ -100,9 +100,16 @@ $(document).ready(function() {
 
       if (pagesToDeleteUUIDs.length > 0) {
         var toDeleteForm = document.createElement("form");
+        toDeleteForm.setAttribute("method", "post");
+        toDeleteForm.setAttribute("action", "/admin/pages/delete");
         for (i = 0; i < pagesToDeleteUUIDs.length; i++) {
-          console.log(pagesToDeleteUUIDs[i]);
+          var pageToDeleteInput = document.createElement("input");
+          pageToDeleteInput.setAttribute("value", pagesToDeleteUUIDs[i]);
+          pageToDeleteInput.setAttribute("type", "hidden");
+          toDeleteForm.appendChild(pageToDeleteInput);
         }
+        document.body.appendChild(toDeleteForm);
+        toDeleteForm.submit();
       }
     });
   
