@@ -80,8 +80,31 @@ $(document).ready(function() {
     }
   
     $("#delete").click(function() {
-      alert("Deleting pages!");
-    })
+
+      var pagesToDeleteUUIDs = [];
+
+      $("#page-list tr").each(function(){
+        $(this).find("td").each(function(){
+          var tableCellId = $(this).attr("id");
+          if (tableCellId) {
+            $(this).find("input").each(function(){
+              if ($(this).attr("type") == "checkbox") {
+                if ($(this).is(":checked")) {
+                  pagesToDeleteUUIDs.push(tableCellId);
+                }
+              }
+            })
+          }
+        })
+      })
+
+      if (pagesToDeleteUUIDs.length > 0) {
+        var toDeleteForm = document.createElement("form");
+        for (i = 0; i < pagesToDeleteUUIDs.length; i++) {
+          console.log(pagesToDeleteUUIDs[i]);
+        }
+      }
+    });
   
     init();
   

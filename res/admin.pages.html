@@ -4,7 +4,7 @@
 		<li class="navbar-item"><a class="navbar-link" href="/admin/pages/new">New</a></li>
 		<li class="navbar-item"><button id="delete" class="navbar-input">Delete</button></li>
 		<%= contentOf("navdashboardfooter") %>
-		<table class="u-full-width">
+		<table id="page-list" class="u-full-width">
 			<thead>
 				<tr>
 					<th></th>
@@ -18,7 +18,7 @@
 				<%= if (len(pages) > 0) { %>
 					<%= for (page) in pages { %>
 						<tr>
-							<td class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+							<td id="<%= page.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
 							<td class="td-nopadding"><%= unixtostring(page.CreatedDateTime) %></td>
 							<td class="td-nopadding"><%= page.Title %></td>
 							<td class="td-nopadding"><a href="<%= page.Route %>"><%= page.Route %></a></td>
