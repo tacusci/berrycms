@@ -325,6 +325,22 @@ func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (Page, error) {
 	return p, nil
 }
 
+func (pt *PagesTable) DeleteByUUID(db *sql.DB, uuid string) (int64, error) {
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = '%s'", pt.Name(), uuid))
+
+	if err != nil {
+		return 0, err
+	}
+
+	numDeleted, err := res.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return numDeleted, nil
+}
+
 func (pt *PagesTable) buildFields() []Field {
 	return buildFieldsFromTable(pt)
 }

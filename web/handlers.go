@@ -49,6 +49,10 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			route:  "/admin/pages/edit/{uuid}",
 			Router: router,
 		},
+		&AdminPagesDeleteHandler{
+			route:  "/admin/pages/delete",
+			Router: router,
+		},
 	}
 }
 

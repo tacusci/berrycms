@@ -99,17 +99,26 @@ $(document).ready(function() {
       })
 
       if (pagesToDeleteUUIDs.length > 0) {
-        var toDeleteForm = document.createElement("form");
-        toDeleteForm.setAttribute("method", "post");
-        toDeleteForm.setAttribute("action", "/admin/pages/delete");
-        for (i = 0; i < pagesToDeleteUUIDs.length; i++) {
-          var pageToDeleteInput = document.createElement("input");
-          pageToDeleteInput.setAttribute("value", pagesToDeleteUUIDs[i]);
-          pageToDeleteInput.setAttribute("type", "hidden");
-          toDeleteForm.appendChild(pageToDeleteInput);
+
+        if (confirm("Delete " + String(pagesToDeleteUUIDs.length) + " pages?")) {
+          var form = document.createElement("form");
+          form.setAttribute("id", "deleteform");
+          form.setAttribute("method", "POST");
+          form.setAttribute("action", "/admin/pages/delete");
+  
+          form._submit_function_ = form.submit;
+  
+          for (var i = 0; i < pagesToDeleteUUIDs.length; i++) {
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", String(i));
+            hiddenField.setAttribute("value", pagesToDeleteUUIDs[i]);
+            form.appendChild(hiddenField);
+          }
+          document.body.appendChild(form);
+          form._submit_function_();
         }
-        document.body.appendChild(toDeleteForm);
-        toDeleteForm.submit();
+
       }
     });
   

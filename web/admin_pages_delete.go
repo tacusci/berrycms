@@ -3,6 +3,8 @@ package web
 import (
 	"net/http"
 
+	"github.com/tacusci/berrycms/db"
+
 	"github.com/tacusci/logging"
 )
 
@@ -19,9 +21,22 @@ func (apdh *AdminPagesDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 		logging.Error(err.Error())
 		Error(w, err)
 	}
+
+	pt := db.PagesTable{}
+	deletedPages := false
+	for _, v := range r.PostForm {
+		deletedPages = true
+		pt.DeleteByUUID(db.Conn, v[0])
+	}
+
+	if deletedPages {
+		apdh.Router.Reload()
+	}
+
+	http.Redirect(w, r, "/admin/pages", http.StatusFound)
 }
 
-func (apdh *AdminPagesNewHandler) Route() string { return apdh.route }
+func (apdh *AdminPagesDeleteHandler) Route() string { return apdh.route }
 
-func (apdh *AdminPagesNewHandler) HandlesGet() bool  { return false }
-func (apdh *AdminPagesNewHandler) HandlesPost() bool { return true }
+func (apdh *AdminPagesDeleteHandler) HandlesGet() bool  { return false }
+func (apdh *AdminPagesDeleteHandler) HandlesPost() bool { return true }
