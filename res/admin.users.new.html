@@ -2,5 +2,30 @@
     <div class="container">
         <%= contentOf("navdashboardheader") %>
         <%= contentOf("navdashboardfooter") %>
+        <form action="/admin/users/new" method="POST">
+            <div class="row">
+                <div class="twelve columns">
+                    <h4 class="u-full-width">Create New User</h4>
+                    <div class="row">
+                        <div class="six columns">
+                            <label>First name</label><input class="u-full-width" name="firstname" type="text">
+                        </div>
+                        <div class="six columns">
+                            <label>Last name</label><input class="u-full-width" name="lastname" type="text">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label>Username</label><input class="u-full-width" name="username" type="text">
+                        <label>Password</label><input class="u-full-width" name="authhash" type="password">
+                        <label>Repeat Password</label><input class="u-full-width" name="repeatedauthhash" type="password">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="twelve columns">
+                    <input class="button-primary u-full-width" type="submit" value="OK">
+                </div>
+            </div>
+        </form>
     </div>
 </body>
