@@ -121,6 +121,19 @@ $(document).ready(function() {
 
       }
     });
+
+    $("#selectall").change(function() {
+      var selectAll = this.checked;
+      $("#page-list tr").each(function(){
+        $(this).find("td").each(function(){
+          $(this).find("input").each(function(){
+            if ($(this).attr("type") == "checkbox") {
+              $(this).prop("checked", selectAll);
+            }
+          })
+        })
+      })
+    });
   
     init();
   
