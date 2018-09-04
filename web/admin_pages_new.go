@@ -34,6 +34,7 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logging.Error(err.Error())
+		http.Redirect(w, r, "/admin/pages/new", http.StatusFound)
 		return
 	}
 
