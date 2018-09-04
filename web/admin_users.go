@@ -8,13 +8,13 @@ import (
 	"github.com/tacusci/logging"
 )
 
-//AdminUsersHandler contains response functions for users admin page
+//AdminUsersHandler handler to contain pointer to core router and the URI string
 type AdminUsersHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
-//Get takes the web request and writes response to session
+//Get handles get requests to URI
 func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	users := make([]db.User, 0)
 
@@ -41,9 +41,14 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	RenderDefault(w, "admin.users.html", pctx)
 }
 
+//Post handles post requests to URI
 func (uh *AdminUsersHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
+//Route get URI route for handler
 func (uh *AdminUsersHandler) Route() string { return uh.route }
 
-func (uh *AdminUsersHandler) HandlesGet() bool  { return true }
+//HandlesGet retrieve whether this handler handles get requests
+func (uh *AdminUsersHandler) HandlesGet() bool { return true }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (uh *AdminUsersHandler) HandlesPost() bool { return false }

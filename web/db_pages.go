@@ -11,11 +11,13 @@ import (
 	"github.com/tacusci/logging"
 )
 
+//SavedPageHandler handler to contain pointer to core router and the URI string
 type SavedPageHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
+//Get handles get requests to URI
 func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pt := db.PagesTable{}
 	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
@@ -48,9 +50,14 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	Render(w, p, ctx)
 }
 
+//Post handles post requests to URI
 func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
+//Route get URI route for handler
 func (sph *SavedPageHandler) Route() string { return sph.route }
 
-func (sph *SavedPageHandler) HandlesGet() bool  { return true }
+//HandlesGet retrieve whether this handler handles get requests
+func (sph *SavedPageHandler) HandlesGet() bool { return true }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (sph *SavedPageHandler) HandlesPost() bool { return false }

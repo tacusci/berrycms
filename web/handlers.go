@@ -11,6 +11,7 @@ import (
 	"github.com/tacusci/logging"
 )
 
+//Handler root interface describing handler structure
 type Handler interface {
 	Route() string
 	Get(w http.ResponseWriter, r *http.Request)
@@ -19,6 +20,7 @@ type Handler interface {
 	HandlesPost() bool
 }
 
+//GetDefaultHandlers get fixed list of all default handlers
 func GetDefaultHandlers(router *MutableRouter) []Handler {
 	return []Handler{
 		&LoginHandler{
@@ -60,10 +62,12 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 	}
 }
 
+//UnixToTimeString take unix time and convert to string of to European time format
 func UnixToTimeString(unix int64) string {
 	return time.Unix(unix, 0).Format("15:04:05 02-01-2006")
 }
 
+//RenderDefault uses plush rendering engine to take default page template and create HTML content
 func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) error {
 	header, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "header.snip")
 
@@ -91,6 +95,7 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 	return err
 }
 
+//Render uses plush rendering engine to read page content from the DB and create HTML content
 func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 	html, err := plush.Render("<html><%= pagecontent %></html>", ctx)
 	if err != nil {

@@ -10,12 +10,13 @@ import (
 	"github.com/tacusci/logging"
 )
 
+//AdminPagesNewHandler handler to contain pointer to core router and the URI string
 type AdminPagesNewHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
-//Get takes the web request and writes response to session
+//Get handles get requests to URI
 func (apnh *AdminPagesNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("title", "New Page")
@@ -27,6 +28,7 @@ func (apnh *AdminPagesNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 	RenderDefault(w, "admin.pages.new.html", pctx)
 }
 
+//Post handles post requests to URI
 func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
@@ -60,7 +62,11 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/admin/pages/edit/%s", pageToCreate.UUID), http.StatusFound)
 }
 
+//Route get URI route for handler
 func (apnh *AdminPagesNewHandler) Route() string { return apnh.route }
 
-func (apnh *AdminPagesNewHandler) HandlesGet() bool  { return true }
+//HandlesGet retrieve whether this handler handles get requests
+func (apnh *AdminPagesNewHandler) HandlesGet() bool { return true }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (apnh *AdminPagesNewHandler) HandlesPost() bool { return true }

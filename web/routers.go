@@ -109,6 +109,7 @@ type authMiddleware struct {
 	Router *MutableRouter
 }
 
+//Middleware attaches http handler to middleware
 func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if amw.HasPermissionsForRoute(r) {
@@ -119,6 +120,7 @@ func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 	})
 }
 
+//HasPermissionsForRoute checks that requesting client has permissions to access the requested URI
 func (amw *authMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	var routeIsProtected bool
 
@@ -138,6 +140,7 @@ func (amw *authMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	return true
 }
 
+//IsLoggedIn checks if the requesting client is currently logged in
 func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
 	var isLoggedIn bool
 

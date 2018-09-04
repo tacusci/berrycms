@@ -11,13 +11,13 @@ import (
 	"github.com/tacusci/logging"
 )
 
-//LoginHandler contains response functions for admin login
+//LoginHandler handler to contain pointer to core router and the URI string
 type LoginHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
-//Get takes the web request and writes response to session
+//Get handles get requests to URI
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	amw := authMiddleware{}
@@ -52,6 +52,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Post handles post requests to URI
 func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	logging.Debug("Recieved login form POST submission...")
@@ -197,7 +198,11 @@ func (lh *LoginHandler) fetchFormHash(w http.ResponseWriter, r *http.Request, fo
 	return formUUID
 }
 
+//Route get URI route for handler
 func (lh *LoginHandler) Route() string { return lh.route }
 
-func (lh *LoginHandler) HandlesGet() bool  { return true }
+//HandlesGet retrieve whether this handler handles get requests
+func (lh *LoginHandler) HandlesGet() bool { return true }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (lh *LoginHandler) HandlesPost() bool { return true }

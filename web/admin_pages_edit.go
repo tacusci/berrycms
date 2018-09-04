@@ -14,13 +14,13 @@ import (
 	"github.com/gobuffalo/plush"
 )
 
-//AdminPagesHandler contains response functions for pages admin page
+//AdminPagesEditHandler contains response functions for pages admin page
 type AdminPagesEditHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
-//Get takes the web request and writes response to session
+//Get handles get requests to URI
 func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	pt := db.PagesTable{}
@@ -40,6 +40,7 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 	RenderDefault(w, "admin.pages.edit.html", pctx)
 }
 
+//Post handles post requests to URI
 func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) {
 	defer http.Redirect(w, r, r.RequestURI, http.StatusFound)
 	vars := mux.Vars(r)
@@ -74,7 +75,11 @@ func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+//Route get URI route for handler
 func (apeh *AdminPagesEditHandler) Route() string { return apeh.route }
 
-func (apeh *AdminPagesEditHandler) HandlesGet() bool  { return true }
+//HandlesGet retrieve whether this handler handles get requests
+func (apeh *AdminPagesEditHandler) HandlesGet() bool { return true }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (apeh *AdminPagesEditHandler) HandlesPost() bool { return true }

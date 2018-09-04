@@ -7,13 +7,13 @@ import (
 	"github.com/tacusci/berrycms/db"
 )
 
-//LogoutHandler contains response functions for logout
+//LogoutHandler handler to contain pointer to core router and the URI string
 type LogoutHandler struct {
 	Router *MutableRouter
 	route  string
 }
 
-//Get handles HTTP get requests for logout route
+//Get handles get requests to URI
 func (lh *LogoutHandler) Get(w http.ResponseWriter, r *http.Request) {
 	err := logout(w, r)
 	if err != nil {
@@ -21,7 +21,7 @@ func (lh *LogoutHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Post handles HTTP post requests for logout route
+//Post handles post requests to URI
 func (lh *LogoutHandler) Post(w http.ResponseWriter, r *http.Request) {
 	err := logout(w, r)
 	if err != nil {
@@ -57,7 +57,11 @@ func logout(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+//Route get URI route for handler
 func (lh *LogoutHandler) Route() string { return lh.route }
 
-func (lh *LogoutHandler) HandlesGet() bool  { return false }
+//HandlesGet retrieve whether this handler handles get requests
+func (lh *LogoutHandler) HandlesGet() bool { return false }
+
+//HandlesPost retrieve whether this handler handles post requests
 func (lh *LogoutHandler) HandlesPost() bool { return true }

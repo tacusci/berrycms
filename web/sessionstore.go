@@ -21,6 +21,7 @@ func init() {
 	}
 }
 
+//ClearOldSessions start checking every 10 seconds for existing sessions older than 20 minutes
 func ClearOldSessions(stop *chan bool) {
 	startTime := time.Now()
 	authSessionsTable := db.AuthSessionsTable{}
