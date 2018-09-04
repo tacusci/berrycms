@@ -79,7 +79,7 @@ $(document).ready(function() {
       });
     }
   
-    $("#delete").click(function() {
+    $("#pagesdelete").click(function() {
 
       var pagesToDeleteUUIDs = [];
 
