@@ -19,7 +19,9 @@ import (
 type UsersRoleFlag int
 
 const (
-	ROOT UsersRoleFlag = 2
+	ROOT_USER UsersRoleFlag = 2
+	MOD_USER  UsersRoleFlag = 3
+	REG_USER  UsersRoleFlag = 4
 )
 
 //Field interface to describe a table field and all of its attributes
@@ -134,7 +136,7 @@ type UsersTable struct {
 
 //Init carries out default data entry
 func (ut *UsersTable) Init(db *sql.DB) {
-	resultRows, err := ut.Select(db, "*", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))
+	resultRows, err := ut.Select(db, "*", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT_USER))
 	defer resultRows.Close()
 	if err == nil {
 		if !resultRows.Next() {
@@ -142,7 +144,7 @@ func (ut *UsersTable) Init(db *sql.DB) {
 			err = ut.Insert(db, User{
 				Username:        "root",
 				CreatedDateTime: time.Now().Unix(),
-				UserroleId:      int(ROOT),
+				UserroleId:      int(ROOT_USER),
 				AuthHash:        util.HashAndSalt([]byte("iamroot")),
 				FirstName:       "Root",
 				LastName:        "User",

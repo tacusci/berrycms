@@ -2,6 +2,11 @@ package web
 
 import (
 	"net/http"
+	"strings"
+	"time"
+
+	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/util"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/logging"
@@ -26,7 +31,32 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		logging.Error(err.Error())
+		http.Redirect(w, r, "/admin/users", http.StatusFound)
 		return
+	}
+
+	authHash := r.PostFormValue("authhash")
+	repeatedAuthHash := r.PostFormValue("repeatedauthhash")
+
+	if strings.Compare(authHash, repeatedAuthHash) == 0 {
+		ut := db.UsersTable{}
+		userToCreate := db.User{
+			Username:        r.PostFormValue("username"),
+			CreatedDateTime: time.Now().Unix(),
+			Email:           r.PostFormValue("email"),
+			UserroleId:      int(db.REG_USER),
+			FirstName:       r.PostFormValue("firstname"),
+			LastName:        r.PostFormValue("lastname"),
+			AuthHash:        util.HashAndSalt([]byte(authHash)),
+		}
+
+		err := ut.Insert(db.Conn, userToCreate)
+
+		if err != nil {
+			logging.Error(err.Error())
+		}
+	} else {
+		//need to add setting error message on screen
 	}
 }
 

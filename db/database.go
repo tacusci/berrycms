@@ -80,7 +80,7 @@ func CreateTestData() {
 		Email:           "person@place.com",
 	})
 	rootUser := User{}
-	rows, err := usersTable.Select(Conn, "UUID", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT))
+	rows, err := usersTable.Select(Conn, "UUID", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT_USER))
 	if err != nil {
 		logging.Error("Unable to fetch root user...")
 		return

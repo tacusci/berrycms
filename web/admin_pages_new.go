@@ -39,12 +39,12 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pt := db.PagesTable{}
-	pageToCreate := db.Page{}
-
-	pageToCreate.CreatedDateTime = time.Now().Unix()
-	pageToCreate.Title = r.PostFormValue("title")
-	pageToCreate.Route = r.PostFormValue("route")
-	pageToCreate.Content = r.PostFormValue("pagecontent")
+	pageToCreate := db.Page{
+		CreatedDateTime: time.Now().Unix(),
+		Title:           r.PostFormValue("title"),
+		Route:           r.PostFormValue("route"),
+		Content:         r.PostFormValue("pagecontent"),
+	}
 
 	err = pt.Insert(db.Conn, pageToCreate)
 
