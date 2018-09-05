@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/plush"
@@ -17,19 +18,30 @@ type AdminPagesHandler struct {
 //Get handles get requests to URI
 func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pages := make([]db.Page, 0)
+	authors := make([]string, 0)
 
 	pt := db.PagesTable{}
-	rows, err := pt.Select(db.Conn, "createddatetime, uuid, title, route", "")
+	rows, err := pt.Select(db.Conn, "createddatetime, uuid, title, route, authoruuid", "")
 	defer rows.Close()
 
 	if err != nil {
 		logging.ErrorAndExit(err.Error())
 	}
 
+	ut := db.UsersTable{}
+
 	for rows.Next() {
 		p := db.Page{}
-		rows.Scan(&p.CreatedDateTime, &p.UUID, &p.Title, &p.Route)
+		rows.Scan(&p.CreatedDateTime, &p.UUID, &p.Title, &p.Route, &p.AuthorUUID)
 		pages = append(pages, p)
+
+		authorUser, err := ut.SelectByUUID(db.Conn, p.AuthorUUID)
+
+		if err != nil {
+			logging.Error(err.Error())
+		} else {
+			authors = append(authors, fmt.Sprintf("%s %s", authorUser.FirstName, authorUser.LastName))
+		}
 	}
 
 	pctx := plush.NewContext()
@@ -37,6 +49,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("title", "Pages")
 	pctx.Set("quillenabled", false)
 	pctx.Set("pages", pages)
+	pctx.Set("authors", authors)
 
 	RenderDefault(w, "admin.pages.html", pctx)
 }

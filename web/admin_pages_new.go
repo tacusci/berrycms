@@ -39,9 +39,20 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pt := db.PagesTable{}
+
+	amw := AuthMiddleware{}
+	loggedInUser, err := amw.LoggedInUser(r)
+
+	if err != nil {
+		logging.Error(err.Error())
+		http.Redirect(w, r, "/admin/pages/new", http.StatusFound)
+		return
+	}
+
 	pageToCreate := db.Page{
 		CreatedDateTime: time.Now().Unix(),
 		Title:           r.PostFormValue("title"),
+		AuthorUUID:      loggedInUser.UUID,
 		Route:           r.PostFormValue("route"),
 		Content:         r.PostFormValue("pagecontent"),
 	}

@@ -11,17 +11,19 @@
 					<th>Date/Time</th>
 					<th>Title</th>
 					<th>Route</th>
+					<th>Author</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<%= if (len(pages) > 0) { %>
-					<%= for (page) in pages { %>
+					<%= for (i, page) in pages { %>
 						<tr>
 							<td id="<%= page.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
 							<td class="td-nopadding"><%= unixtostring(page.CreatedDateTime) %></td>
 							<td class="td-nopadding"><%= page.Title %></td>
 							<td class="td-nopadding"><a href="<%= page.Route %>"><%= page.Route %></a></td>
+							<td class="td-nopadding"><%= if (len(authors) > 0) { %><%= authors[i] %><% } %></td>
 							<td class="td-nopadding"><a class="button" href="/admin/pages/edit/<%= page.UUID %>" style="margin: 0.2rem;">Edit</a></td>
 						</tr>
 					<% } %>
