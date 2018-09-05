@@ -69,7 +69,7 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 					rowCount++
 				}
 
-				//make sure that the user to delete isn't the author of any pages
+				//make sure that the user to delete isn't the author of any pages (should probably do something different to this in future)
 				if rowCount == 0 {
 					st.Delete(db.Conn, fmt.Sprintf("uuid = '%s'", userToDelete.UUID))
 					ut.DeleteByUUID(db.Conn, userToDelete.UUID)
