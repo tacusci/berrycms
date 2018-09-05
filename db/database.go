@@ -10,7 +10,7 @@ import (
 	"github.com/tacusci/logging"
 
 	//blank import to make sure right SQL driver is used to talk to DB
-	// _ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
 )
 

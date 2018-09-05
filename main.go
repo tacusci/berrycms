@@ -19,15 +19,25 @@ const (
 	VERSION = "v0.0.1a"
 )
 
-var devMode *bool
-var port *int
-var addr *string
+var (
+	devMode     *bool
+	port        *int
+	addr        *string
+	sql         *string
+	sqlUsername *string
+	sqlPassword *string
+	sqlAddress  *string
+)
 
 func parseCmdArgs() {
-	debugLevel := flag.Bool("db", false, "Set logging to debug")
+	debugLevel := flag.Bool("dbg", false, "Set logging to debug")
 	devMode = flag.Bool("dev", false, "Turn on development mode")
 	port = flag.Int("p", 8080, "Port to listen for HTTP requests on")
 	addr = flag.String("a", "0.0.0.0", "IP address to listen against if multiple network adapters")
+	sql = flag.String("db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
+	sqlUsername = flag.String("dbu", "berryadmin", "Database server username, ignored if using sqlite")
+	sqlPassword = flag.String("dbp", "", "Database server password, ignored if using sqlite")
+	sqlAddress = flag.String("dbaddr", "/", "Database server location, ignored if using sqlite")
 
 	flag.Parse()
 
@@ -45,8 +55,11 @@ func main() {
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
-	db.Connect(db.SQLITE, "", "berrycms")
-	// db.Connect(db.MySQL, "berryadmin:Password12345@/", "berrycms")
+	if *sql == "sqlite" {
+		db.Connect(db.SQLITE, "", "berrycms")
+	} else if *sql == "mysql" {
+		db.Connect(db.MySQL, fmt.Sprintf("%s:%s@%s", *sqlUsername, *sqlPassword, *sqlAddress), "berrycms")
+	}
 
 	if *devMode {
 		db.Wipe()
