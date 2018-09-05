@@ -232,6 +232,40 @@ func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error
 	return u, nil
 }
 
+func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (User, error) {
+	u := User{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", ut.Name(), uuid))
+	defer rows.Close()
+	if err != nil {
+		return u, err
+	}
+
+	for rows.Next() {
+		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
+		if err != nil {
+			return u, err
+		}
+	}
+
+	return u, nil
+}
+
+func (ut *UsersTable) DeleteByUUID(db *sql.DB, uuid string) (int64, error) {
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = '%s'", ut.Name(), uuid))
+
+	if err != nil {
+		return 0, err
+	}
+
+	numDeleted, err := res.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return numDeleted, nil
+}
+
 //BuildFields takes the table struct and maps all of the struct fields to their own struct
 func (ut *UsersTable) buildFields() []Field {
 	return buildFieldsFromTable(ut)
