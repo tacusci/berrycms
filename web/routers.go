@@ -105,6 +105,7 @@ func (mr *MutableRouter) monitorStatic(sd string) {
 	mr.Reload()
 }
 
+//AuthMiddleware authentication struct with auth helper functions
 type AuthMiddleware struct {
 	Router *MutableRouter
 }
@@ -171,6 +172,7 @@ func (amw *AuthMiddleware) IsLoggedIn(r *http.Request) bool {
 	return isLoggedIn
 }
 
+//LoggedInUser get user of existing web session
 func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
 	authSessionStore, err := sessionsstore.Get(r, "auth")
 	if err == nil {
