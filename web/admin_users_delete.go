@@ -30,6 +30,9 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 	ut := db.UsersTable{}
 	st := db.AuthSessionsTable{}
+	amw := AuthMiddleware{}
+
+	loggedInUser, err := amw.LoggedInUser(r)
 
 	for _, v := range r.PostForm {
 		userToDelete, err := ut.SelectByUUID(db.Conn, v[0])
@@ -41,8 +44,6 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 		//don't allow deletion of the root user account
 		if db.UsersRoleFlag(userToDelete.UserroleId) != db.ROOT_USER {
-			amw := AuthMiddleware{}
-			loggedInUser, err := amw.LoggedInUser(r)
 
 			if err != nil {
 				logging.Error(err.Error())
