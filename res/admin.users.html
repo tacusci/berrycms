@@ -4,9 +4,10 @@
       <li class="navbar-item"><a class="navbar-link" href="/admin/users/new">New</a></li>
       <li class="navbar-item"><button id="usersdelete" class="navbar-input">Delete</button></li>
       <%= contentOf("navdashboardfooter") %>
-      <table class="u-full-width">
+      <table id="user-list" class="u-full-width">
         <thead>
           <tr>
+            <th style="padding: 0px 0px;"><input id="selectallusers" style="margin-top: 1.4rem;" type="checkbox"></th>
             <th>Date/Time</th>
             <th>Name</th>
             <th>Username</th>
@@ -17,6 +18,7 @@
           <%= if (users && len(users) > 0) { %>
             <%= for (user) in users { %>
               <tr>
+                  <td id="<%= user.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
                   <td><%= unixtostring(user.CreatedDateTime) %></td>
                   <td><%= user.FirstName %> <%=user.LastName %></td>
                   <td><%= user.Username %></td>

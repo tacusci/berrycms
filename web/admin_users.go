@@ -19,7 +19,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	users := make([]db.User, 0)
 
 	ut := db.UsersTable{}
-	rows, err := ut.Select(db.Conn, "createddatetime, firstname, lastname, username, email", "")
+	rows, err := ut.Select(db.Conn, "createddatetime, uuid, firstname, lastname, username, email", "")
 	defer rows.Close()
 
 	if err != nil {
@@ -28,7 +28,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		u := db.User{}
-		rows.Scan(&u.CreatedDateTime, &u.FirstName, &u.LastName, &u.Username, &u.Email)
+		rows.Scan(&u.CreatedDateTime, &u.UUID, &u.FirstName, &u.LastName, &u.Username, &u.Email)
 		users = append(users, u)
 	}
 

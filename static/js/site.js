@@ -84,23 +84,12 @@ $(document).ready(function() {
       var pagesToDeleteUUIDs = [];
 
       $("#page-list tr").each(function(){
-        $(this).find("td").each(function(){
-          var tableCellId = $(this).attr("id");
-          if (tableCellId) {
-            $(this).find("input").each(function(){
-              if ($(this).attr("type") == "checkbox") {
-                if ($(this).is(":checked")) {
-                  pagesToDeleteUUIDs.push(tableCellId);
-                }
-              }
-            })
-          }
-        })
+        collectAllCheckedBoxIDs(this, pagesToDeleteUUIDs);
       })
 
       if (pagesToDeleteUUIDs.length > 0) {
 
-        if (confirm("Delete " + String(pagesToDeleteUUIDs.length) + " page" + ((pagesToDeleteUUIDs.length > 1) ? "s?" : "?") )) {
+        if (confirm("Delete " + String(pagesToDeleteUUIDs.length) + " page" + ((pagesToDeleteUUIDs.length > 1) ? "s?" : "?"))) {
           var form = document.createElement("form");
           form.setAttribute("id", "deleteform");
           form.setAttribute("method", "POST");
@@ -118,22 +107,77 @@ $(document).ready(function() {
           document.body.appendChild(form);
           form._submit_function_();
         }
-
       }
     });
 
-    $("#selectall").change(function() {
+    $("#usersdelete").click(function() {
+
+      var usersToDeleteUUIDs = [];
+
+      $("#user-list tr").each(function(){
+        collectAllCheckedBoxIDs(this, usersToDeleteUUIDs);
+      })
+
+      if (usersToDeleteUUIDs.length > 0) {
+        if (confirm("Delete " + String(usersToDeleteUUIDs.length) + " user" + ((usersToDeleteUUIDs.length > 1) ? "s?" : "?"))) {
+          var form = document.createElement("form");
+          form.setAttribute("id", "deleteform");
+          form.setAttribute("method", "POST");
+          form.setAttribute("action", "/admin/users/delete");
+
+          form._submit_function_ = form.submit;
+
+          for (var i = 0; i < usersToDeleteUUIDs.length; i++) {
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", String(i));
+            hiddenField.setAttribute("value", usersToDeleteUUIDs[i]);
+            form.appendChild(hiddenField);
+          }
+          document.body.appendChild(form);
+          form._submit_function_();
+        }
+      }
+    })
+
+    $("#selectallpages").change(function() {
       var selectAll = this.checked;
       $("#page-list tr").each(function(){
-        $(this).find("td").each(function(){
-          $(this).find("input").each(function(){
-            if ($(this).attr("type") == "checkbox") {
-              $(this).prop("checked", selectAll);
-            }
-          })
-        })
+        selectAllCheckboxes(this, selectAll);
       })
     });
+
+    $("#selectallusers").change(function() {
+      var selectAll = this.checked;
+      $("#user-list tr").each(function(){
+        selectAllCheckboxes(this, selectAll);
+      })
+    });
+
+    function selectAllCheckboxes(row, selectAll) {
+      $(row).find("td").each(function(){
+        $(this).find("input").each(function(){
+          if ($(this).attr("type") == "checkbox") {
+            $(this).prop("checked", selectAll);
+          }
+        })
+      })
+    }
+
+    function collectAllCheckedBoxIDs(row, collection) {
+      $(row).find("td").each(function(){
+        var tableCellId = $(this).attr("id");
+        if (tableCellId) {
+          $(this).find("input").each(function(){
+            if ($(this).attr("type") == "checkbox") {
+              if ($(this).is(":checked")) {
+                collection.push(tableCellId);
+              }
+            }
+          })
+        }
+      })
+    }
   
     init();
   
