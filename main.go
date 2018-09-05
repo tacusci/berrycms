@@ -35,8 +35,8 @@ func parseCmdArgs() {
 	port = flag.Int("p", 8080, "Port to listen for HTTP requests on")
 	addr = flag.String("a", "0.0.0.0", "IP address to listen against if multiple network adapters")
 	sql = flag.String("db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
-	sqlUsername = flag.String("dbu", "berryadmin", "Database server username, ignored if using sqlite")
-	sqlPassword = flag.String("dbp", "", "Database server password, ignored if using sqlite")
+	sqlUsername = flag.String("dbuser", "berryadmin", "Database server username, ignored if using sqlite")
+	sqlPassword = flag.String("dbpass", "", "Database server password, ignored if using sqlite")
 	sqlAddress = flag.String("dbaddr", "/", "Database server location, ignored if using sqlite")
 
 	flag.Parse()
