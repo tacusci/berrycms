@@ -41,8 +41,8 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 		//don't allow deletion of the root user account
 		if db.UsersRoleFlag(userToDelete.UserroleId) != db.ROOT_USER {
-			ut.DeleteByUUID(db.Conn, userToDelete.UUID)
 			st.Delete(db.Conn, fmt.Sprintf("uuid = '%s'", userToDelete.UUID))
+			ut.DeleteByUUID(db.Conn, userToDelete.UUID)
 		}
 	}
 }
