@@ -147,8 +147,8 @@ func (amw *AuthMiddleware) IsLoggedIn(r *http.Request) bool {
 
 	authSessionStore, err := sessionsstore.Get(r, "auth")
 	if err == nil {
-		authSessionsTable := db.AuthSessionsTable{}
 		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
+			authSessionsTable := db.AuthSessionsTable{}
 			authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
 			if err == nil {
 				if len(authSession.UserUUID) > 0 {
