@@ -54,7 +54,7 @@ func (mr *MutableRouter) Reload() {
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
 
-	amw := authMiddleware{Router: mr}
+	amw := AuthMiddleware{Router: mr}
 	r.Use(amw.Middleware)
 
 	mr.Swap(r)
@@ -105,12 +105,12 @@ func (mr *MutableRouter) monitorStatic(sd string) {
 	mr.Reload()
 }
 
-type authMiddleware struct {
+type AuthMiddleware struct {
 	Router *MutableRouter
 }
 
 //Middleware attaches http handler to middleware
-func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
+func (amw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if amw.HasPermissionsForRoute(r) {
 			next.ServeHTTP(w, r)
@@ -121,7 +121,7 @@ func (amw *authMiddleware) Middleware(next http.Handler) http.Handler {
 }
 
 //HasPermissionsForRoute checks that requesting client has permissions to access the requested URI
-func (amw *authMiddleware) HasPermissionsForRoute(r *http.Request) bool {
+func (amw *AuthMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	var routeIsProtected bool
 
 	routeIsProtected = strings.HasPrefix(r.RequestURI, "/admin")
@@ -141,7 +141,7 @@ func (amw *authMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 }
 
 //IsLoggedIn checks if the requesting client is currently logged in
-func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
+func (amw *AuthMiddleware) IsLoggedIn(r *http.Request) bool {
 	var isLoggedIn bool
 
 	authSessionStore, err := sessionsstore.Get(r, "auth")
@@ -169,6 +169,27 @@ func (amw *authMiddleware) IsLoggedIn(r *http.Request) bool {
 		logging.Debug(fmt.Sprintf("Error trying to read existing session \"auth\" -> %s", err.Error()))
 	}
 	return isLoggedIn
+}
+
+func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
+	authSessionStore, err := sessionsstore.Get(r, "auth")
+	if err == nil {
+		authSessionsTable := db.AuthSessionsTable{}
+		if authSessionUUID := authSessionStore.Values["sessionuuid"]; authSessionUUID != nil {
+			authSession, err := authSessionsTable.SelectBySessionUUID(db.Conn, authSessionUUID.(string))
+			if err == nil {
+				if len(authSession.UserUUID) > 0 {
+					ut := db.UsersTable{}
+					loggedInUser, err := ut.SelectByUUID(db.Conn, authSession.UserUUID)
+					if err != nil {
+						return db.User{}, err
+					}
+					return loggedInUser, nil
+				}
+			}
+		}
+	}
+	return db.User{}, err
 }
 
 //Error writes HTTP error message to web response and add error message to log

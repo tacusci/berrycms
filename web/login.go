@@ -20,7 +20,7 @@ type LoginHandler struct {
 //Get handles get requests to URI
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
-	amw := authMiddleware{}
+	amw := AuthMiddleware{}
 
 	if !amw.IsLoggedIn(r) {
 

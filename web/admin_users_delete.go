@@ -41,8 +41,19 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 		//don't allow deletion of the root user account
 		if db.UsersRoleFlag(userToDelete.UserroleId) != db.ROOT_USER {
-			st.Delete(db.Conn, fmt.Sprintf("uuid = '%s'", userToDelete.UUID))
-			ut.DeleteByUUID(db.Conn, userToDelete.UUID)
+			amw := AuthMiddleware{}
+			loggedInUser, err := amw.LoggedInUser(r)
+
+			if err != nil {
+				logging.Error(err.Error())
+				Error(w, err)
+			}
+
+			//make sure that the logged in user is not the same as user to delete
+			if loggedInUser.UUID != userToDelete.UUID {
+				st.Delete(db.Conn, fmt.Sprintf("uuid = '%s'", userToDelete.UUID))
+				ut.DeleteByUUID(db.Conn, userToDelete.UUID)
+			}
 		}
 	}
 }
