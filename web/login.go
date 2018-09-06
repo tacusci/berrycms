@@ -20,6 +20,26 @@ type LoginHandler struct {
 //Get handles get requests to URI
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
+	ut := db.UsersTable{}
+	rows, err := ut.Select(db.Conn, "userid", fmt.Sprintf("userroleid = %d", db.ROOT_USER))
+
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
+	var i = 0
+	for rows.Next() {
+		i++
+		if i > 0 {
+			break
+		}
+	}
+
+	if i == 0 {
+		//do something like redirect to a create root user page
+	}
+
 	amw := AuthMiddleware{}
 
 	if !amw.IsLoggedIn(r) {
@@ -101,7 +121,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 				if err != nil {
 					Error(w, err)
-					return
 				}
 			} else {
 				logging.Debug(fmt.Sprintf("Existing session for uuid for user: %s of UUID: %s, updating...", user.Username, user.UUID))
@@ -113,7 +132,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 				})
 				if err != nil {
 					Error(w, err)
-					return
 				}
 			}
 
@@ -121,7 +139,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				Error(w, err)
-				return
 			}
 
 			authSessionStore.Values["sessionuuid"] = sessionUUID
@@ -133,7 +150,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				Error(w, err)
-				return
 			}
 
 			logging.Debug("Login unsuccessful...")
@@ -146,7 +162,6 @@ func (lh *LoginHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				Error(w, err)
-				return
 			}
 
 			loginErrorStore.Values["errormessage"] = "Username or password incorrect..."
@@ -165,14 +180,12 @@ func (lh *LoginHandler) mapFormToHash(w http.ResponseWriter, r *http.Request, fo
 
 	if err != nil {
 		Error(w, err)
-		return ""
 	}
 
 	newUUID, err := uuid.NewV4()
 
 	if err != nil {
 		Error(w, err)
-		return ""
 	}
 
 	formUUID := newUUID.String()
@@ -187,7 +200,6 @@ func (lh *LoginHandler) fetchFormHash(w http.ResponseWriter, r *http.Request, fo
 
 	if err != nil {
 		Error(w, err)
-		return ""
 	}
 
 	var formUUID string

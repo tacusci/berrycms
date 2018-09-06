@@ -25,7 +25,7 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	if err != nil {
-		logging.ErrorAndExit(err.Error())
+		Error(w, err)
 	}
 
 	ut := db.UsersTable{}

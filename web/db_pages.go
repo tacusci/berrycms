@@ -8,7 +8,6 @@ import (
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/logging"
 )
 
 //SavedPageHandler handler to contain pointer to core router and the URI string
@@ -36,9 +35,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
 	defer rows.Close()
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
-		return
+		Error(w, err)
 	}
 	p := &db.Page{}
 	for rows.Next() {

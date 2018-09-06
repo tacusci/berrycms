@@ -5,7 +5,6 @@ import (
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/logging"
 )
 
 //AdminUsersHandler handler to contain pointer to core router and the URI string
@@ -23,7 +22,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	if err != nil {
-		logging.ErrorAndExit(err.Error())
+		Error(w, err)
 	}
 
 	for rows.Next() {
