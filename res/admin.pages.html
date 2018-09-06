@@ -20,10 +20,10 @@
 					<%= for (i, page) in pages { %>
 						<tr>
 							<td id="<%= page.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
-							<td class="td-nopadding"><%= unixtostring(page.CreatedDateTime) %></td>
-							<td class="td-nopadding"><%= page.Title %></td>
-							<td class="td-nopadding"><a href="<%= page.Route %>"><%= page.Route %></a></td>
-							<td class="td-nopadding"><%= if (len(authors) > 0) { %><%= authors[i] %><% } %></td>
+							<td><%= unixtostring(page.CreatedDateTime) %></td>
+							<td><%= page.Title %></td>
+							<td><a href="<%= page.Route %>"><%= page.Route %></a></td>
+							<td><%= if (len(authors) > 0) { %><%= authors[i] %><% } %></td>
 							<td class="td-nopadding"><a class="button" href="/admin/pages/edit/<%= page.UUID %>" style="margin: 0.2rem;">Edit</a></td>
 						</tr>
 					<% } %>

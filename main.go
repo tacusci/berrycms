@@ -55,10 +55,13 @@ func main() {
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
-	if *sql == "sqlite" {
+	switch *sql {
+	case "sqlite":
 		db.Connect(db.SQLITE, "", "berrycms")
-	} else if *sql == "mysql" {
+	case "mysql":
 		db.Connect(db.MySQL, fmt.Sprintf("%s:%s@%s", *sqlUsername, *sqlPassword, *sqlAddress), "berrycms")
+	default:
+		logging.ErrorAndExit(fmt.Sprintf("Unknown database server type %s...", *sql))
 	}
 
 	if *devMode {
