@@ -20,18 +20,37 @@ type AdminUsersNewHandler struct {
 
 //Get handles get requests to URI
 func (aunh *AdminUsersNewHandler) Get(w http.ResponseWriter, r *http.Request) {
+	var postRequestForNewRootUser = strings.Compare(r.RequestURI, "/admin/users/root/new") == 0
+
 	pctx := plush.NewContext()
-	pctx.Set("title", "New User")
+	if postRequestForNewRootUser {
+		pctx.Set("title", "New Root User")
+		pctx.Set("navBarEnabled", false)
+		pctx.Set("newuserformaction", "/admin/users/root/new")
+		pctx.Set("createuserlabel", "Create Root User")
+	} else {
+		pctx.Set("title", "New User")
+		pctx.Set("navBarEnabled", true)
+		pctx.Set("newuserformaction", "/admin/users/new")
+		pctx.Set("createuserlabel", "Create New User")
+	}
 	RenderDefault(w, "admin.users.new.html", pctx)
 }
 
 //Post handles post requests to URI
 func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
-	defer http.Redirect(w, r, "/admin/users", http.StatusFound)
+
+	var postRequestForNewRootUser = strings.Compare(r.RequestURI, "/admin/users/root/new") == 0
+
+	if postRequestForNewRootUser {
+		defer http.Redirect(w, r, "/login", http.StatusFound)
+	} else {
+		defer http.Redirect(w, r, "/admin/users", http.StatusFound)
+	}
+
 	err := r.ParseForm()
 	if err != nil {
 		logging.Error(err.Error())
-		http.Redirect(w, r, "/admin/users", http.StatusFound)
 		return
 	}
 
@@ -39,12 +58,18 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	repeatedAuthHash := r.PostFormValue("repeatedauthhash")
 
 	if strings.Compare(authHash, repeatedAuthHash) == 0 {
+		var userRoleID int
+		if postRequestForNewRootUser {
+			userRoleID = int(db.ROOT_USER)
+		} else {
+			userRoleID = int(db.REG_USER)
+		}
 		ut := db.UsersTable{}
 		userToCreate := db.User{
 			Username:        r.PostFormValue("username"),
 			CreatedDateTime: time.Now().Unix(),
 			Email:           r.PostFormValue("email"),
-			UserroleId:      int(db.REG_USER),
+			UserroleId:      userRoleID,
 			FirstName:       r.PostFormValue("firstname"),
 			LastName:        r.PostFormValue("lastname"),
 			AuthHash:        util.HashAndSalt([]byte(authHash)),

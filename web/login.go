@@ -20,29 +20,14 @@ type LoginHandler struct {
 //Get handles get requests to URI
 func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
-	ut := db.UsersTable{}
-	rows, err := ut.Select(db.Conn, "userid", fmt.Sprintf("userroleid = %d", db.ROOT_USER))
-
-	if err != nil {
-		Error(w, err)
-		return
-	}
-
-	var i = 0
-	for rows.Next() {
-		i++
-		if i > 0 {
-			break
-		}
-	}
-
-	if i == 0 {
-		//do something like redirect to a create root user page
-	}
-
 	amw := AuthMiddleware{}
 
 	if !amw.IsLoggedIn(r) {
+
+		ut := db.UsersTable{}
+		if !ut.RootUserExists() {
+			http.Redirect(w, r, "/admin/users/root/new", http.StatusFound)
+		}
 
 		pctx := plush.NewContext()
 

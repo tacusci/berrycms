@@ -7,12 +7,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"time"
 
 	"github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
 
@@ -135,34 +133,31 @@ type UsersTable struct {
 }
 
 //Init carries out default data entry
-func (ut *UsersTable) Init(db *sql.DB) {
-	resultRows, err := ut.Select(db, "*", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT_USER))
-	defer resultRows.Close()
-	if err == nil {
-		if !resultRows.Next() {
-			logging.Debug("Creating default root user account...")
-			err = ut.Insert(db, User{
-				Username:        "root",
-				CreatedDateTime: time.Now().Unix(),
-				UserroleId:      int(ROOT_USER),
-				AuthHash:        util.HashAndSalt([]byte("iamroot")),
-				FirstName:       "Root",
-				LastName:        "User",
-				Email:           "none",
-			})
-			if err != nil {
-				logging.ErrorAndExit(err.Error())
-			}
-		} else {
-			logging.Debug("Root user already exists... Cannot re-create.")
-		}
-	} else {
-		logging.Error(err.Error())
-	}
-}
+func (ut *UsersTable) Init(db *sql.DB) {}
 
 //Name gets the table name, have to implement to make UsersTable inherit Table
 func (ut *UsersTable) Name() string { return "users" }
+
+//RootUserExists checks if at least one root user exists
+func (ut *UsersTable) RootUserExists() bool {
+	rows, err := ut.Select(Conn, "userid", fmt.Sprintf("userroleid = %d", ROOT_USER))
+	defer rows.Close()
+
+	if err != nil {
+		logging.Error(err.Error())
+		return false
+	}
+
+	var i = 0
+	for rows.Next() {
+		i++
+		if i > 0 {
+			break
+		}
+	}
+
+	return i > 0
+}
 
 //InsertMultiple takes a slice of user structs and passes them all to 'Insert'
 func (ut *UsersTable) InsertMultiple(db *sql.DB, us []User) error {

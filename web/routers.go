@@ -50,6 +50,14 @@ func (mr *MutableRouter) Reload() {
 		}
 	}
 
+	ut := db.UsersTable{}
+	if !ut.RootUserExists() {
+		aunh := AdminUsersNewHandler{}
+		//add explicit mapping of root user creation handler routes
+		r.HandleFunc("/admin/users/root/new", aunh.Get).Methods("GET")
+		r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")
+	}
+
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
@@ -126,6 +134,17 @@ func (amw *AuthMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	var routeIsProtected bool
 
 	routeIsProtected = strings.HasPrefix(r.RequestURI, "/admin")
+
+	if routeIsProtected && strings.Compare(r.RequestURI, "/admin/users/root/new") == 0 {
+		ut := db.UsersTable{}
+		if !ut.RootUserExists() {
+			routeIsProtected = false
+		} else {
+			//if this route is mapped then within the existing server runtime there was no root user
+			//however if there now is one we want to unmap this route as well as preventing access
+			amw.Router.Reload()
+		}
+	}
 
 	if !routeIsProtected {
 		pt := db.PagesTable{}

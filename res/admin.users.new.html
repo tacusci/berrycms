@@ -1,11 +1,13 @@
 <body>
     <div class="container">
-        <%= contentOf("navdashboardheader") %>
-        <%= contentOf("navdashboardfooter") %>
-        <form action="/admin/users/new" method="POST">
+        <%= if (navBarEnabled) { %>
+            <%= contentOf("navdashboardheader") %>
+            <%= contentOf("navdashboardfooter") %>
+        <% } %>
+        <form action="<%= newuserformaction %>" method="POST">
             <div class="row">
                 <div class="twelve columns">
-                    <h4 class="u-full-width">Create New User</h4>
+                    <h4 class="u-full-width"><%= createuserlabel %></h4>
                     <div class="row">
                         <div class="six columns">
                             <label>First name</label><input class="u-full-width" name="firstname" type="text">
