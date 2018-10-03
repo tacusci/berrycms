@@ -275,6 +275,10 @@ func (ut *UsersTable) buildInsertStatement(m Model) string {
 	return buildInsertStatementFromTable(ut, m)
 }
 
+func (ut *UsersTable) buildPreparedInsertStatement(m Model) string {
+	return buildPreparedInsertStatementFromTable(ut, m)
+}
+
 // ******** End UserTable ********
 
 // ******** Start Pages Table ********
@@ -306,8 +310,8 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 			return err
 		}
 		p.UUID = newUUID.String()
-		insertStatement := pt.buildInsertStatement(&p)
-		_, err = db.Exec(insertStatement)
+		insertStatement := pt.buildPreparedInsertStatement(&p)
+		_, err = db.Exec(insertStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content)
 		if err != nil {
 			return err
 		}
@@ -385,6 +389,10 @@ func (pt *PagesTable) buildFields() []Field {
 
 func (pt *PagesTable) buildInsertStatement(m Model) string {
 	return buildInsertStatementFromTable(pt, m)
+}
+
+func (pt *PagesTable) buildPreparedInsertStatement(m Model) string {
+	return buildPreparedInsertStatementFromTable(pt, m)
 }
 
 // ******** End Pages Table ********
@@ -487,6 +495,10 @@ func (ast *AuthSessionsTable) buildFields() []Field {
 
 func (ast *AuthSessionsTable) buildInsertStatement(m Model) string {
 	return buildInsertStatementFromTable(ast, m)
+}
+
+func (ast *AuthSessionsTable) buildPreparedInsertStatement(m Model) string {
+	return buildPreparedInsertStatementFromTable(ast, m)
 }
 
 // ******** End Auth Table ********
@@ -647,6 +659,41 @@ func buildInsertStatementFromTable(t Table, m Model) string {
 				formatString = fmt.Sprintf("'%s'", formatString)
 			}
 			insertStatementBuilder.WriteString(fmt.Sprintf(formatString, modelField.Value))
+			if i+1 < modelFieldsCount {
+				insertStatementBuilder.WriteString(", ")
+			}
+		}
+	}
+	insertStatementBuilder.WriteString(")")
+
+	return insertStatementBuilder.String()
+}
+
+func buildPreparedInsertStatementFromTable(t Table, m Model) string {
+	var insertStatementBuilder bytes.Buffer
+	insertStatementBuilder.WriteString(fmt.Sprintf("INSERT INTO %s (", t.Name()))
+
+	tableFields := t.buildFields()
+	tableFieldsCount := len(tableFields)
+
+	for i := 0; i < tableFieldsCount; i++ {
+		tableField := tableFields[i]
+		if !tableField.AutoIncrement && tableField.Name != "" {
+			insertStatementBuilder.WriteString(fmt.Sprintf("%s", tableField.Name))
+			if i+1 < tableFieldsCount {
+				insertStatementBuilder.WriteString(", ")
+			}
+		}
+	}
+	insertStatementBuilder.WriteString(") VALUES (")
+
+	modelFields := m.BuildFields()
+	modelFieldsCount := len(modelFields)
+
+	for i := 0; i < modelFieldsCount; i++ {
+		modelField := modelFields[i]
+		if !modelField.AutoIncrement {
+			insertStatementBuilder.WriteString("?")
 			if i+1 < modelFieldsCount {
 				insertStatementBuilder.WriteString(", ")
 			}
