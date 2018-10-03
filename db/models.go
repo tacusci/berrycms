@@ -141,12 +141,13 @@ func (ut *UsersTable) Name() string { return "users" }
 //RootUserExists checks if at least one root user exists
 func (ut *UsersTable) RootUserExists() bool {
 	rows, err := ut.Select(Conn, "userid", fmt.Sprintf("userroleid = %d", ROOT_USER))
-	defer rows.Close()
 
 	if err != nil {
 		logging.Error(err.Error())
 		return false
 	}
+
+	defer rows.Close()
 
 	var i = 0
 	for rows.Next() {
@@ -212,10 +213,12 @@ func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string
 func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error) {
 	u := User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE username = '%s'", ut.Name(), username))
-	defer rows.Close()
+
 	if err != nil {
 		return u, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
@@ -230,10 +233,12 @@ func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error
 func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (User, error) {
 	u := User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", ut.Name(), uuid))
-	defer rows.Close()
+
 	if err != nil {
 		return u, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
@@ -331,10 +336,12 @@ func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
 	p := Page{}
 
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE route = '%s'", pt.Name(), route))
-	defer rows.Close()
+
 	if err != nil {
 		return p, err
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		err = rows.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
