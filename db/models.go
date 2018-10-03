@@ -413,8 +413,8 @@ func (ast *AuthSessionsTable) Name() string { return "authsessions" }
 
 func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 	if as.Validate() {
-		insertStatement := ast.buildInsertStatement(&as)
-		_, err := db.Exec(insertStatement)
+		insertStatement := ast.buildPreparedInsertStatement(&as)
+		_, err := db.Exec(insertStatement, as.CreatedDateTime, as.LastActiveDateTime, as.UserUUID, as.SessionUUID)
 		if err != nil {
 			return err
 		}
