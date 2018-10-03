@@ -191,8 +191,8 @@ func (ut *UsersTable) Insert(db *sql.DB, u User) error {
 		if u.UserroleId == 0 {
 			u.UserroleId = 3
 		}
-		insertStatement := ut.buildInsertStatement(&u)
-		_, err = db.Exec(insertStatement)
+		insertStatement := ut.buildPreparedInsertStatement(&u)
+		_, err = db.Exec(insertStatement, u.CreatedDateTime, u.UserroleId, u.UUID, u.Username, u.AuthHash, u.FirstName, u.LastName, u.Email)
 		if err != nil {
 			return err
 		}
@@ -413,8 +413,8 @@ func (ast *AuthSessionsTable) Name() string { return "authsessions" }
 
 func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 	if as.Validate() {
-		insertStatement := ast.buildPreparedInsertStatement(&as)
-		_, err := db.Exec(insertStatement, ast.CreatedDateTime, ast.LastActiveDateTime, ast.SessionUUID, ast.UserUUID)
+		insertStatement := ast.buildInsertStatement(&as)
+		_, err := db.Exec(insertStatement)
 		if err != nil {
 			return err
 		}
