@@ -251,7 +251,7 @@ func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (User, error) {
 }
 
 func (ut *UsersTable) DeleteByUUID(db *sql.DB, uuid string) (int64, error) {
-	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = '%s'", ut.Name(), uuid))
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = ?", ut.Name()), uuid)
 
 	if err != nil {
 		return 0, err
@@ -316,8 +316,8 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 }
 
 func (pt *PagesTable) Update(db *sql.DB, p Page) error {
-	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', uuid = '%s', roleprotected = '%t', authoruuid = '%s', title = '%s', route = '%s', content = '%s' WHERE uuid = '%s'", pt.Name(), p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)
-	_, err := db.Exec(updateStatement)
+	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, roleprotected = ?, authoruuid = ?, title = ?, route = ?, content = ? WHERE uuid = ?", pt.Name())
+	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)
 	if err != nil {
 		return err
 	}
@@ -364,7 +364,7 @@ func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (Page, error) {
 }
 
 func (pt *PagesTable) DeleteByUUID(db *sql.DB, uuid string) (int64, error) {
-	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = '%s'", pt.Name(), uuid))
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = ?", pt.Name()), uuid)
 
 	if err != nil {
 		return 0, err
@@ -419,8 +419,8 @@ func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
 //Update - Takes auth session to update existing user session entry session UUID
 func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
 	if as.Validate() {
-		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = '%d', lastactivedatetime = '%d', sessionuuid = '%s' WHERE useruuid = '%s'", ast.Name(), as.CreatedDateTime, as.LastActiveDateTime, as.SessionUUID, as.UserUUID)
-		_, err := db.Exec(updateStatement)
+		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, lastactivedatetime = ?, sessionuuid = ? WHERE useruuid = ?", ast.Name())
+		_, err := db.Exec(updateStatement, as.CreatedDateTime, as.LastActiveDateTime, as.SessionUUID, as.UserUUID)
 		if err != nil {
 			return err
 		}
@@ -460,7 +460,7 @@ func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (Aut
 
 func (ast *AuthSessionsTable) Delete(db *sql.DB, whereClause string) error {
 	if len(whereClause) > 0 {
-		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE %s", ast.Name(), whereClause))
+		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE ?", ast.Name()), whereClause)
 		if err != nil {
 			return err
 		}
@@ -471,7 +471,7 @@ func (ast *AuthSessionsTable) Delete(db *sql.DB, whereClause string) error {
 
 func (ast *AuthSessionsTable) DeleteBySessionUUID(db *sql.DB, sessionUUID string) error {
 	if len(sessionUUID) > 0 {
-		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE sessionuuid = '%s'", ast.Name(), sessionUUID))
+		_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE sessionuuid = ?", ast.Name()), sessionUUID)
 		if err != nil {
 			return err
 		}
