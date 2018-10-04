@@ -16,6 +16,7 @@ package web
 
 import (
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -23,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/util"
@@ -230,5 +232,33 @@ func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
 //Error writes HTTP error message to web response and add error message to log
 func Error(w http.ResponseWriter, err error) {
 	logging.Error(err.Error())
-	http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
+
+	pt := db.PagesTable{}
+	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", "[500]"))
+
+	if err != nil {
+		Error(w, err)
+	}
+
+	defer rows.Close()
+
+	p := &db.Page{}
+	// set intial content here just in case no custom page exists
+	p.Content = "<h1>500 Server Error</h1>"
+
+	for rows.Next() {
+		rows.Scan(&p.Content)
+	}
+
+	ctx := plush.NewContext()
+	ctx.Set("pagecontent", template.HTML(p.Content))
+
+	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusInternalServerError)
+}
+
+func WriteHTMLAndStatus(w http.ResponseWriter, error string, code int) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
+	fmt.Fprintln(w, error)
 }
