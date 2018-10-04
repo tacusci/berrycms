@@ -25,6 +25,7 @@ import (
 )
 
 var (
+	// need to change this to be random per db somehow
 	sessionStoreSecretKey = []byte("83fdjuif49f4fjdim93490cvk4gkirv349")
 	sessionsstore         = sessions.NewCookieStore(sessionStoreSecretKey)
 )
