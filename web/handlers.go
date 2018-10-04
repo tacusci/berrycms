@@ -124,3 +124,13 @@ func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 	w.Write([]byte(html))
 	return err
 }
+
+//RenderStr uses plush rendering engine to read page content from the DB and create HTML content as string
+func RenderStr(p *db.Page, ctx *plush.Context) string {
+	html, err := plush.Render("<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><%= pagecontent %></html>", ctx)
+	if err != nil {
+		logging.Error(err.Error())
+		return "<h1>500 Server Error</h1>"
+	}
+	return html
+}
