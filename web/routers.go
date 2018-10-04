@@ -74,6 +74,8 @@ func (mr *MutableRouter) Reload() {
 		r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")
 	}
 
+	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
+
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
@@ -237,6 +239,7 @@ func Error(w http.ResponseWriter, err error) {
 	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", "[500]"))
 
 	if err != nil {
+		//potential stack overflow, should change this
 		Error(w, err)
 	}
 
@@ -254,6 +257,29 @@ func Error(w http.ResponseWriter, err error) {
 	ctx.Set("pagecontent", template.HTML(p.Content))
 
 	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusInternalServerError)
+}
+
+func fourOhFour(w http.ResponseWriter, r *http.Request) {
+	pt := db.PagesTable{}
+	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", "[404]"))
+
+	if err != nil {
+		Error(w, err)
+	}
+
+	defer rows.Close()
+
+	p := &db.Page{}
+	p.Content = "<h1>404 page not found</h1>"
+
+	for rows.Next() {
+		rows.Scan(&p.Content)
+	}
+
+	ctx := plush.NewContext()
+	ctx.Set("pagecontent", template.HTML(p.Content))
+
+	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusNotFound)
 }
 
 func WriteHTMLAndStatus(w http.ResponseWriter, error string, code int) {
