@@ -50,6 +50,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 	if err != nil {
 		Error(w, err)
+		return
 	}
 	p := &db.Page{}
 	for rows.Next() {
