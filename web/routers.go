@@ -15,7 +15,6 @@
 package web
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -24,8 +23,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/robertkrimen/otto"
 
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
@@ -236,56 +233,6 @@ func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
 		}
 	}
 	return db.User{}, err
-}
-
-type PluginMiddleware struct {
-	Router *MutableRouter
-}
-
-func (pm *PluginMiddleware) Middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		runtime := pm.loadPluginRuntime()
-
-		if runtime == nil {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		result, err := runtime.Call("init", nil, nil)
-		if err != nil {
-			logging.Error(err.Error())
-		}
-
-		out, err := result.ToBoolean()
-		if err != nil {
-			logging.Error(fmt.Sprintf("\"checkRequest\" must return a boolean. Got %s", err.Error()))
-		}
-
-		logging.Debug(fmt.Sprintf("%t", out))
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (pm *PluginMiddleware) loadPluginRuntime() *otto.Otto {
-	f, err := os.Open("./plugins/test.js")
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		logging.Error(err.Error())
-	}
-	defer f.Close()
-	buff := bytes.NewBuffer(nil)
-
-	if _, err := buff.ReadFrom(f); err != nil {
-		logging.Error(err.Error())
-	}
-	runtime := otto.New()
-	if _, err := runtime.Run(buff.String()); err != nil {
-		logging.Error(err.Error())
-	}
-	return runtime
 }
 
 //Error writes HTTP error message to web response and add error message to log

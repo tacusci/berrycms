@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/tacusci/logging"
 
@@ -13,8 +14,11 @@ import (
 )
 
 func NewManager() *Manager {
-	man := &Manager{}
-	man.load("./plugins")
+	man := &Manager{
+		pluginsDirPath: "./plugins",
+		plugins:        &[]Plugin{},
+	}
+	man.load()
 	return man
 }
 
@@ -23,21 +27,31 @@ type Manager struct {
 	plugins        *[]Plugin
 }
 
-func (m *Manager) load(dirPath string) {
-	pluginFiles, err := ioutil.ReadDir(dirPath)
+func (m *Manager) load() {
+	pluginFiles, err := ioutil.ReadDir(m.pluginsDirPath)
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
 
-	m.pluginsDirPath = dirPath
-
 	for _, file := range pluginFiles {
-		plugin := Plugin{filePath: fmt.Sprintf("%s%s%s", dirPath, string(filepath.Separator), file.Name())}
-		if plugin.loadRuntime() {
-			*m.plugins = append(*m.plugins, plugin)
+		if m.validatePlugin(file) {
+			plugin := Plugin{filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name())}
+			if plugin.loadRuntime() {
+				*m.plugins = append(*m.plugins, plugin)
+			}
 		}
 	}
+}
+
+func (m *Manager) ExecAll() {
+	for _, plugin := range *m.plugins {
+		plugin.Run()
+	}
+}
+
+func (m *Manager) validatePlugin(fi os.FileInfo) bool {
+	return strings.Contains(fi.Name(), ".js")
 }
 
 type Plugin struct {
@@ -46,6 +60,14 @@ type Plugin struct {
 }
 
 func (p *Plugin) loadRuntime() bool {
+
+	p.runtime = otto.New()
+
+	return true
+}
+
+func (p *Plugin) Run() bool {
+
 	f, err := os.Open(p.filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -63,13 +85,12 @@ func (p *Plugin) loadRuntime() bool {
 		return false
 	}
 
-	runtime := otto.New()
-	if _, err := runtime.Run(buff.String()); err != nil {
+	p.runtime.Set("Log", Log)
+
+	if _, err := p.runtime.Run(buff.String()); err != nil {
 		logging.Error(err.Error())
 		return false
 	}
-
-	p.runtime = runtime
 
 	return true
 }
