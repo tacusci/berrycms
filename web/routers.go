@@ -15,6 +15,7 @@
 package web
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -24,9 +25,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/robertkrimen/otto"
+
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
@@ -37,6 +41,7 @@ type MutableRouter struct {
 	mu     sync.Mutex
 	Root   *mux.Router
 	dw     *util.RecursiveDirWatch
+	pm     *plugins.Manager
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -75,6 +80,8 @@ func (mr *MutableRouter) Reload() {
 	}
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
+
+	mr.pm = plugins.NewManager()
 
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
@@ -237,8 +244,48 @@ type PluginMiddleware struct {
 
 func (pm *PluginMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		runtime := pm.loadPluginRuntime()
 
+		if runtime == nil {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		result, err := runtime.Call("init", nil, nil)
+		if err != nil {
+			logging.Error(err.Error())
+		}
+
+		out, err := result.ToBoolean()
+		if err != nil {
+			logging.Error(fmt.Sprintf("\"checkRequest\" must return a boolean. Got %s", err.Error()))
+		}
+
+		logging.Debug(fmt.Sprintf("%t", out))
+
+		next.ServeHTTP(w, r)
 	})
+}
+
+func (pm *PluginMiddleware) loadPluginRuntime() *otto.Otto {
+	f, err := os.Open("./plugins/test.js")
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		logging.Error(err.Error())
+	}
+	defer f.Close()
+	buff := bytes.NewBuffer(nil)
+
+	if _, err := buff.ReadFrom(f); err != nil {
+		logging.Error(err.Error())
+	}
+	runtime := otto.New()
+	if _, err := runtime.Run(buff.String()); err != nil {
+		logging.Error(err.Error())
+	}
+	return runtime
 }
 
 //Error writes HTTP error message to web response and add error message to log
