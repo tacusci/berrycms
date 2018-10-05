@@ -231,6 +231,16 @@ func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
 	return db.User{}, err
 }
 
+type PluginMiddleware struct {
+	Router *MutableRouter
+}
+
+func (pm *PluginMiddleware) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	})
+}
+
 //Error writes HTTP error message to web response and add error message to log
 func Error(w http.ResponseWriter, err error) {
 	logging.Error(err.Error())
