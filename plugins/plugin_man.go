@@ -16,7 +16,7 @@ import (
 func NewManager() *Manager {
 	man := &Manager{
 		pluginsDirPath: "./plugins",
-		plugins:        &[]Plugin{},
+		Plugins:        &[]Plugin{},
 	}
 	man.load()
 	return man
@@ -24,7 +24,7 @@ func NewManager() *Manager {
 
 type Manager struct {
 	pluginsDirPath string
-	plugins        *[]Plugin
+	Plugins        *[]Plugin
 }
 
 func (m *Manager) load() {
@@ -38,14 +38,14 @@ func (m *Manager) load() {
 		if m.validatePlugin(file) {
 			plugin := Plugin{filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name())}
 			if plugin.loadRuntime() {
-				*m.plugins = append(*m.plugins, plugin)
+				*m.Plugins = append(*m.Plugins, plugin)
 			}
 		}
 	}
 }
 
 func (m *Manager) ExecAll() {
-	for _, plugin := range *m.plugins {
+	for _, plugin := range *m.Plugins {
 		plugin.Run()
 	}
 }
@@ -85,7 +85,7 @@ func (p *Plugin) Run() bool {
 		return false
 	}
 
-	p.runtime.Set("Log", Log)
+	p.runtime.Set("Log", PluginInfoLog)
 
 	if _, err := p.runtime.Run(buff.String()); err != nil {
 		logging.Error(err.Error())
@@ -93,4 +93,8 @@ func (p *Plugin) Run() bool {
 	}
 
 	return true
+}
+
+func (p *Plugin) Call(funcName string) {
+	p.runtime.Call(funcName, nil, nil)
 }

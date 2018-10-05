@@ -59,6 +59,10 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	sph.Router.pm.ExecAll()
 
+	for _, plugin := range *sph.Router.pm.Plugins {
+		plugin.Call("onLoad")
+	}
+
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
 	Render(w, p, ctx)

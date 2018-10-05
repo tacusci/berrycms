@@ -1,3 +1,5 @@
 //BERRYCMS PLUGIN VER(0.0.1)
 
-Log("Message from Berry CMS plugin");
+function onLoad() {
+    Log("Message from Berry CMS plugin");
+}

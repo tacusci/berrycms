@@ -7,7 +7,7 @@ import (
 	"github.com/tacusci/logging"
 )
 
-func Log(call otto.FunctionCall) otto.Value {
-	logging.Info(fmt.Sprintf("%s", call.Argument(0).String()))
+func PluginInfoLog(call otto.FunctionCall) otto.Value {
+	logging.InfoNoColor(fmt.Sprintf("%s", call.Argument(0).String()))
 	return otto.Value{}
 }
