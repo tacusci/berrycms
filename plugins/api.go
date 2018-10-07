@@ -33,6 +33,12 @@ func PluginDebugLog(call otto.FunctionCall) otto.Value {
 
 func PluginErrorLog(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
-	logging.ErrorNoColor(fmt.Sprintf("%s", call.Argument(0).String()))
+	if uuid, err := call.Otto.Get("UUID"); err == nil {
+		if uuid.IsString() {
+			logging.Error(fmt.Sprintf("%s", call.Argument(0).String()))
+		}
+	} else {
+		logging.Error(err.Error())
+	}
 	return otto.Value{}
 }
