@@ -26,17 +26,20 @@ import (
 
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
+	"github.com/radovskyb/watcher"
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/berrycms/util"
+	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/logging"
 )
 
 //MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
-	Server *http.Server
-	mu     sync.Mutex
-	Root   *mux.Router
-	dw     *util.RecursiveDirWatch
+	Server         *http.Server
+	mu             sync.Mutex
+	Root           *mux.Router
+	staticwatcher  *watcher.Watcher
+	pluginswatcher *watcher.Watcher
+	pm             *plugins.Manager
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -49,6 +52,16 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
+
+	if mr.staticwatcher != nil {
+		mr.staticwatcher.Close()
+	}
+	mr.staticwatcher = watcher.New()
+
+	if mr.pluginswatcher != nil {
+		mr.pluginswatcher.Close()
+	}
+	mr.pluginswatcher = watcher.New()
 
 	r := mux.NewRouter()
 
@@ -76,9 +89,12 @@ func (mr *MutableRouter) Reload() {
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
+	mr.pm = plugins.NewManager()
+
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
-	go mr.monitorStatic("static")
+	go mr.monitorStatic("./static", mr.staticwatcher)
+	go mr.monitorPlugins("./plugins", mr.pluginswatcher)
 
 	amw := AuthMiddleware{Router: mr}
 	r.Use(amw.Middleware)
@@ -118,17 +134,58 @@ func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
 	}
 }
 
-func (mr *MutableRouter) monitorStatic(sd string) {
-	mr.dw = &util.RecursiveDirWatch{Change: make(chan bool), Stop: make(chan bool)}
-	go mr.dw.WatchDir(sd)
-	for {
-		if <-mr.dw.Change {
-			logging.Debug("Change detected in static dir...")
-			break
+func (mr *MutableRouter) monitorStatic(sd string, w *watcher.Watcher) {
+	w.SetMaxEvents(1)
+
+	w.FilterOps(watcher.Create, watcher.Remove, watcher.Rename)
+
+	go func() {
+		for {
+			select {
+			case <-w.Event:
+				mr.Reload()
+			case err := <-w.Error:
+				logging.Error(err.Error())
+			case <-w.Closed:
+				return
+			}
 		}
+	}()
+
+	if err := w.AddRecursive(sd); err != nil {
+		logging.Error(err.Error())
 	}
-	mr.dw.Stop <- true
-	mr.Reload()
+
+	if err := w.Start(time.Millisecond * 500); err != nil {
+		logging.Error(err.Error())
+	}
+}
+
+func (mr *MutableRouter) monitorPlugins(sd string, w *watcher.Watcher) {
+	w.SetMaxEvents(1)
+
+	w.FilterOps(watcher.Create, watcher.Remove, watcher.Rename)
+
+	go func() {
+		for {
+			select {
+			case <-w.Event:
+				mr.pm = plugins.NewManager()
+			case err := <-w.Error:
+				logging.Error(err.Error())
+			case <-w.Closed:
+				return
+			}
+		}
+	}()
+
+	if err := w.AddRecursive(sd); err != nil {
+		logging.Error(err.Error())
+	}
+
+	if err := w.Start(time.Millisecond * 500); err != nil {
+		logging.Error(err.Error())
+	}
 }
 
 //AuthMiddleware authentication struct with auth helper functions
