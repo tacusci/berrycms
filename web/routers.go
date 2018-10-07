@@ -93,7 +93,9 @@ func (mr *MutableRouter) Reload() {
 	mr.pm.CompileAll()
 
 	for _, plugin := range *mr.pm.Plugins {
-		plugin.Call("main")
+		if &plugin != nil {
+			plugin.Call("main", nil, plugin.UUID)
+		}
 	}
 
 	mr.mapSavedPageRoutes(r)

@@ -10,6 +10,6 @@ function onLoad() {
 }
 
 // main function gets called on plugin load
-function main() {
-	console.log("Plugin of UUID -> ");
+function main(uuid) {
+	console.log("Plugin of UUID -> " + uuid);
 }

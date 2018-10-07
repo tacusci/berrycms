@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobuffalo/uuid"
 	"github.com/tacusci/logging"
 
 	"github.com/robertkrimen/otto"
@@ -44,9 +45,16 @@ func (m *Manager) load() {
 
 func (m *Manager) loadPlugin(file os.FileInfo) *Plugin {
 	if m.validatePlugin(file) {
-		plugin := &Plugin{filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name())}
-		if plugin.loadRuntime() {
-			return plugin
+		if uuidV4, err := uuid.NewV4(); err == nil {
+			plugin := &Plugin{
+				UUID:     uuidV4.String(),
+				filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name()),
+			}
+			if plugin.loadRuntime() {
+				return plugin
+			}
+		} else {
+			return nil
 		}
 	}
 	return nil
@@ -68,6 +76,7 @@ func (m *Manager) validatePlugin(fi os.FileInfo) bool {
 
 type Plugin struct {
 	runtime  *otto.Otto
+	UUID     string
 	filePath string
 }
 
@@ -113,6 +122,6 @@ func (p *Plugin) Compile() bool {
 	return true
 }
 
-func (p *Plugin) Call(funcName string) {
-	p.runtime.Call(funcName, nil, nil)
+func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) {
+	p.runtime.Call(funcName, this, argumentList)
 }

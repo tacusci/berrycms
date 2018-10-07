@@ -60,7 +60,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	sph.Router.pm.CompileAll()
 
 	for _, plugin := range *sph.Router.pm.Plugins {
-		plugin.Call("onLoad")
+		plugin.Call("onLoad", nil, nil)
 	}
 
 	ctx := plush.NewContext()
