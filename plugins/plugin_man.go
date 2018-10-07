@@ -35,13 +35,25 @@ func (m *Manager) load() {
 	}
 
 	for _, file := range pluginFiles {
-		if m.validatePlugin(file) {
-			plugin := Plugin{filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name())}
-			if plugin.loadRuntime() {
-				*m.Plugins = append(*m.Plugins, plugin)
-			}
+		plugin := m.loadPlugin(file)
+		if plugin != nil {
+			*m.Plugins = append(*m.Plugins, *plugin)
 		}
 	}
+}
+
+func (m *Manager) loadPlugin(file os.FileInfo) *Plugin {
+	if m.validatePlugin(file) {
+		plugin := &Plugin{filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name())}
+		if plugin.loadRuntime() {
+			return plugin
+		}
+	}
+	return nil
+}
+
+func (m *Manager) NewExtPlugin() *Plugin {
+	return &Plugin{}
 }
 
 func (m *Manager) ExecAll() {
@@ -60,10 +72,14 @@ type Plugin struct {
 }
 
 func (p *Plugin) loadRuntime() bool {
-
 	p.runtime = otto.New()
+	return p.runtime != nil
+}
 
-	return true
+func (p *Plugin) setApiFuncs() {
+	if p.runtime != nil {
+		p.runtime.Set("InfoLog", PluginInfoLog)
+	}
 }
 
 func (p *Plugin) Run() bool {
@@ -85,7 +101,7 @@ func (p *Plugin) Run() bool {
 		return false
 	}
 
-	p.runtime.Set("Log", PluginInfoLog)
+	p.setApiFuncs()
 
 	if _, err := p.runtime.Run(buff.String()); err != nil {
 		logging.Error(err.Error())
