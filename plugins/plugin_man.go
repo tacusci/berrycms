@@ -66,7 +66,10 @@ func (m *Manager) NewExtPlugin() *Plugin {
 
 func (m *Manager) CompileAll() {
 	for _, plugin := range *m.Plugins {
-		plugin.Compile()
+		if !plugin.compiled {
+			plugin.Compile()
+		}
+		plugin.setGlobalVariables()
 	}
 }
 
@@ -78,6 +81,7 @@ type Plugin struct {
 	runtime  *otto.Otto
 	UUID     string
 	filePath string
+	compiled bool
 }
 
 func (p *Plugin) loadRuntime() bool {
@@ -87,11 +91,14 @@ func (p *Plugin) loadRuntime() bool {
 
 func (p *Plugin) setApiFuncs() {
 	if p.runtime != nil {
-		p.runtime.Set("UUID", p.UUID)
 		p.runtime.Set("InfoLog", PluginInfoLog)
 		p.runtime.Set("DebugLog", PluginDebugLog)
 		p.runtime.Set("ErrorLog", PluginErrorLog)
 	}
+}
+
+func (p *Plugin) setGlobalVariables() {
+	p.runtime.Set("UUID", p.UUID)
 }
 
 func (p *Plugin) Compile() bool {
@@ -120,7 +127,9 @@ func (p *Plugin) Compile() bool {
 		return false
 	}
 
-	return true
+	p.compiled = true
+
+	return p.compiled
 }
 
 func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) {
