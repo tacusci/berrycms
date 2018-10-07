@@ -1,6 +1,6 @@
 //BERRYCMS PLUGIN VER(0.0.1)
 
-var UUID = '';
+var UUID = "ferergre";
 
 function onGet(uri) {
 	InfoLog("Page at " + uri + " requested");

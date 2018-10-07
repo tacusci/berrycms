@@ -9,7 +9,13 @@ import (
 
 func PluginInfoLog(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
-	logging.InfoNoColor(fmt.Sprintf("%s", call.Argument(0).String()))
+	if uuid, err := call.Otto.Get("UUID"); err == nil {
+		if uuid.IsString() {
+			logging.Info(fmt.Sprintf("PLUGIN {%s}: %s", uuid.String(), call.Argument(0).String()))
+		}
+	} else {
+		logging.Error(err.Error())
+	}
 	return otto.Value{}
 }
 
