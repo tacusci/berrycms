@@ -69,7 +69,7 @@ func (m *Manager) CompileAll() {
 		if !plugin.compiled {
 			plugin.Compile()
 		}
-		plugin.setGlobalVariables()
+		plugin.setGlobalConsts()
 	}
 }
 
@@ -97,7 +97,7 @@ func (p *Plugin) setApiFuncs() {
 	}
 }
 
-func (p *Plugin) setGlobalVariables() {
+func (p *Plugin) setGlobalConsts() {
 	p.runtime.Set("UUID", p.UUID)
 }
 
