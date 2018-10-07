@@ -34,11 +34,12 @@ import (
 
 //MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
-	Server *http.Server
-	mu     sync.Mutex
-	Root   *mux.Router
-	dw     *util.RecursiveDirWatch
-	pm     *plugins.Manager
+	Server    *http.Server
+	mu        sync.Mutex
+	Root      *mux.Router
+	dwstatic  *util.RecursiveDirWatch
+	dwplugins *util.RecursiveDirWatch
+	pm        *plugins.Manager
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -83,6 +84,7 @@ func (mr *MutableRouter) Reload() {
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
+	// go mr.monitorPlugins("plugins")
 
 	amw := AuthMiddleware{Router: mr}
 	r.Use(amw.Middleware)
@@ -123,16 +125,28 @@ func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
 }
 
 func (mr *MutableRouter) monitorStatic(sd string) {
-	mr.dw = &util.RecursiveDirWatch{Change: make(chan bool), Stop: make(chan bool)}
-	go mr.dw.WatchDir(sd)
+	mr.dwstatic = &util.RecursiveDirWatch{Change: make(chan bool), Stop: make(chan bool)}
+	go mr.dwstatic.WatchDir(sd)
 	for {
-		if <-mr.dw.Change {
+		if <-mr.dwstatic.Change {
 			logging.Debug("Change detected in static dir...")
 			break
 		}
 	}
-	mr.dw.Stop <- true
+	mr.dwstatic.Stop <- true
 	mr.Reload()
+}
+
+func (mr *MutableRouter) monitorPlugins(sd string) {
+	mr.dwplugins = &util.RecursiveDirWatch{Change: make(chan bool), Stop: make(chan bool)}
+	go mr.dwplugins.WatchDir(sd)
+	for {
+		if <-mr.dwplugins.Change {
+			logging.Debug("Change detected in plugins dir... Reloading plugins...")
+			break
+		}
+	}
+	mr.pm = plugins.NewManager()
 }
 
 //AuthMiddleware authentication struct with auth helper functions
