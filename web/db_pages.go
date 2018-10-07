@@ -57,7 +57,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		rows.Scan(&p.Content)
 	}
 
-	sph.Router.pm.ExecAll()
+	sph.Router.pm.CompileAll()
 
 	for _, plugin := range *sph.Router.pm.Plugins {
 		plugin.Call("onLoad")

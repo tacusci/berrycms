@@ -56,9 +56,9 @@ func (m *Manager) NewExtPlugin() *Plugin {
 	return &Plugin{}
 }
 
-func (m *Manager) ExecAll() {
+func (m *Manager) CompileAll() {
 	for _, plugin := range *m.Plugins {
-		plugin.Run()
+		plugin.Compile()
 	}
 }
 
@@ -84,7 +84,7 @@ func (p *Plugin) setApiFuncs() {
 	}
 }
 
-func (p *Plugin) Run() bool {
+func (p *Plugin) Compile() bool {
 
 	f, err := os.Open(p.filePath)
 	if err != nil {

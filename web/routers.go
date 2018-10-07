@@ -90,6 +90,11 @@ func (mr *MutableRouter) Reload() {
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
 	mr.pm = plugins.NewManager()
+	mr.pm.CompileAll()
+
+	for _, plugin := range *mr.pm.Plugins {
+		plugin.Call("main")
+	}
 
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
