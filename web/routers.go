@@ -84,7 +84,7 @@ func (mr *MutableRouter) Reload() {
 	mr.mapSavedPageRoutes(r)
 	mr.mapStaticDir(r, "static")
 	go mr.monitorStatic("static")
-	// go mr.monitorPlugins("plugins")
+	go mr.monitorPlugins("plugins")
 
 	amw := AuthMiddleware{Router: mr}
 	r.Use(amw.Middleware)

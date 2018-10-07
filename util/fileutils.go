@@ -44,8 +44,10 @@ func (w *RecursiveDirWatch) WatchDir(sd string) {
 				w.genChecksum(sd, &currentChecksum)
 				if startChecksum != currentChecksum {
 					startChecksum = currentChecksum
+					logging.Debug("Change detected")
 					w.Change <- true
 				} else {
+					logging.Debug("No change detected")
 					w.Change <- false
 				}
 				startTime = time.Now()
