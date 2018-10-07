@@ -60,7 +60,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	sph.Router.pm.CompileAll()
 
 	for _, plugin := range *sph.Router.pm.Plugins {
-		plugin.Call("onLoad", nil, nil)
+		plugin.Call("onGet", nil, r.RequestURI)
 	}
 
 	ctx := plush.NewContext()
@@ -69,7 +69,13 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 //Post handles post requests to URI
-func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}
+func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
+	sph.Router.pm.CompileAll()
+
+	for _, plugin := range *sph.Router.pm.Plugins {
+		plugin.Call("onPost", nil, r.RequestURI)
+	}
+}
 
 //Route get URI route for handler
 func (sph *SavedPageHandler) Route() string { return sph.route }

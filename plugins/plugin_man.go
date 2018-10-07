@@ -87,6 +87,7 @@ func (p *Plugin) loadRuntime() bool {
 
 func (p *Plugin) setApiFuncs() {
 	if p.runtime != nil {
+		p.runtime.Set("UUID", p.UUID)
 		p.runtime.Set("InfoLog", PluginInfoLog)
 		p.runtime.Set("DebugLog", PluginDebugLog)
 		p.runtime.Set("ErrorLog", PluginErrorLog)
