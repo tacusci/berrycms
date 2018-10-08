@@ -99,8 +99,11 @@ func (mr *MutableRouter) Reload() {
 	}
 
 	mr.mapSavedPageRoutes(r)
-	mr.mapStaticDir(r, "static")
-	go mr.monitorStatic("./static", mr.staticwatcher)
+	if err := mr.mapStaticDir(r, "static"); err == nil {
+		go mr.monitorStatic("./static", mr.staticwatcher)
+	} else {
+		logging.Error("Unable to map static dir, not listening for directory changes...")
+	}
 	go mr.monitorPlugins("./plugins", mr.pluginswatcher)
 
 	amw := AuthMiddleware{Router: mr}
@@ -127,11 +130,17 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 	}
 }
 
-func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
+func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) error {
 	fs, err := ioutil.ReadDir(sd)
+	if os.IsNotExist(err) {
+		logging.Error("Unable to find static folder... Creating...")
+		err = os.Mkdir("./static", os.ModeDir)
+		if err != nil {
+			return err
+		}
+	}
 	if err != nil {
-		logging.Error("Unable to find static folder...")
-		return
+		return err
 	}
 	for _, f := range fs {
 		pathPrefixLocation := fmt.Sprintf("%s%s%s", string(os.PathSeparator), f.Name(), string(os.PathSeparator))
@@ -139,6 +148,7 @@ func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) {
 		logging.Debug(fmt.Sprintf("Serving dir (%s)'s files...", f.Name()))
 		r.PathPrefix(pathPrefixAddress).Handler(http.StripPrefix(pathPrefixAddress, http.FileServer(http.Dir(sd+pathPrefixLocation))))
 	}
+	return nil
 }
 
 func (mr *MutableRouter) monitorStatic(sd string, w *watcher.Watcher) {
