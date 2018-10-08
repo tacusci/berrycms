@@ -55,6 +55,7 @@ func (m *Manager) load() error {
 			*m.Plugins = append(*m.Plugins, *plugin)
 		}
 	}
+	return nil
 }
 
 func (m *Manager) loadPlugin(file os.FileInfo) *Plugin {
