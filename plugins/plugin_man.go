@@ -19,7 +19,11 @@ func NewManager() *Manager {
 		pluginsDirPath: "./plugins",
 		Plugins:        &[]Plugin{},
 	}
-	man.load()
+	err := man.load()
+	if err != nil {
+		logging.Error(fmt.Sprintf("Unable to load plugins, -> %s", err.Error()))
+		return nil
+	}
 	return man
 }
 
@@ -28,11 +32,21 @@ type Manager struct {
 	Plugins        *[]Plugin
 }
 
-func (m *Manager) load() {
+func (m *Manager) load() error {
 	pluginFiles, err := ioutil.ReadDir(m.pluginsDirPath)
 	if err != nil {
-		logging.Error(err.Error())
-		return
+		if os.IsNotExist(err) {
+			err := os.Mkdir("./plugins", os.ModeDir)
+			if os.IsPermission(err) {
+				logging.Error(fmt.Sprintf("Unable to create plugins dir, permission denied -> %s", err.Error()))
+				return err
+			}
+			pluginFiles, err = ioutil.ReadDir(m.pluginsDirPath)
+			if err != nil {
+				return err
+			}
+		}
+		return err
 	}
 
 	for _, file := range pluginFiles {
