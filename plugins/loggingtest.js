@@ -1,10 +1,10 @@
 //BERRYCMS PLUGIN VER(0.0.1)
 
-function onGet(uri) {
+function onGet(uri, page) {
 	InfoLog("Page at " + uri + " requested");
 }
 
-function onPreRender(page) {
+function onPreRender(uri, page) {
 	InfoLog("Page content looks like: " + page);
 }
 
