@@ -81,9 +81,7 @@ func (m *Manager) NewExtPlugin() *Plugin {
 
 func (m *Manager) CompileAll() {
 	for _, plugin := range m.Plugins {
-		if !plugin.compiled {
-			plugin.Compile()
-		}
+		plugin.Compile()
 		plugin.setGlobalConsts()
 	}
 }
