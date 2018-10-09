@@ -17,7 +17,7 @@ import (
 func NewManager() *Manager {
 	man := &Manager{
 		pluginsDirPath: "./plugins",
-		Plugins:        &[]Plugin{},
+		Plugins:        make([]*Plugin, 0),
 	}
 	err := man.load()
 	if err != nil {
@@ -29,7 +29,7 @@ func NewManager() *Manager {
 
 type Manager struct {
 	pluginsDirPath string
-	Plugins        *[]Plugin
+	Plugins        []*Plugin
 }
 
 func (m *Manager) load() error {
@@ -52,7 +52,7 @@ func (m *Manager) load() error {
 	for _, file := range pluginFiles {
 		plugin := m.loadPlugin(file)
 		if plugin != nil {
-			*m.Plugins = append(*m.Plugins, *plugin)
+			m.Plugins = append(m.Plugins, plugin)
 		}
 	}
 	return nil
@@ -80,7 +80,7 @@ func (m *Manager) NewExtPlugin() *Plugin {
 }
 
 func (m *Manager) CompileAll() {
-	for _, plugin := range *m.Plugins {
+	for _, plugin := range m.Plugins {
 		if !plugin.compiled {
 			plugin.Compile()
 		}
