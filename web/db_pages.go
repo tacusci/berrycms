@@ -68,14 +68,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
-
-	renderedPageContent := RenderStr(p, ctx)
-
-	for _, plugin := range *pm.Plugins {
-		plugin.Call("onPostRender", nil, r.RequestURI, renderedPageContent)
-	}
-
-	w.Write([]byte(renderedPageContent))
+	Render(w, p, ctx)
 }
 
 //Post handles post requests to URI
