@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tacusci/berrycms/plugins"
+
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 )
@@ -57,9 +59,10 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		rows.Scan(&p.Content)
 	}
 
-	sph.Router.pm.CompileAll()
+	pm := plugins.NewManager()
+	pm.CompileAll()
 
-	for _, plugin := range sph.Router.pm.Plugins {
+	for _, plugin := range *pm.Plugins {
 		plugin.Call("onGet", nil, r.RequestURI, p.Content)
 	}
 
@@ -68,7 +71,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	renderedPageContent := RenderStr(p, ctx)
 
-	for _, plugin := range sph.Router.pm.Plugins {
+	for _, plugin := range *pm.Plugins {
 		plugin.Call("onPostRender", nil, r.RequestURI, renderedPageContent)
 	}
 
@@ -77,9 +80,10 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 //Post handles post requests to URI
 func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
-	sph.Router.pm.CompileAll()
+	pm := plugins.NewManager()
+	pm.CompileAll()
 
-	for _, plugin := range sph.Router.pm.Plugins {
+	for _, plugin := range *pm.Plugins {
 		plugin.Call("onPost", nil, r.RequestURI)
 	}
 }

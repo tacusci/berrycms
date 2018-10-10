@@ -10,5 +10,5 @@ function onPostRender(args) {
 }
 
 function main(uuid) {
-
+    InfoLog(uuid);
 }

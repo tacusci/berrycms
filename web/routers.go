@@ -89,10 +89,12 @@ func (mr *MutableRouter) Reload() {
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
-	mr.pm = plugins.NewManager()
-	mr.pm.CompileAll()
+	pm := plugins.NewManager()
+	pm.UnloadPlugins()
+	pm.LoadPlugins()
+	pm.CompileAll()
 
-	for _, plugin := range mr.pm.Plugins {
+	for _, plugin := range *pm.Plugins {
 		if &plugin != nil {
 			plugin.Call("main", nil, plugin.UUID)
 		}

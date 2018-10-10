@@ -14,22 +14,33 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+var pluginsList *[]Plugin = &[]Plugin{}
+
 func NewManager() *Manager {
 	man := &Manager{
 		pluginsDirPath: "./plugins",
-		Plugins:        make([]*Plugin, 0),
-	}
-	err := man.load()
-	if err != nil {
-		logging.Error(fmt.Sprintf("Unable to load plugins, -> %s", err.Error()))
-		return nil
+		Plugins:        pluginsList,
 	}
 	return man
 }
 
 type Manager struct {
 	pluginsDirPath string
-	Plugins        []*Plugin
+	Plugins        *[]Plugin
+}
+
+func (m *Manager) LoadPlugins() error {
+	err := m.load()
+	if err != nil {
+		logging.Error(fmt.Sprintf("Unable to load plugins, -> %s", err.Error()))
+		return err
+	}
+	return nil
+}
+
+func (m *Manager) UnloadPlugins() {
+	pluginsList = &[]Plugin{}
+	m.Plugins = pluginsList
 }
 
 func (m *Manager) load() error {
@@ -52,7 +63,7 @@ func (m *Manager) load() error {
 	for _, file := range pluginFiles {
 		plugin := m.loadPlugin(file)
 		if plugin != nil {
-			m.Plugins = append(m.Plugins, plugin)
+			*m.Plugins = append(*m.Plugins, *plugin)
 		}
 	}
 	return nil
@@ -80,7 +91,7 @@ func (m *Manager) NewExtPlugin() *Plugin {
 }
 
 func (m *Manager) CompileAll() {
-	for _, plugin := range m.Plugins {
+	for _, plugin := range *m.Plugins {
 		plugin.Compile()
 		plugin.setGlobalConsts()
 	}
