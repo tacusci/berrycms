@@ -48,7 +48,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		sph.Router.Reload()
 	}
-	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
+	rows, err := pt.Select(db.Conn, "content, route", fmt.Sprintf("route = '%s'", r.RequestURI))
 	defer rows.Close()
 	if err != nil {
 		Error(w, err)
@@ -56,7 +56,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	p := &db.Page{}
 	for rows.Next() {
-		rows.Scan(&p.Content)
+		rows.Scan(&p.Content, &p.Route)
 	}
 
 	pm := plugins.NewManager()

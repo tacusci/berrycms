@@ -2,6 +2,10 @@
 
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
+function onPreRender(args) {
+    InfoLog(args[0]);
+}
+
 function onPostRender(args) {
     if (args[0] === "/recaptcha-test") {
         page = args[1]

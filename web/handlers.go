@@ -15,6 +15,8 @@
 package web
 
 import (
+	"fmt"
+	"github.com/tacusci/berrycms/plugins"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -115,6 +117,11 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 
 //Render uses plush rendering engine to read page content from the DB and create HTML content
 func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
+	pm := plugins.NewManager()
+	for _, plugin := range *pm.Plugins {
+		plugin.Call("onPreRender", nil, &p.Route)
+	}
+
 	html, err := plush.Render("<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><%= pagecontent %></html>", ctx)
 	if err != nil {
 		logging.Error(err.Error())
