@@ -60,7 +60,6 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pm := plugins.NewManager()
-	pm.CompileAll()
 
 	for _, plugin := range *pm.Plugins {
 		plugin.Call("onGet", nil, r.RequestURI, p.Content)
@@ -74,7 +73,6 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 //Post handles post requests to URI
 func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 	pm := plugins.NewManager()
-	pm.CompileAll()
 
 	for _, plugin := range *pm.Plugins {
 		plugin.Call("onPost", nil, r.RequestURI)

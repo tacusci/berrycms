@@ -15,7 +15,6 @@
 package web
 
 import (
-	"fmt"
 	"github.com/tacusci/berrycms/plugins"
 	"io/ioutil"
 	"net/http"

@@ -21,6 +21,7 @@ func NewManager() *Manager {
 		pluginsDirPath: "./plugins",
 		Plugins:        pluginsList,
 	}
+	man.CompileAll()
 	return man
 }
 
