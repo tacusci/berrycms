@@ -157,6 +157,6 @@ func (p *Plugin) Compile() bool {
 	return p.compiled
 }
 
-func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) {
-	p.runtime.Call(funcName, this, argumentList)
+func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) (otto.Value, error) {
+	return p.runtime.Call(funcName, this, argumentList)
 }
