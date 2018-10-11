@@ -15,6 +15,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/tacusci/berrycms/plugins"
 	"io/ioutil"
 	"net/http"
@@ -122,11 +123,14 @@ func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 	pm := plugins.NewManager()
 	for _, plugin := range *pm.Plugins {
 		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
-		if val.IsObject() {
+		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
-			editedPageHeader, _ := editedPage.Get("header")
-			if editedPageHeader.IsString() {
-				htmlHead = editedPageHeader.String()
+			if editedPageHeader, err := editedPage.Get("header"); err == nil {
+				if editedPageHeader.IsString() {
+					htmlHead = editedPageHeader.String()
+				}
+			} else {
+				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
 			}
 		}
 	}
