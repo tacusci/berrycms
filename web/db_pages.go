@@ -20,8 +20,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tacusci/berrycms/plugins"
-
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 )
