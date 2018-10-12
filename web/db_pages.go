@@ -49,20 +49,14 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		sph.Router.Reload()
 	}
 	rows, err := pt.Select(db.Conn, "content, route", fmt.Sprintf("route = '%s'", r.RequestURI))
-	defer rows.Close()
 	if err != nil {
 		Error(w, err)
 		return
 	}
+	defer rows.Close()
 	p := &db.Page{}
 	for rows.Next() {
 		rows.Scan(&p.Content, &p.Route)
-	}
-
-	pm := plugins.NewManager()
-
-	for _, plugin := range *pm.Plugins {
-		plugin.Call("onGet", nil, r.RequestURI, p.Content)
 	}
 
 	ctx := plush.NewContext()
@@ -71,13 +65,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 //Post handles post requests to URI
-func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
-	pm := plugins.NewManager()
-
-	for _, plugin := range *pm.Plugins {
-		plugin.Call("onPost", nil, r.RequestURI)
-	}
-}
+func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
 //Route get URI route for handler
 func (sph *SavedPageHandler) Route() string { return sph.route }
