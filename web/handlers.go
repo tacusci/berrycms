@@ -119,6 +119,8 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 //Render uses plush rendering engine to read page content from the DB and create HTML content
 func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 
+	// assume response is fine/OK
+	var code = 200
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
 	pm := plugins.NewManager()
@@ -126,6 +128,7 @@ func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
+
 			if editedPageHeader, err := editedPage.Get("header"); err == nil {
 				if editedPageHeader.IsString() {
 					htmlHead = editedPageHeader.String()
@@ -142,15 +145,27 @@ func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 			} else {
 				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
 			}
+
+			if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
+				if editedPageResponseCode.IsNumber() {
+					if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
+						code = int(responseCode)
+					} else {
+						logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
+					}
+				}
+			}
 		}
 	}
 
 	html, err := plush.Render("<html>"+htmlHead+"<%= pagecontent %></html>", ctx)
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
+		Error(w, err)
 		return err
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(code)
 	w.Write([]byte(html))
 	return err
 }

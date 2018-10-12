@@ -8,7 +8,8 @@ function onPreRender(args) {
         return { 
             route: args[0], 
             header: args[1].replace("</head>", "<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script></head>"),
-            body: args[2] + "<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>"
+            body: args[2] + "<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>",
+            code: 200
         };
     }
     return null;
