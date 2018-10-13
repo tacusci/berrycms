@@ -59,7 +59,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
-	Render(w, p, ctx)
+	Render(w, r, p, ctx)
 }
 
 //Post handles post requests to URI

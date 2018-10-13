@@ -16,12 +16,13 @@ package web
 
 import (
 	"fmt"
-	"github.com/tacusci/berrycms/plugins"
 	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/tacusci/berrycms/plugins"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -117,7 +118,7 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 }
 
 //Render uses plush rendering engine to read page content from the DB and create HTML content
-func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
+func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Context) error {
 
 	// assume response is fine/OK
 	var code = 200
@@ -152,6 +153,15 @@ func Render(w http.ResponseWriter, p *db.Page, ctx *plush.Context) error {
 						code = int(responseCode)
 					} else {
 						logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
+					}
+				}
+			}
+
+			if editedPageRoute, err := editedPage.Get("route"); err == nil {
+				if editedPageRoute.IsString() {
+					if editedPageRoute.String() != p.Route {
+						http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
+						return nil
 					}
 				}
 			}
