@@ -130,6 +130,15 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
 
+			if editedPageRoute, err := editedPage.Get("route"); err == nil {
+				if editedPageRoute.IsString() {
+					if editedPageRoute.String() != p.Route {
+						http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
+						return nil
+					}
+				}
+			}
+
 			if editedPageHeader, err := editedPage.Get("header"); err == nil {
 				if editedPageHeader.IsString() {
 					htmlHead = editedPageHeader.String()
@@ -157,14 +166,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 				}
 			}
 
-			if editedPageRoute, err := editedPage.Get("route"); err == nil {
-				if editedPageRoute.IsString() {
-					if editedPageRoute.String() != p.Route {
-						http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
-						return nil
-					}
-				}
-			}
 		}
 	}
 
