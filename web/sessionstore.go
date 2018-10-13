@@ -41,6 +41,7 @@ func ClearOldSessions(stop *chan bool) {
 	startTime := time.Now()
 	authSessionsTable := db.AuthSessionsTable{}
 	for {
+		time.Sleep(5 * time.Millisecond)
 		select {
 		case <-*stop:
 			return
