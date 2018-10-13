@@ -121,7 +121,7 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Context) error {
 
 	// assume response is fine/OK
-	var code = 200
+	var code = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
 	pm := plugins.NewManager()
