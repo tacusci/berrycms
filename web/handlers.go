@@ -126,8 +126,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 	pm := plugins.NewManager()
 	for _, plugin := range *pm.GetPlugins() {
-		plugin.WaitGroup.Wait()
-		plugin.WaitGroup.Add(1)
 		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
@@ -168,7 +166,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 				}
 			}
 		}
-		plugin.WaitGroup.Done()
 	}
 
 	html, err := plush.Render("<html>"+htmlHead+"<%= pagecontent %></html>", ctx)

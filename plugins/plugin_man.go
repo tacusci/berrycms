@@ -118,11 +118,10 @@ func (m *Manager) validatePlugin(fi os.FileInfo) bool {
 }
 
 type Plugin struct {
-	runtime   *otto.Otto
-	UUID      string
-	filePath  string
-	compiled  bool
-	WaitGroup sync.WaitGroup
+	runtime  *otto.Otto
+	UUID     string
+	filePath string
+	compiled bool
 }
 
 func (p *Plugin) loadRuntime() bool {
