@@ -2,11 +2,13 @@ package plugins
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/gobuffalo/uuid"
 	"github.com/tacusci/logging"
@@ -103,10 +105,11 @@ func (m *Manager) validatePlugin(fi os.FileInfo) bool {
 }
 
 type Plugin struct {
-	runtime  *otto.Otto
-	UUID     string
-	filePath string
-	compiled bool
+	runtime   *otto.Otto
+	UUID      string
+	filePath  string
+	compiled  bool
+	WaitGroup sync.WaitGroup
 }
 
 func (p *Plugin) loadRuntime() bool {
@@ -158,5 +161,8 @@ func (p *Plugin) Compile() bool {
 }
 
 func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) (otto.Value, error) {
-	return p.runtime.Call(funcName, this, argumentList)
+	if argumentList != nil {
+		return p.runtime.Call(funcName, this, argumentList)
+	}
+	return otto.Value{}, errors.New("Argument list is nil")
 }
