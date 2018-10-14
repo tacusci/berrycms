@@ -21,15 +21,28 @@ var pluginsList *[]Plugin = &[]Plugin{}
 func NewManager() *Manager {
 	man := &Manager{
 		pluginsDirPath: "./plugins",
-		Plugins:        pluginsList,
+		plugins:        pluginsList,
 	}
 	man.CompileAll()
 	return man
 }
 
 type Manager struct {
+	sync.Mutex
 	pluginsDirPath string
-	Plugins        *[]Plugin
+	plugins        *[]Plugin
+}
+
+func (m *Manager) GetPlugins() *[]Plugin {
+	m.Lock()
+	defer m.Unlock()
+	return m.plugins
+}
+
+func (m *Manager) SetPlugins(plugins []Plugin) {
+	m.Lock()
+	defer m.Unlock()
+	m.plugins = &plugins
 }
 
 func (m *Manager) LoadPlugins() error {
@@ -42,8 +55,7 @@ func (m *Manager) LoadPlugins() error {
 }
 
 func (m *Manager) UnloadPlugins() {
-	pluginsList = &[]Plugin{}
-	m.Plugins = pluginsList
+	m.SetPlugins([]Plugin{})
 }
 
 func (m *Manager) load() error {
@@ -66,7 +78,8 @@ func (m *Manager) load() error {
 	for _, file := range pluginFiles {
 		plugin := m.loadPlugin(file)
 		if plugin != nil {
-			*m.Plugins = append(*m.Plugins, *plugin)
+			plugins := m.GetPlugins()
+			m.SetPlugins(append(*plugins, *plugin))
 		}
 	}
 	return nil
@@ -94,7 +107,7 @@ func (m *Manager) NewExtPlugin() *Plugin {
 }
 
 func (m *Manager) CompileAll() {
-	for _, plugin := range *m.Plugins {
+	for _, plugin := range *m.plugins {
 		plugin.Compile()
 		plugin.setGlobalConsts()
 	}

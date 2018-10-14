@@ -94,7 +94,7 @@ func (mr *MutableRouter) Reload() {
 	pm.LoadPlugins()
 	pm.CompileAll()
 
-	for _, plugin := range *pm.Plugins {
+	for _, plugin := range *pm.GetPlugins() {
 		if &plugin != nil {
 			plugin.Call("main", nil, plugin.UUID)
 		}
