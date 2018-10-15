@@ -125,7 +125,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
 	pm := plugins.NewManager()
-	for _, plugin := range *pm.GetPlugins() {
+	for _, plugin := range *pm.Plugins {
 		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
