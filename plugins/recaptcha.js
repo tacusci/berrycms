@@ -22,6 +22,6 @@ function onPostRender(args) {
     }
 }
 
-function main(uuid) {
-    InfoLog(uuid);
+function main() {
+    InfoLog("Loaded plugin " + UUID);
 }
