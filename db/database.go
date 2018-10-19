@@ -118,7 +118,7 @@ func CreateTestData() {
 
 func Heartbeat() {
 	for {
-		<-time.After(time.Second * 60)
+		time.Sleep(time.Second * 60)
 		err := Conn.Ping()
 		if err != nil {
 			logging.Error(fmt.Sprintf("DB Ping error -> %s", err.Error()))

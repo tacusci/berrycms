@@ -89,14 +89,14 @@ func (mr *MutableRouter) Reload() {
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
-	mr.pm = plugins.NewManager()
-	mr.pm.CompileAll()
+	pm := plugins.NewManager()
+	pm.Load()
 
-	for _, plugin := range mr.pm.Plugins {
-		if &plugin != nil {
-			plugin.Call("main", nil, plugin.UUID)
-		}
+	pm.Lock()
+	for _, plugin := range *pm.Plugins() {
+		plugin.Call("main", nil, nil)
 	}
+	pm.Unlock()
 
 	mr.mapSavedPageRoutes(r)
 	if err := mr.mapStaticDir(r, "static"); err == nil {
@@ -188,6 +188,7 @@ func (mr *MutableRouter) monitorPlugins(sd string, w *watcher.Watcher) {
 			select {
 			case <-w.Event:
 				mr.pm = plugins.NewManager()
+				mr.pm.Load()
 			case err := <-w.Error:
 				logging.Error(err.Error())
 			case <-w.Closed:

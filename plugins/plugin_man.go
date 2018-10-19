@@ -1,152 +1,134 @@
 package plugins
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/gobuffalo/uuid"
-	"github.com/tacusci/logging"
 
 	"github.com/robertkrimen/otto"
 )
 
-func NewManager() *Manager {
-	man := &Manager{
-		pluginsDirPath: "./plugins",
-		Plugins:        make([]*Plugin, 0),
-	}
-	err := man.load()
-	if err != nil {
-		logging.Error(fmt.Sprintf("Unable to load plugins, -> %s", err.Error()))
-		return nil
-	}
-	return man
-}
-
-type Manager struct {
-	pluginsDirPath string
-	Plugins        []*Plugin
-}
-
-func (m *Manager) load() error {
-	pluginFiles, err := ioutil.ReadDir(m.pluginsDirPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			err := os.Mkdir("./plugins", os.ModeDir)
-			if os.IsPermission(err) {
-				logging.Error(fmt.Sprintf("Unable to create plugins dir, permission denied -> %s", err.Error()))
-				return err
-			}
-			pluginFiles, err = ioutil.ReadDir(m.pluginsDirPath)
-			if err != nil {
-				return err
-			}
-		}
-		return err
-	}
-
-	for _, file := range pluginFiles {
-		plugin := m.loadPlugin(file)
-		if plugin != nil {
-			m.Plugins = append(m.Plugins, plugin)
-		}
-	}
-	return nil
-}
-
-func (m *Manager) loadPlugin(file os.FileInfo) *Plugin {
-	if m.validatePlugin(file) {
-		if uuidV4, err := uuid.NewV4(); err == nil {
-			plugin := &Plugin{
-				UUID:     uuidV4.String(),
-				filePath: fmt.Sprintf("%s%s%s", m.pluginsDirPath, string(filepath.Separator), file.Name()),
-			}
-			if plugin.loadRuntime() {
-				return plugin
-			}
-		} else {
-			return nil
-		}
-	}
-	return nil
-}
-
-func (m *Manager) NewExtPlugin() *Plugin {
-	return &Plugin{}
-}
-
-func (m *Manager) CompileAll() {
-	for _, plugin := range m.Plugins {
-		if !plugin.compiled {
-			plugin.Compile()
-		}
-		plugin.setGlobalConsts()
-	}
-}
-
-func (m *Manager) validatePlugin(fi os.FileInfo) bool {
-	return strings.Contains(fi.Name(), ".js")
+var manager = &Manager{
+	dir:     "./plugins",
+	plugins: []Plugin{},
 }
 
 type Plugin struct {
-	runtime  *otto.Otto
-	UUID     string
+	uuid     string
 	filePath string
-	compiled bool
+	src      string
+	vm       *otto.Otto
 }
 
-func (p *Plugin) loadRuntime() bool {
-	p.runtime = otto.New()
-	return p.runtime != nil
-}
+func (p *Plugin) UUID() string { return p.uuid }
 
-func (p *Plugin) setApiFuncs() {
-	if p.runtime != nil {
-		p.runtime.Set("InfoLog", PluginInfoLog)
-		p.runtime.Set("DebugLog", PluginDebugLog)
-		p.runtime.Set("ErrorLog", PluginErrorLog)
-	}
-}
-
-func (p *Plugin) setGlobalConsts() {
-	p.runtime.Set("UUID", p.UUID)
-}
-
-func (p *Plugin) Compile() bool {
-
-	f, err := os.Open(p.filePath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
+func (p *Plugin) ParseFile() error {
+	if p.filePath != "" && p.filePath != "-" {
+		data, err := ioutil.ReadFile(p.filePath)
+		if err != nil {
+			return err
 		}
-		logging.Error(err.Error())
-		return false
+		p.src = string(data)
 	}
-	defer f.Close()
-
-	buff := bytes.NewBuffer(nil)
-
-	if _, err := buff.ReadFrom(f); err != nil {
-		logging.Error(err.Error())
-		return false
-	}
-
-	p.setApiFuncs()
-
-	if _, err := p.runtime.Run(buff.String()); err != nil {
-		logging.Error(err.Error())
-		return false
-	}
-
-	p.compiled = true
-
-	return p.compiled
+	return nil
 }
 
-func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) {
-	p.runtime.Call(funcName, this, argumentList)
+func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) (otto.Value, error) {
+	if err := p.ParseFile(); err != nil {
+		return otto.Value{}, err
+	}
+
+	if _, err := p.vm.Run(p.src); err != nil {
+		return otto.Value{}, err
+	}
+
+	return p.vm.Call(funcName, this, argumentList)
+}
+
+// Manager contains plugin collection and add utility and concurrent protection for executing
+type Manager struct {
+	sync.Mutex
+	dir     string
+	plugins []Plugin
+}
+
+// NewManager retrieves pointer to only single instance plugin manager
+func NewManager() *Manager {
+	return manager
+}
+
+// Load finds all plugins in provided directory and loads then into manager
+func (m *Manager) Load() error {
+	m.Unload()
+
+	if err := m.loadFromDir(m.dir); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Manager) Unload() {
+	m.Lock()
+	defer m.Unlock()
+	m.plugins = []Plugin{}
+}
+
+func (m *Manager) Plugins() *[]Plugin {
+	return &m.plugins
+}
+
+func (m *Manager) loadFromDir(dir string) error {
+	if files, err := ioutil.ReadDir(m.dir); err == nil {
+		for i := range files {
+			file := files[i]
+			fileFullPath := fmt.Sprintf("%s%s%s", dir, string(os.PathSeparator), file.Name())
+			// if found directory, call this function to process that directory too
+			if file.IsDir() {
+				m.loadFromDir(fileFullPath)
+			}
+			fileNameParts := strings.Split(file.Name(), ".")
+			if len(fileNameParts) > 1 {
+				if fileNameParts[len(fileNameParts)-1] == "js" {
+					m.loadPlugin(fileFullPath)
+				}
+			}
+		}
+	} else {
+		return err
+	}
+	return nil
+}
+
+func (m *Manager) loadPlugin(fileFullPath string) error {
+	m.Lock()
+	defer m.Unlock()
+
+	if uuidV4, err := uuid.NewV4(); err == nil {
+		plugin := Plugin{
+			uuid:     uuidV4.String(),
+			vm:       otto.New(),
+			filePath: fileFullPath,
+		}
+
+		if err := plugin.ParseFile(); err != nil {
+			return err
+		}
+
+		plugin.vm.Set("UUID", plugin.uuid)
+		plugin.vm.Set("InfoLog", PluginInfoLog)
+		plugin.vm.Set("DebugLog", PluginDebugLog)
+		plugin.vm.Set("ErrorLog", PluginErrorLog)
+		plugin.vm.Run(plugin.src)
+
+		m.plugins = append(m.plugins, plugin)
+	} else {
+		return err
+	}
+
+	return nil
 }

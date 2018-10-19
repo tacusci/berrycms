@@ -46,40 +46,24 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		sph.Router.Reload()
 	}
-	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", r.RequestURI))
-	defer rows.Close()
+	rows, err := pt.Select(db.Conn, "content, route", fmt.Sprintf("route = '%s'", r.RequestURI))
 	if err != nil {
 		Error(w, err)
 		return
 	}
+	defer rows.Close()
 	p := &db.Page{}
 	for rows.Next() {
-		rows.Scan(&p.Content)
-	}
-
-	sph.Router.pm.CompileAll()
-
-	for _, plugin := range sph.Router.pm.Plugins {
-		plugin.Call("onGet", nil, r.RequestURI, p.Content)
-	}
-
-	for _, plugin := range sph.Router.pm.Plugins {
-		plugin.Call("onPreRender", nil, r.RequestURI, p.Content)
+		rows.Scan(&p.Content, &p.Route)
 	}
 
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
-	Render(w, p, ctx)
+	Render(w, r, p, ctx)
 }
 
 //Post handles post requests to URI
-func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
-	sph.Router.pm.CompileAll()
-
-	for _, plugin := range sph.Router.pm.Plugins {
-		plugin.Call("onPost", nil, r.RequestURI)
-	}
-}
+func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}
 
 //Route get URI route for handler
 func (sph *SavedPageHandler) Route() string { return sph.route }
