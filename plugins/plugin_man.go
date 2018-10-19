@@ -37,6 +37,18 @@ func (p *Plugin) ParseFile() error {
 	return nil
 }
 
+func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interface{}) (otto.Value, error) {
+	if err := p.ParseFile(); err != nil {
+		return otto.Value{}, err
+	}
+
+	if _, err := p.vm.Run(p.src); err != nil {
+		return otto.Value{}, err
+	}
+
+	return p.vm.Call(funcName, this, argumentList)
+}
+
 // Manager contains plugin collection and add utility and concurrent protection for executing
 type Manager struct {
 	sync.Mutex
@@ -66,15 +78,8 @@ func (m *Manager) Unload() {
 	m.plugins = []Plugin{}
 }
 
-func (m *Manager) Call(funcName string, this interface{}, argumentList ...interface{}) {
-	m.Lock()
-	defer m.Unlock()
-
-	for _, plugin := range m.plugins {
-		if _, err := plugin.vm.Run(plugin.src); err == nil {
-			plugin.vm.Call(funcName, this, argumentList)
-		}
-	}
+func (m *Manager) Plugins() *[]Plugin {
+	return &m.plugins
 }
 
 func (m *Manager) loadFromDir(dir string) error {
@@ -116,6 +121,8 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 
 		plugin.vm.Set("UUID", plugin.uuid)
 		plugin.vm.Set("InfoLog", PluginInfoLog)
+		plugin.vm.Set("DebugLog", PluginDebugLog)
+		plugin.vm.Set("ErrorLog", PluginErrorLog)
 		plugin.vm.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)

@@ -15,10 +15,14 @@
 package web
 
 import (
+	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/tacusci/berrycms/plugins"
 
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
@@ -120,49 +124,52 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	var code = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
-	// pm := plugins.NewManager()
-	// for _, plugin := range *pm.Plugins {
-	// 	val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
-	// 	if &val != nil && val.IsObject() {
-	// 		editedPage := val.Object()
+	pm := plugins.NewManager()
 
-	// 		if editedPageRoute, err := editedPage.Get("route"); err == nil {
-	// 			if editedPageRoute.IsString() {
-	// 				if editedPageRoute.String() != p.Route {
-	// 					http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
-	// 					return nil
-	// 				}
-	// 			}
-	// 		}
+	pm.Lock()
+	for _, plugin := range *pm.Plugins() {
+		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
+		if &val != nil && val.IsObject() {
+			editedPage := val.Object()
 
-	// 		if editedPageHeader, err := editedPage.Get("header"); err == nil {
-	// 			if editedPageHeader.IsString() {
-	// 				htmlHead = editedPageHeader.String()
-	// 			}
-	// 		} else {
-	// 			logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
-	// 		}
+			if editedPageRoute, err := editedPage.Get("route"); err == nil {
+				if editedPageRoute.IsString() {
+					if editedPageRoute.String() != p.Route {
+						http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
+						return nil
+					}
+				}
+			}
 
-	// 		if editedPageContent, err := editedPage.Get("body"); err == nil {
-	// 			if editedPageContent.IsString() {
-	// 				p.Content = editedPageContent.String()
-	// 				ctx.Set("pagecontent", template.HTML(p.Content))
-	// 			}
-	// 		} else {
-	// 			logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
-	// 		}
+			if editedPageHeader, err := editedPage.Get("header"); err == nil {
+				if editedPageHeader.IsString() {
+					htmlHead = editedPageHeader.String()
+				}
+			} else {
+				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+			}
 
-	// 		if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
-	// 			if editedPageResponseCode.IsNumber() {
-	// 				if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
-	// 					code = int(responseCode)
-	// 				} else {
-	// 					logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID, err.Error()))
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-	// }
+			if editedPageContent, err := editedPage.Get("body"); err == nil {
+				if editedPageContent.IsString() {
+					p.Content = editedPageContent.String()
+					ctx.Set("pagecontent", template.HTML(p.Content))
+				}
+			} else {
+				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+			}
+
+			if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
+				if editedPageResponseCode.IsNumber() {
+					if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
+						code = int(responseCode)
+					} else {
+						logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+					}
+				}
+			}
+		}
+	}
+	pm.Unlock()
 
 	html, err := plush.Render("<html>"+htmlHead+"<%= pagecontent %></html>", ctx)
 	if err != nil {
