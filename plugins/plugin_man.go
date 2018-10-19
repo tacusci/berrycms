@@ -2,21 +2,46 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
+
+	"github.com/gobuffalo/uuid"
+
+	"github.com/robertkrimen/otto"
 )
 
 var manager = &Manager{
 	dir:     "./plugins",
-	scripts: []otto.Script{},
+	plugins: []Plugin{},
+}
+
+type Plugin struct {
+	uuid     string
+	filePath string
+	src      string
+	vm       *otto.Otto
+}
+
+func (p *Plugin) UUID() string { return p.uuid }
+
+func (p *Plugin) ParseFile() error {
+	if p.filePath != "" && p.filePath != "-" {
+		data, err := ioutil.ReadFile(p.filePath)
+		if err != nil {
+			return err
+		}
+		p.src = string(data)
+	}
+	return nil
 }
 
 // Manager contains plugin collection and add utility and concurrent protection for executing
 type Manager struct {
+	sync.Mutex
 	dir     string
-	scripts []otto.Script
+	plugins []Plugin
 }
 
 // NewManager retrieves pointer to only single instance plugin manager
@@ -36,7 +61,20 @@ func (m *Manager) Load() error {
 }
 
 func (m *Manager) Unload() {
-	m.scripts = []otto.Script{}
+	m.Lock()
+	defer m.Unlock()
+	m.plugins = []Plugin{}
+}
+
+func (m *Manager) Call(funcName string, this interface{}, argumentList ...interface{}) {
+	m.Lock()
+	defer m.Unlock()
+
+	for _, plugin := range m.plugins {
+		if _, err := plugin.vm.Run(plugin.src); err == nil {
+			plugin.vm.Call(funcName, this, argumentList)
+		}
+	}
 }
 
 func (m *Manager) loadFromDir(dir string) error {
@@ -61,6 +99,29 @@ func (m *Manager) loadFromDir(dir string) error {
 	return nil
 }
 
-func (m *Manager) loadPlugin(pluginFileInfo string) error {
+func (m *Manager) loadPlugin(fileFullPath string) error {
+	m.Lock()
+	defer m.Unlock()
+
+	if uuidV4, err := uuid.NewV4(); err == nil {
+		plugin := Plugin{
+			uuid:     uuidV4.String(),
+			vm:       otto.New(),
+			filePath: fileFullPath,
+		}
+
+		if err := plugin.ParseFile(); err != nil {
+			return err
+		}
+
+		plugin.vm.Set("UUID", plugin.uuid)
+		plugin.vm.Set("InfoLog", PluginInfoLog)
+		plugin.vm.Run(plugin.src)
+
+		m.plugins = append(m.plugins, plugin)
+	} else {
+		return err
+	}
+
 	return nil
 }

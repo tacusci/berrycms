@@ -91,6 +91,7 @@ func (mr *MutableRouter) Reload() {
 
 	pm := plugins.NewManager()
 	pm.Load()
+	pm.Call("main", nil, nil)
 
 	mr.mapSavedPageRoutes(r)
 	if err := mr.mapStaticDir(r, "static"); err == nil {
