@@ -44,6 +44,30 @@
           $("#pageeditorform").submit(function() {
             document.querySelector('input[name=pagecontent]').value = quill.root.innerHTML;
           });
+          
+          var txtArea = document.createElement('textarea');
+          txtArea.style.cssText = "width: 100%; height: 100%; margin: 0px;background: rgb(29, 29, 29);box-sizing: border-box;color: rgb(204, 204, 204);font-size: 15px;outline: none;padding: 20px;line-height: 24px;font-family: Consolas, Menlo, Monaco, &quot;Courier New&quot;, monospace;position: absolute;top: 0;bottom: 0;border: none;display:none";
+
+          var htmlEditor = quill.addContainer('ql-custom');
+          htmlEditor.appendChild(txtArea);
+
+          var editor = document.querySelector('#editor-container');
+          var html = editor.children[0].innerHTML;
+          txtArea.value = html;
+
+          quill.on('text-change', (delta, oldDelta, source) => {
+            var html = editor.children[0].innerHTML;
+            txtArea.value = html;
+          });
+
+          var sourceCodeToggleButton = document.getElementById('htmltoggle');
+          sourceCodeToggleButton.addEventListener('click', function() {
+            if (txtArea.style.display === '') {
+              var html = txtArea.value;
+              quill.pasteHTML(html);
+            }
+            txtArea.style.display = txtArea.style.display === 'none' ? '' : 'none';
+          });
         });
   </script>
   <% } %>
@@ -152,6 +176,9 @@
             </span>
             <span class="ql-formats">
               <button class="ql-clean"></button>
+            </span>
+            <span class="ql-formats">
+              <button id="htmltoggle" class="ql-sourceview">[source code]</button>
             </span>
           </div>
         <div id="editor-container">
