@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/plush"
-	"github.com/gobuffalo/uuid"
+	"github.com/gofrs/uuid"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 )
