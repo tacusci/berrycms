@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/satori/go.uuid"
+	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/tacusci/logging"

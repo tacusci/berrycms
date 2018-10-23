@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gobuffalo/uuid"
+	"github.com/gofrs/uuid"
 
 	"github.com/robertkrimen/otto"
 )
