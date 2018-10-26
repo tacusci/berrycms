@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"time"
 
+	quill "github.com/dchenk/go-render-quill"
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 )
@@ -59,6 +60,12 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
+
+	// if trying to render the page content from delta fails, then it just won't replace previous context pagecontent value
+	if html, _ := quill.Render([]byte(p.Content)); err == nil {
+		ctx.Set("pagecontent", template.HTML(html))
+	}
+
 	Render(w, r, p, ctx)
 }
 
