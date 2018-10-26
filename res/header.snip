@@ -42,7 +42,8 @@
           theme: 'snow'
           });
           $("#pageeditorform").submit(function() {
-            document.querySelector('input[name=pagecontent]').value = quill.root.innerHTML;
+            var pagecontentinput = document.querySelector('input[name=pagecontent]')
+            pagecontentinput.value = JSON.stringify(quill.getContents());
           });
           
           var txtArea = document.createElement('textarea');
