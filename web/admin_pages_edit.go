@@ -20,6 +20,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dchenk/go-render-quill"
+
 	"github.com/tacusci/logging"
 
 	"github.com/gorilla/mux"
@@ -44,14 +46,19 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Page to edit not found"))
 		return
 	}
-	pctx := plush.NewContext()
-	pctx.Set("title", fmt.Sprintf("Edit Page - %s", pageToEdit.Title))
-	pctx.Set("submitroute", r.RequestURI)
-	pctx.Set("pagetitle", pageToEdit.Title)
-	pctx.Set("pageroute", pageToEdit.Route)
-	pctx.Set("pagecontent", template.HTML(pageToEdit.Content))
-	pctx.Set("quillenabled", true)
-	RenderDefault(w, "admin.pages.edit.html", pctx)
+
+	if html, err := quill.Render([]byte(pageToEdit.Content)); err == nil {
+		pctx := plush.NewContext()
+		pctx.Set("title", fmt.Sprintf("Edit Page - %s", pageToEdit.Title))
+		pctx.Set("submitroute", r.RequestURI)
+		pctx.Set("pagetitle", pageToEdit.Title)
+		pctx.Set("pageroute", pageToEdit.Route)
+		pctx.Set("pagecontent", template.HTML(string(html)))
+		pctx.Set("quillenabled", true)
+		RenderDefault(w, "admin.pages.edit.html", pctx)
+	} else {
+		Error(w, err)
+	}
 }
 
 //Post handles post requests to URI

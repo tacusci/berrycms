@@ -43,7 +43,8 @@
           });
           $("#pageeditorform").submit(function() {
             var pagecontentinput = document.querySelector('input[name=pagecontent]')
-            pagecontentinput.value = JSON.stringify(quill.getContents());
+            // convert quill data object to JSON string, parse JSON string into object, select ops value object and convert to JSON string again 
+            pagecontentinput.value = JSON.stringify(JSON.parse(JSON.stringify(quill.getContents()))['ops']);
           });
           
           var txtArea = document.createElement('textarea');
