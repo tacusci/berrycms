@@ -1,5 +1,7 @@
 $(document).ready(function() {
 
+    var validEmailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$";
+
     // Variables
     var $nav = $('.navbar');
     if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null) {
