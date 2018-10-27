@@ -1,11 +1,13 @@
 $(document).ready(function() {
 
     // Variables
-    var $nav = $('.navbar'),
-        $body = $('body'),
+    var $nav = $('.navbar');
+    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null) {
+      var $navOffsetTop = $nav.offset().top;
+    }
+    var $body = $('body'),
         $window = $(window),
         $popoverLink = $('[data-popover]'),
-        navOffsetTop = $nav.offset().top,
         $document = $(document),
         entityMap = {
           "&": "&amp;",
@@ -177,6 +179,14 @@ $(document).ready(function() {
           })
         }
       })
+    }
+
+    $("#newrootform").find("input").each(function(){
+      this.addEventListener("change", onChange(this));
+    });
+
+    function onChange(input) {
+      console.log("something changed");
     }
   
     init();
