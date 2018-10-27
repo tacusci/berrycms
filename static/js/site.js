@@ -181,15 +181,24 @@ $(document).ready(function() {
       })
     }
 
-    $('#newrootform').change(function(){
+    $('#newrootform').submit(function(){
+      return validatePasswords();
+    });
+
+    function validatePasswords() {
       if ($("#newpass").val().length > 0 && $("#repnewpass").val().length > 0) {
         if ($("#newpass").val() !== $("#repnewpass").val()) {
-          console.log("Passwords don't match");
+          $('#repnewpass').get(0).setCustomValidity("Passwords don't match");
+          return false;
         } else {
-          console.log("Passwords match!");
+          $('#repnewpass').get(0).setCustomValidity("");
         }
+        return true;
       }
-    });
+      return false;
+    }
+
+    $('#repnewpass').keyup(validatePasswords);
   
     init();
   
