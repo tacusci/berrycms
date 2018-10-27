@@ -190,9 +190,8 @@ $(document).ready(function() {
         if ($("#newpass").val() !== $("#repnewpass").val()) {
           $('#repnewpass').get(0).setCustomValidity("Passwords don't match");
           return false;
-        } else {
-          $('#repnewpass').get(0).setCustomValidity("");
         }
+        $('#repnewpass').get(0).setCustomValidity("");
         return true;
       }
       return false;
