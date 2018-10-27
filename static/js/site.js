@@ -181,13 +181,15 @@ $(document).ready(function() {
       })
     }
 
-    $("#newrootform").find("input").each(function(){
-      this.addEventListener("change", onChange(this));
+    $('#newrootform').change(function(){
+      if ($("#newpass").val().length > 0 && $("#repnewpass").val().length > 0) {
+        if ($("#newpass").val() !== $("#repnewpass").val()) {
+          console.log("Passwords don't match");
+        } else {
+          console.log("Passwords match!");
+        }
+      }
     });
-
-    function onChange(input) {
-      console.log("something changed");
-    }
   
     init();
   
