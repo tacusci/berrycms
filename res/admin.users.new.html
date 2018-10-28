@@ -18,10 +18,10 @@
                     </div>
                     <div class="row">
                         <div class="six columns">                                                                                                       
-                            <label>Username</label><input required class="u-full-width" name="username" type="text">
+                            <label>Username</label><input required class="u-full-width" name="username" type="text" pattern="^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$" title="Invalid format, can only contain upper and special characters -, _">
                         </div>
                         <div class="six columns">
-                            <label>Email</label><input required class="u-full-width" name="email" type="text">
+                            <label>Email</label><input required class="u-full-width" name="email" type="text" pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$" title="Enter a valid email address.">
                         </div>
                     </div>
                     <div class="row">

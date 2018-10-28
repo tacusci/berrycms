@@ -16,6 +16,7 @@ package web
 
 import (
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -25,6 +26,9 @@ import (
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/logging"
 )
+
+const usernameRegex = "^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$"
+const emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
 
 //AdminUsersNewHandler handler to contain pointer to core router and the URI string
 type AdminUsersNewHandler struct {
@@ -68,6 +72,10 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !validatePostForm(r) {
+		return
+	}
+
 	authHash := r.PostFormValue("authhash")
 	repeatedAuthHash := r.PostFormValue("repeatedauthhash")
 
@@ -107,3 +115,31 @@ func (aunh *AdminUsersNewHandler) HandlesGet() bool { return true }
 
 //HandlesPost retrieve whether this handler handles post requests
 func (aunh *AdminUsersNewHandler) HandlesPost() bool { return true }
+
+func validatePostForm(r *http.Request) bool {
+	authHash := r.PostFormValue("authhash")
+	repeatedAuthHash := r.PostFormValue("repeatedauthhash")
+
+	if strings.Compare(authHash, repeatedAuthHash) != 0 {
+		return false
+	}
+
+	firstname := r.PostFormValue("firstname")
+	lastname := r.PostFormValue("lastname")
+	email := r.PostFormValue("email")
+	username := r.PostFormValue("username")
+
+	if len(firstname) <= 0 || len(lastname) <= 0 || len(email) <= 0 || len(username) <= 0 {
+		return false
+	}
+
+	if match, err := regexp.MatchString(usernameRegex, username); err != nil || match == false {
+		return false
+	}
+
+	if match, err := regexp.MatchString(emailRegex, email); err != nil || match == false {
+		return false
+	}
+
+	return true
+}
