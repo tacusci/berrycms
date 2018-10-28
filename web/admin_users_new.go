@@ -15,6 +15,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -72,7 +73,8 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !validatePostForm(r) {
+	if validated, err := validatePostForm(r); err != nil || validated == false {
+		logging.Error(err.Error())
 		return
 	}
 
@@ -116,12 +118,13 @@ func (aunh *AdminUsersNewHandler) HandlesGet() bool { return true }
 //HandlesPost retrieve whether this handler handles post requests
 func (aunh *AdminUsersNewHandler) HandlesPost() bool { return true }
 
-func validatePostForm(r *http.Request) bool {
+// validate makes sure that the passwords match and that the username and email are in correct format
+func validatePostForm(r *http.Request) (bool, error) {
 	authHash := r.PostFormValue("authhash")
 	repeatedAuthHash := r.PostFormValue("repeatedauthhash")
 
 	if strings.Compare(authHash, repeatedAuthHash) != 0 {
-		return false
+		return false, errors.New("Password and repeated passwords don't match")
 	}
 
 	firstname := r.PostFormValue("firstname")
@@ -130,16 +133,16 @@ func validatePostForm(r *http.Request) bool {
 	username := r.PostFormValue("username")
 
 	if len(firstname) <= 0 || len(lastname) <= 0 || len(email) <= 0 || len(username) <= 0 {
-		return false
+		return false, errors.New("One of required fields is blank")
 	}
 
 	if match, err := regexp.MatchString(usernameRegex, username); err != nil || match == false {
-		return false
+		return false, errors.New("Username does not match pattern regex")
 	}
 
 	if match, err := regexp.MatchString(emailRegex, email); err != nil || match == false {
-		return false
+		return false, errors.New("Email does not match pattern regex")
 	}
 
-	return true
+	return true, nil
 }
