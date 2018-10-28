@@ -4,32 +4,32 @@
             <%= contentOf("navdashboardheader") %>
             <%= contentOf("navdashboardfooter") %>
         <% } %>
-        <form action="<%= newuserformaction %>" method="POST">
+        <form id="newrootform" action="<%= newuserformaction %>" method="POST">
             <div class="row">
                 <div class="twelve columns">
                     <h4 class="u-full-width"><%= createuserlabel %></h4>
                     <div class="row">
                         <div class="six columns">
-                            <label>First name</label><input class="u-full-width" name="firstname" type="text">
+                            <label>First name</label><input required class="u-full-width" name="firstname" type="text">
                         </div>
                         <div class="six columns">
-                            <label>Last name</label><input class="u-full-width" name="lastname" type="text">
+                            <label>Last name</label><input required class="u-full-width" name="lastname" type="text">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="six columns">                                                                                                       
+                            <label>Username</label><input required class="u-full-width" name="username" type="text" pattern="^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$" title="Invalid format, can only contain upper and special characters -, _">
+                        </div>
+                        <div class="six columns">
+                            <label>Email</label><input required class="u-full-width" name="email" type="text" pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$" title="Enter a valid email address.">
                         </div>
                     </div>
                     <div class="row">
                         <div class="six columns">
-                            <label>Username</label><input class="u-full-width" name="username" type="text">
+                            <label>Password</label><input id="newpass" required class="u-full-width" name="authhash" type="password">
                         </div>
                         <div class="six columns">
-                            <label>Email</label><input class="u-full-width" name="email" type="text">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="six columns">
-                            <label>Password</label><input class="u-full-width" name="authhash" type="password">
-                        </div>
-                        <div class="six columns">
-                            <label>Repeat Password</label><input class="u-full-width" name="repeatedauthhash" type="password">
+                            <label>Repeat Password</label><input id="repnewpass" required class="u-full-width" name="repeatedauthhash" type="password">
                         </div>
                     </div>
                 </div>

@@ -1,11 +1,13 @@
 $(document).ready(function() {
 
     // Variables
-    var $nav = $('.navbar'),
-        $body = $('body'),
+    var $nav = $('.navbar');
+    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null) {
+      var $navOffsetTop = $nav.offset().top;
+    }
+    var $body = $('body'),
         $window = $(window),
         $popoverLink = $('[data-popover]'),
-        navOffsetTop = $nav.offset().top,
         $document = $(document),
         entityMap = {
           "&": "&amp;",
@@ -178,6 +180,24 @@ $(document).ready(function() {
         }
       })
     }
+
+    $('#newrootform').submit(function(){
+      return validatePasswords();
+    });
+
+    function validatePasswords() {
+      if ($("#newpass").val().length > 0 && $("#repnewpass").val().length > 0) {
+        if ($("#newpass").val() !== $("#repnewpass").val()) {
+          $('#repnewpass').get(0).setCustomValidity("Passwords don't match");
+          return false;
+        }
+        $('#repnewpass').get(0).setCustomValidity("");
+        return true;
+      }
+      return false;
+    }
+
+    $('#repnewpass').keyup(validatePasswords);
   
     init();
   
