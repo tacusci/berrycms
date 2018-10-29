@@ -14,6 +14,7 @@ const handlerRouteNewUser string = "/admin/users/new"
 const handlerRouteNewRootUser string = "/admin/users/root/new"
 
 func init() {
+	//this is here so if a 500 or otherwise occurs the whole test doesn't crash because of a nil pointer
 	db.Connect(db.SQLITE, "", "berrycmstesting")
 	db.Wipe()
 	db.Setup()
