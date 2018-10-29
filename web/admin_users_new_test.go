@@ -34,6 +34,19 @@ func TestGet(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Test get retrieved a response which is not OK...")
 	}
+
+	//test handle get request for new user
+	aunh = AdminUsersNewHandler{}
+	req = httptest.NewRequest("GET", handlerRouteNewUser, nil)
+	responseRecorder = httptest.NewRecorder()
+
+	aunh.Get(responseRecorder, req)
+
+	resp = responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Test get retrieved a response which is not OK...")
+	}
 }
 
 func TestPost(t *testing.T) {}
