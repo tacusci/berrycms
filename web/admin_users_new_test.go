@@ -1,21 +1,39 @@
 package web
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
+
+	"github.com/tacusci/berrycms/db"
 )
 
 const handlerRouteNewUser string = "/admin/users/new"
 const handlerRouteNewRootUser string = "/admin/users/root/new"
 
+func init() {
+	db.Connect(db.SQLITE, "", "berrycmstesting")
+	db.Wipe()
+	db.Setup()
+}
+
 func TestGet(t *testing.T) {
+	//need this to force working directory contain /res folder
+	os.Chdir("../")
 	//will need to handle both new user and new root user routes
 	aunh := AdminUsersNewHandler{}
 	req := httptest.NewRequest("GET", handlerRouteNewRootUser, nil)
 	responseRecorder := httptest.NewRecorder()
 
 	aunh.Get(responseRecorder, req)
+
+	resp := responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Test get retrieved a response which is not OK...")
+	}
 }
 
 func TestPost(t *testing.T) {}

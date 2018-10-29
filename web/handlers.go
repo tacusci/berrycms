@@ -94,25 +94,23 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 	header, err := ioutil.ReadFile("res" + string(os.PathSeparator) + "header.snip")
 
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
+		Error(w, err)
 		return err
 	}
 
 	content, err := ioutil.ReadFile("res" + string(os.PathSeparator) + template)
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
+		Error(w, err)
 		return err
 	}
 
 	renderedContent, err := plush.Render(string(append(append(header, []byte("\n")...), content...))+"\n</html>", pctx)
 
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("<h1>500 Server Error</h1>"))
+		Error(w, err)
 		return err
 	}
+
 	_, err = w.Write([]byte(renderedContent))
 	return err
 }
