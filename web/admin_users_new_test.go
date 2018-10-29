@@ -6,22 +6,32 @@ import (
 	"testing"
 )
 
-type FormTest struct {
-	testName      string
-	vals          url.Values
-	toFail        bool
-	onFailMessage string
-}
+const handlerRouteNewUser string = "/admin/users/new"
+const handlerRouteNewRootUser string = "/admin/users/root/new"
 
-func TestGet(t *testing.T) {}
+func TestGet(t *testing.T) {
+	//will need to handle both new user and new root user routes
+	aunh := AdminUsersNewHandler{}
+	req := httptest.NewRequest("GET", handlerRouteNewRootUser, nil)
+	responseRecorder := httptest.NewRecorder()
+
+	aunh.Get(responseRecorder, req)
+}
 
 func TestPost(t *testing.T) {}
 
 func TestRoute(t *testing.T) {
 	aunh := AdminUsersNewHandler{
-		route: "/admin/users/root/new",
+		route: handlerRouteNewRootUser,
 	}
-	if aunh.Route() != "/admin/users/root/new" {
+	if aunh.Route() != handlerRouteNewRootUser {
+		t.Errorf("Test fetched route doesn't match with set route")
+	}
+
+	aunh = AdminUsersNewHandler{
+		route: handlerRouteNewUser,
+	}
+	if aunh.Route() != handlerRouteNewUser {
 		t.Errorf("Test fetched route doesn't match with set route")
 	}
 }
@@ -41,7 +51,7 @@ func TestHandlesPost(t *testing.T) {
 }
 
 func TestValidatePostFormPass(t *testing.T) {
-	req := httptest.NewRequest("POST", "/admin/users/root/new", nil)
+	req := httptest.NewRequest("POST", handlerRouteNewRootUser, nil)
 
 	//data set which should pass correctly
 	formValues := url.Values{}
