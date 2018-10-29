@@ -13,18 +13,6 @@ type FormTest struct {
 	onFailMessage string
 }
 
-var failTestCases = []FormTest{
-	FormTest{
-		testName: "[Passwords Mismatch]",
-		vals: url.Values{
-			"authhash":         []string{"thispassworddoesnotmatch"},
-			"repeatedauthhash": []string{"withtheotherone"},
-		},
-		toFail:        true,
-		onFailMessage: "Expected %s test to fail %b, %v\n",
-	},
-}
-
 func TestValidatePostFormPass(t *testing.T) {
 	req := httptest.NewRequest("POST", "/admin/users/root/new", nil)
 
