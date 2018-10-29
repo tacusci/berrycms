@@ -13,6 +13,33 @@ type FormTest struct {
 	onFailMessage string
 }
 
+func TestGet(t *testing.T) {}
+
+func TestPost(t *testing.T) {}
+
+func TestRoute(t *testing.T) {
+	aunh := AdminUsersNewHandler{
+		route: "/admin/users/root/new",
+	}
+	if aunh.Route() != "/admin/users/root/new" {
+		t.Errorf("Test fetched route doesn't match with set route")
+	}
+}
+
+func TestHandlesGet(t *testing.T) {
+	aunh := AdminUsersNewHandler{}
+	if aunh.HandlesGet() == false {
+		t.Errorf("Test admin users new handler should handle get requests")
+	}
+}
+
+func TestHandlesPost(t *testing.T) {
+	aunh := AdminUsersNewHandler{}
+	if aunh.HandlesPost() == false {
+		t.Errorf("Test admin users new handler should handle post requests")
+	}
+}
+
 func TestValidatePostFormPass(t *testing.T) {
 	req := httptest.NewRequest("POST", "/admin/users/root/new", nil)
 

@@ -61,7 +61,9 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	var postRequestForNewRootUser = strings.Compare(r.RequestURI, "/admin/users/root/new") == 0
 
+	// the new user form can normally only be accessed by a logged in user, so just redirect to users man page
 	if postRequestForNewRootUser {
+		// if the new root user has just been created there won't be a login session nor other users
 		defer http.Redirect(w, r, "/login", http.StatusFound)
 	} else {
 		defer http.Redirect(w, r, "/admin/users", http.StatusFound)
