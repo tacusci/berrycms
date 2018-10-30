@@ -82,6 +82,11 @@ func TestPost(t *testing.T) {
 	if len(resp.Header["Location"]) == 0 {
 		t.Errorf("Test post new user didn't set location in header")
 	}
+
+	ut := db.UsersTable{}
+	if user, err := ut.SelectByUsername(db.Conn, "testuser222"); err != nil || user.Username != "testuser222" {
+		t.Errorf("Test post new user, didn't actually create the new user")
+	}
 }
 
 func TestRoute(t *testing.T) {
