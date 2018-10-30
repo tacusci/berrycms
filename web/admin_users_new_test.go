@@ -50,7 +50,39 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestPost(t *testing.T) {}
+func TestPost(t *testing.T) {
+	aunh := AdminUsersNewHandler{}
+	req := httptest.NewRequest("POST", handlerRouteNewUser, nil)
+	responseRecorder := httptest.NewRecorder()
+
+	//data set which should pass correctly
+	formValues := url.Values{}
+	formValues["authhash"] = []string{"thisisatestpassword"}
+	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
+	formValues["firstname"] = []string{"IAmATest"}
+	formValues["lastname"] = []string{"Person"}
+	formValues["email"] = []string{"someone@place.com"}
+	formValues["username"] = []string{"testuser222"}
+
+	req.PostForm = formValues
+
+	aunh.Post(responseRecorder, req)
+
+	resp := responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("Test new user post didn't redirect request, STATUS CODE: %d", resp.StatusCode)
+	}
+
+	//location header will have been set on http server redirect
+	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/admin/users" {
+		t.Errorf("Test post new user didn't set header to redirect to correct location")
+	}
+
+	if len(resp.Header["Location"]) == 0 {
+		t.Errorf("Test post new user didn't set location in header")
+	}
+}
 
 func TestRoute(t *testing.T) {
 	aunh := AdminUsersNewHandler{
