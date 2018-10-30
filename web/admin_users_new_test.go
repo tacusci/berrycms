@@ -55,7 +55,7 @@ func TestPost(t *testing.T) {
 	req := httptest.NewRequest("POST", handlerRouteNewUser, nil)
 	responseRecorder := httptest.NewRecorder()
 
-	//data set which should pass correctly
+	//testing new regular user form POST submission result
 	formValues := url.Values{}
 	formValues["authhash"] = []string{"thisisatestpassword"}
 	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
@@ -86,6 +86,41 @@ func TestPost(t *testing.T) {
 	ut := db.UsersTable{}
 	if user, err := ut.SelectByUsername(db.Conn, "testuser222"); err != nil || user.Username != "testuser222" {
 		t.Errorf("Test post new user, didn't actually create the new user")
+	}
+
+	//testing new regular user form POST submission result
+	formValues = url.Values{}
+	formValues["authhash"] = []string{"thisisatestpassword"}
+	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
+	formValues["firstname"] = []string{"IAmATest"}
+	formValues["lastname"] = []string{"Person"}
+	formValues["email"] = []string{"root@place.com"}
+	formValues["username"] = []string{"rootuser222"}
+
+	req = httptest.NewRequest("POST", handlerRouteNewRootUser, nil)
+
+	req.PostForm = formValues
+
+	aunh.Post(responseRecorder, req)
+
+	resp = responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("Test new user post didn't redirect request, STATUS CODE: %d", resp.StatusCode)
+	}
+
+	//location header will have been set on http server redirect
+	t.Logf("%s", resp.Header["Location"])
+	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/login" {
+		t.Errorf("Test post new root user didn't set header to redirect to correct location")
+	}
+
+	if len(resp.Header["Location"]) == 0 {
+		t.Errorf("Test post new root user didn't set location in header")
+	}
+
+	if !ut.RootUserExists() {
+		t.Errorf("Test new root user post didn't create root user")
 	}
 }
 
