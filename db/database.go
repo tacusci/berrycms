@@ -59,7 +59,10 @@ func Connect(dbType DBType, dbRoute string, schemaName string) {
 	case MySQL:
 		dbLoc = dbRoute + SchemaName
 	case SQLITE:
-		dbLoc = dbFileName
+		dbLoc = dbRoute
+		if dbRoute == "" {
+			dbLoc = dbFileName
+		}
 	}
 	logging.InfoNnl(fmt.Sprintf("Connecting to %s:%s schema...", Type.DriverName(), dbLoc))
 	db, err := sql.Open(Type.DriverName(), dbLoc)
