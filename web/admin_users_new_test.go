@@ -89,6 +89,9 @@ func TestPost(t *testing.T) {
 	}
 
 	//testing new regular user form POST submission result
+
+	responseRecorder = httptest.NewRecorder()
+
 	formValues = url.Values{}
 	formValues["authhash"] = []string{"thisisatestpassword"}
 	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
@@ -110,7 +113,6 @@ func TestPost(t *testing.T) {
 	}
 
 	//location header will have been set on http server redirect
-	t.Logf("%s", resp.Header["Location"])
 	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/login" {
 		t.Errorf("Test post new root user didn't set header to redirect to correct location")
 	}
