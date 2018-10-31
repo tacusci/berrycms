@@ -88,8 +88,7 @@ func TestPost(t *testing.T) {
 		t.Errorf("Test post new user, didn't actually create the new user")
 	}
 
-	//testing new regular user form POST submission result
-
+	//testing new root user form POST submission result
 	responseRecorder = httptest.NewRecorder()
 
 	formValues = url.Values{}
