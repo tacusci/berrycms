@@ -19,7 +19,7 @@ import (
 	"testing"
 )
 
-func TestPost(t *testing.T) {
+func TestDeleteUsersPost(t *testing.T) {
 	audh := AdminUsersDeleteHandler{}
 	req := httptest.NewRequest("POST", "/admin/users/delete", nil)
 	responseRecorder := httptest.NewRecorder()

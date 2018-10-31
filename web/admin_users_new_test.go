@@ -34,7 +34,7 @@ func init() {
 	db.Setup()
 }
 
-func TestGet(t *testing.T) {
+func TestNewUsersGet(t *testing.T) {
 	//need this to force working directory contain /res folder
 	os.Chdir("../")
 	//will need to handle both new user and new root user routes
@@ -64,7 +64,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestPost(t *testing.T) {
+func TestNewUsersPost(t *testing.T) {
 	aunh := AdminUsersNewHandler{}
 	req := httptest.NewRequest("POST", handlerRouteNewUser, nil)
 	responseRecorder := httptest.NewRecorder()
@@ -139,7 +139,7 @@ func TestPost(t *testing.T) {
 	}
 }
 
-func TestRoute(t *testing.T) {
+func TestNewUsersRoute(t *testing.T) {
 	aunh := AdminUsersNewHandler{
 		route: handlerRouteNewRootUser,
 	}
@@ -155,21 +155,21 @@ func TestRoute(t *testing.T) {
 	}
 }
 
-func TestHandlesGet(t *testing.T) {
+func TestNewUsersHandlesGet(t *testing.T) {
 	aunh := AdminUsersNewHandler{}
 	if aunh.HandlesGet() == false {
 		t.Errorf("Test admin users new handler should handle get requests")
 	}
 }
 
-func TestHandlesPost(t *testing.T) {
+func TestNewUsersHandlesPost(t *testing.T) {
 	aunh := AdminUsersNewHandler{}
 	if aunh.HandlesPost() == false {
 		t.Errorf("Test admin users new handler should handle post requests")
 	}
 }
 
-func TestValidatePostFormPass(t *testing.T) {
+func TestNewUsersValidatePostFormPass(t *testing.T) {
 	req := httptest.NewRequest("POST", handlerRouteNewRootUser, nil)
 
 	//data set which should pass correctly
@@ -189,7 +189,7 @@ func TestValidatePostFormPass(t *testing.T) {
 	}
 }
 
-func TestValidatePostFormFail(t *testing.T) {
+func TestNewUsersValidatePostFormFail(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/admin/users/root/new", nil)
 
