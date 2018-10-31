@@ -15,11 +15,55 @@
 package web
 
 import (
+	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/util"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
+func init() {
+	//this is here to make sure the data contains only pages we're creating now
+	db.Connect(db.SQLITE, "./berrycmstesting.db", "")
+	db.Wipe()
+	db.Setup()
+
+}
+
 func TestDeleteUsersPost(t *testing.T) {
+	ut := db.UsersTable{}
+	userToCreate := db.User{
+		Username:        "rootuser",
+		CreatedDateTime: time.Now().Unix(),
+		Email:           "root@local.com",
+		UserroleId:      int(db.ROOT_USER),
+		FirstName:       "Root",
+		LastName:        "User",
+		AuthHash:        util.HashAndSalt([]byte("testingrootpass")),
+	}
+
+	err := ut.Insert(db.Conn, userToCreate)
+
+	if err != nil {
+		t.Errorf("Error occurred inserting test root user %v", err)
+	}
+
+	rootUser, err := ut.SelectByUsername(db.Conn, "rootuser")
+
+	if err != nil {
+		t.Errorf("Error occurred inserting test root user %v", err)
+	}
+
+	pt := db.PagesTable{}
+	pt.Insert(db.Conn, db.Page{
+		CreatedDateTime: time.Now().Unix(),
+		AuthorUUID:      rootUser.UUID,
+		Roleprotected:   false,
+		Title:           "Test Page",
+		Route:           "/",
+		Content:         "Root Page",
+	})
+
 	audh := AdminUsersDeleteHandler{}
 	req := httptest.NewRequest("POST", "/admin/users/delete", nil)
 	responseRecorder := httptest.NewRecorder()
