@@ -54,16 +54,6 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred inserting test root user %v", err)
 	}
 
-	pt := db.PagesTable{}
-	pt.Insert(db.Conn, db.Page{
-		CreatedDateTime: time.Now().Unix(),
-		AuthorUUID:      rootUser.UUID,
-		Roleprotected:   false,
-		Title:           "Test Page",
-		Route:           "/",
-		Content:         "Root Page",
-	})
-
 	audh := AdminUsersDeleteHandler{}
 	req := httptest.NewRequest("POST", "/admin/users/delete", nil)
 	responseRecorder := httptest.NewRecorder()
