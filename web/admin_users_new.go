@@ -91,7 +91,7 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 			userRoleID = int(db.REG_USER)
 		}
 		ut := db.UsersTable{}
-		userToCreate := db.User{
+		userToCreate := &db.User{
 			Username:        r.PostFormValue("username"),
 			CreatedDateTime: time.Now().Unix(),
 			Email:           r.PostFormValue("email"),

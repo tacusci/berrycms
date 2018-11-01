@@ -72,6 +72,11 @@ func (apeh *AdminPagesEditHandler) Post(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if pageToEdit == nil {
+		logging.Error(fmt.Sprintf("%s", "Page to edit doesn't exist, stopping..."))
+		return
+	}
+
 	err = r.ParseForm()
 
 	if err != nil {
