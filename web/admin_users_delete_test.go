@@ -24,6 +24,8 @@ import (
 	"time"
 )
 
+const handlerRouteDeleteUser string = "/admin/users/delete"
+
 func init() {
 	//this is here to make sure the data contains only pages we're creating now
 	db.Connect(db.SQLITE, "./berrycmstesting.db", "")
@@ -92,7 +94,7 @@ func TestDeleteUsersPost(t *testing.T) {
 	formValues["0"] = []string{rootUser.UUID}
 	formValues["1"] = []string{adminUserNotRoot.UUID}
 
-	req := httptest.NewRequest("POST", "/admin/users/delete", nil)
+	req := httptest.NewRequest("POST", handlerRouteDeleteUser, nil)
 	req.PostForm = formValues
 
 	audh.Post(responseRecorder, req)
@@ -126,5 +128,35 @@ func TestDeleteUsersPost(t *testing.T) {
 
 	if adminUserNotRoot.Username == "adminuser" {
 		t.Error("Admin user still exists but should have been deleted")
+	}
+}
+
+func TestDeleteUsersRoute(t *testing.T) {
+	aunh := AdminUsersDeleteHandler{
+		route: handlerRouteDeleteUser,
+	}
+	if aunh.Route() != handlerRouteDeleteUser {
+		t.Errorf("Test fetched route doesn't match with set route")
+	}
+
+	aunh = AdminUsersDeleteHandler{
+		route: handlerRouteDeleteUser,
+	}
+	if aunh.Route() != handlerRouteDeleteUser {
+		t.Errorf("Test fetched route doesn't match with set route")
+	}
+}
+
+func TestDeleteUsersHandlesGet(t *testing.T) {
+	aunh := AdminUsersDeleteHandler{}
+	if aunh.HandlesGet() == true {
+		t.Errorf("Test admin delete users handler should not handle get requests")
+	}
+}
+
+func TestDeleteUsersHandlesPost(t *testing.T) {
+	aunh := AdminUsersDeleteHandler{}
+	if aunh.HandlesPost() == false {
+		t.Errorf("Test admin delete users handler should handle post requests")
 	}
 }
