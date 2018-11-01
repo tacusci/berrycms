@@ -105,7 +105,7 @@ func TestDeleteUsersPost(t *testing.T) {
 
 	//location header will have been set on http server redirect
 	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/admin/users" {
-		t.Errorf("Test post new root user didn't set header to redirect to correct location")
+		t.Errorf("Test post delete users didn't set header to redirect to correct location")
 	}
 
 	rootUser, err = ut.SelectByUsername(db.Conn, "rootuser")
