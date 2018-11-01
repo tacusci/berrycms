@@ -37,7 +37,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
 	if r.RequestURI == "/addnew" {
 		for i := 0; i < 51; i++ {
-			pt.Insert(db.Conn, db.Page{
+			pt.Insert(db.Conn, &db.Page{
 				CreatedDateTime: time.Now().Unix(),
 				Title:           fmt.Sprintf("Carbon %d", i),
 				Route:           fmt.Sprintf("/carbonite-%d", i),

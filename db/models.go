@@ -175,7 +175,7 @@ func (ut *UsersTable) RootUserExists() bool {
 }
 
 //InsertMultiple takes a slice of user structs and passes them all to 'Insert'
-func (ut *UsersTable) InsertMultiple(db *sql.DB, us []User) error {
+func (ut *UsersTable) InsertMultiple(db *sql.DB, us []*User) error {
 	var err error
 	for i := range us {
 		err = ut.Insert(db, us[i])
@@ -184,7 +184,7 @@ func (ut *UsersTable) InsertMultiple(db *sql.DB, us []User) error {
 }
 
 //Insert adds user struct to users table, it also sets default values
-func (ut *UsersTable) Insert(db *sql.DB, u User) error {
+func (ut *UsersTable) Insert(db *sql.DB, u *User) error {
 
 	if u.UUID != "" {
 		return fmt.Errorf("User to insert already has UUID %s", u.UUID)
@@ -205,7 +205,7 @@ func (ut *UsersTable) Insert(db *sql.DB, u User) error {
 		if u.UserroleId == 0 {
 			u.UserroleId = 3
 		}
-		insertStatement := ut.buildPreparedInsertStatement(&u)
+		insertStatement := ut.buildPreparedInsertStatement(u)
 		_, err = db.Exec(insertStatement, u.CreatedDateTime, u.UserroleId, u.UUID, u.Username, u.AuthHash, u.FirstName, u.LastName, u.Email)
 		if err != nil {
 			return err
@@ -224,12 +224,12 @@ func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	}
 }
 
-func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error) {
-	u := User{}
+func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (*User, error) {
+	u := &User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE username = '%s'", ut.Name(), username))
 
 	if err != nil {
-		return u, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -237,19 +237,19 @@ func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (User, error
 	for rows.Next() {
 		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
 		if err != nil {
-			return u, err
+			return nil, err
 		}
 	}
 
 	return u, nil
 }
 
-func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (User, error) {
-	u := User{}
+func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (*User, error) {
+	u := &User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", ut.Name(), uuid))
 
 	if err != nil {
-		return u, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -257,7 +257,7 @@ func (ut *UsersTable) SelectByUUID(db *sql.DB, uuid string) (User, error) {
 	for rows.Next() {
 		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
 		if err != nil {
-			return u, err
+			return nil, err
 		}
 	}
 
@@ -313,7 +313,7 @@ func (pt *PagesTable) Name() string {
 	return "pages"
 }
 
-func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
+func (pt *PagesTable) Insert(db *sql.DB, p *Page) error {
 	if p.UUID != "" {
 		return fmt.Errorf("Page to insert already has UUID %s", p.UUID)
 	}
@@ -324,7 +324,7 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 			return err
 		}
 		p.UUID = newUUID.String()
-		insertStatement := pt.buildPreparedInsertStatement(&p)
+		insertStatement := pt.buildPreparedInsertStatement(p)
 		_, err = db.Exec(insertStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content)
 		if err != nil {
 			return err
@@ -333,7 +333,7 @@ func (pt *PagesTable) Insert(db *sql.DB, p Page) error {
 	return nil
 }
 
-func (pt *PagesTable) Update(db *sql.DB, p Page) error {
+func (pt *PagesTable) Update(db *sql.DB, p *Page) error {
 	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, roleprotected = ?, authoruuid = ?, title = ?, route = ?, content = ? WHERE uuid = ?", pt.Name())
 	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)
 	if err != nil {
@@ -350,13 +350,13 @@ func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	}
 }
 
-func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
-	p := Page{}
+func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (*Page, error) {
+	p := &Page{}
 
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE route = '%s'", pt.Name(), route))
 
 	if err != nil {
-		return p, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -364,19 +364,19 @@ func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (Page, error) {
 	for rows.Next() {
 		err = rows.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
 		if err != nil {
-			return p, err
+			return nil, err
 		}
 	}
 
 	return p, nil
 }
 
-func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (Page, error) {
-	p := Page{}
+func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (*Page, error) {
+	p := &Page{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", pt.Name(), uuid))
 	err := row.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
 	if err != nil {
-		return p, err
+		return nil, err
 	}
 	return p, nil
 }
@@ -425,21 +425,20 @@ func (ast *AuthSessionsTable) Init(db *sql.DB) {}
 
 func (ast *AuthSessionsTable) Name() string { return "authsessions" }
 
-func (ast *AuthSessionsTable) Insert(db *sql.DB, as AuthSession) error {
+func (ast *AuthSessionsTable) Insert(db *sql.DB, as *AuthSession) error {
 	if as.Validate() {
-		insertStatement := ast.buildPreparedInsertStatement(&as)
+		insertStatement := ast.buildPreparedInsertStatement(as)
 		_, err := db.Exec(insertStatement, as.CreatedDateTime, as.LastActiveDateTime, as.UserUUID, as.SessionUUID)
 		if err != nil {
 			return err
 		}
 		return nil
-	} else {
-		return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
 	}
+	return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
 }
 
 //Update - Takes auth session to update existing user session entry session UUID
-func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
+func (ast *AuthSessionsTable) Update(db *sql.DB, as *AuthSession) error {
 	if as.Validate() {
 		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, lastactivedatetime = ?, sessionuuid = ? WHERE useruuid = ?", ast.Name())
 		_, err := db.Exec(updateStatement, as.CreatedDateTime, as.LastActiveDateTime, as.SessionUUID, as.UserUUID)
@@ -447,35 +446,33 @@ func (ast *AuthSessionsTable) Update(db *sql.DB, as AuthSession) error {
 			return err
 		}
 		return nil
-	} else {
-		return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
 	}
+	return errors.New("AuthSession doesn't have a user UUID and/or a session UUID")
 }
 
 func (ast *AuthSessionsTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, ast.Name(), whereClause))
-	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, ast.Name()))
 	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, ast.Name()))
 }
 
-func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (AuthSession, error) {
-	as := AuthSession{}
+func (ast *AuthSessionsTable) SelectBySessionUUID(db *sql.DB, sessionUUID string) (*AuthSession, error) {
+	as := &AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE sessionuuid = '%s'", ast.Name(), sessionUUID))
 	err := row.Scan(&as.Authsessionid, &as.CreatedDateTime, &as.LastActiveDateTime, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
-		return as, err
+		return nil, err
 	}
 	return as, nil
 }
 
-func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (AuthSession, error) {
-	as := AuthSession{}
+func (ast *AuthSessionsTable) SelectByUserUUID(db *sql.DB, userUUID string) (*AuthSession, error) {
+	as := &AuthSession{}
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE useruuid = '%s'", ast.Name(), userUUID))
 	err := row.Scan(&as.Authsessionid, &as.CreatedDateTime, &as.LastActiveDateTime, &as.UserUUID, &as.SessionUUID)
 	if err != nil {
-		return as, err
+		return nil, err
 	}
 	return as, nil
 }

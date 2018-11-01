@@ -285,7 +285,7 @@ func (amw *AuthMiddleware) IsLoggedIn(r *http.Request) bool {
 }
 
 //LoggedInUser get user of existing web session
-func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
+func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (*db.User, error) {
 	authSessionStore, err := sessionsstore.Get(r, "auth")
 	if err == nil {
 		authSessionsTable := db.AuthSessionsTable{}
@@ -296,14 +296,14 @@ func (amw *AuthMiddleware) LoggedInUser(r *http.Request) (db.User, error) {
 					ut := db.UsersTable{}
 					loggedInUser, err := ut.SelectByUUID(db.Conn, authSession.UserUUID)
 					if err != nil {
-						return db.User{}, err
+						return nil, err
 					}
 					return loggedInUser, nil
 				}
 			}
 		}
 	}
-	return db.User{}, err
+	return nil, err
 }
 
 //Error writes HTTP error message to web response and add error message to log

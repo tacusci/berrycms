@@ -61,7 +61,7 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin/pages/new", http.StatusFound)
 	}
 
-	pageToCreate := db.Page{
+	pageToCreate := &db.Page{
 		CreatedDateTime: time.Now().Unix(),
 		Title:           r.PostFormValue("title"),
 		AuthorUUID:      loggedInUser.UUID,
