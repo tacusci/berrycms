@@ -224,6 +224,26 @@ func (ut *UsersTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	}
 }
 
+func (ut *UsersTable) SelectRootUser(db *sql.DB) (*User, error) {
+	u := &User{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE userroleid = %d", ut.Name(), int(ROOT_USER)))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return u, nil
+}
+
 func (ut *UsersTable) SelectByUsername(db *sql.DB, username string) (*User, error) {
 	u := &User{}
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE username = '%s'", ut.Name(), username))
