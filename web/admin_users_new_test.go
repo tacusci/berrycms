@@ -1,3 +1,17 @@
+// Copyright (c) 2018, tacusci ltd
+//
+// Licensed under the GNU GENERAL PUBLIC LICENSE Version 3 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.gnu.org/licenses/gpl-3.0.html
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package web
 
 import (
@@ -15,12 +29,12 @@ const handlerRouteNewRootUser string = "/admin/users/root/new"
 
 func init() {
 	//this is here so if a 500 or otherwise occurs the whole test doesn't crash because of a nil pointer
-	db.Connect(db.SQLITE, "", "berrycmstesting")
+	db.Connect(db.SQLITE, "./berrycmstesting.db", "")
 	db.Wipe()
 	db.Setup()
 }
 
-func TestGet(t *testing.T) {
+func TestNewUsersGet(t *testing.T) {
 	//need this to force working directory contain /res folder
 	os.Chdir("../")
 	//will need to handle both new user and new root user routes
@@ -50,9 +64,82 @@ func TestGet(t *testing.T) {
 	}
 }
 
-func TestPost(t *testing.T) {}
+func TestNewUsersPost(t *testing.T) {
+	aunh := AdminUsersNewHandler{}
+	req := httptest.NewRequest("POST", handlerRouteNewUser, nil)
+	responseRecorder := httptest.NewRecorder()
 
-func TestRoute(t *testing.T) {
+	//testing new regular user form POST submission result
+	formValues := url.Values{}
+	formValues["authhash"] = []string{"thisisatestpassword"}
+	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
+	formValues["firstname"] = []string{"IAmATest"}
+	formValues["lastname"] = []string{"Person"}
+	formValues["email"] = []string{"someone@place.com"}
+	formValues["username"] = []string{"testuser222"}
+
+	req.PostForm = formValues
+
+	aunh.Post(responseRecorder, req)
+
+	resp := responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("Test new user post didn't redirect request, STATUS CODE: %d", resp.StatusCode)
+	}
+
+	//location header will have been set on http server redirect
+	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/admin/users" {
+		t.Errorf("Test post new user didn't set header to redirect to correct location")
+	}
+
+	if len(resp.Header["Location"]) == 0 {
+		t.Errorf("Test post new user didn't set location in header")
+	}
+
+	ut := db.UsersTable{}
+	if user, err := ut.SelectByUsername(db.Conn, "testuser222"); err != nil || user.Username != "testuser222" {
+		t.Errorf("Test post new user, didn't actually create the new user")
+	}
+
+	//testing new root user form POST submission result
+	responseRecorder = httptest.NewRecorder()
+
+	formValues = url.Values{}
+	formValues["authhash"] = []string{"thisisatestpassword"}
+	formValues["repeatedauthhash"] = []string{"thisisatestpassword"}
+	formValues["firstname"] = []string{"IAmATest"}
+	formValues["lastname"] = []string{"Person"}
+	formValues["email"] = []string{"root@place.com"}
+	formValues["username"] = []string{"rootuser222"}
+
+	req = httptest.NewRequest("POST", handlerRouteNewRootUser, nil)
+
+	req.PostForm = formValues
+
+	aunh.Post(responseRecorder, req)
+
+	resp = responseRecorder.Result()
+
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf("Test new user post didn't redirect request, STATUS CODE: %d", resp.StatusCode)
+	}
+
+	//location header will have been set on http server redirect
+	if len(resp.Header["Location"]) > 0 && resp.Header["Location"][0] != "/login" {
+		t.Errorf("Test post new root user didn't set header to redirect to correct location")
+	}
+
+	if len(resp.Header["Location"]) == 0 {
+		t.Errorf("Test post new root user didn't set location in header")
+	}
+
+	if !ut.RootUserExists() {
+		t.Errorf("Test new root user post didn't create root user")
+	}
+}
+
+func TestNewUsersRoute(t *testing.T) {
 	aunh := AdminUsersNewHandler{
 		route: handlerRouteNewRootUser,
 	}
@@ -68,21 +155,21 @@ func TestRoute(t *testing.T) {
 	}
 }
 
-func TestHandlesGet(t *testing.T) {
+func TestNewUsersHandlesGet(t *testing.T) {
 	aunh := AdminUsersNewHandler{}
 	if aunh.HandlesGet() == false {
 		t.Errorf("Test admin users new handler should handle get requests")
 	}
 }
 
-func TestHandlesPost(t *testing.T) {
+func TestNewUsersHandlesPost(t *testing.T) {
 	aunh := AdminUsersNewHandler{}
 	if aunh.HandlesPost() == false {
 		t.Errorf("Test admin users new handler should handle post requests")
 	}
 }
 
-func TestValidatePostFormPass(t *testing.T) {
+func TestNewUsersValidatePostFormPass(t *testing.T) {
 	req := httptest.NewRequest("POST", handlerRouteNewRootUser, nil)
 
 	//data set which should pass correctly
@@ -102,7 +189,7 @@ func TestValidatePostFormPass(t *testing.T) {
 	}
 }
 
-func TestValidatePostFormFail(t *testing.T) {
+func TestNewUsersValidatePostFormFail(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/admin/users/root/new", nil)
 
