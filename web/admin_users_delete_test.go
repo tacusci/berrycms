@@ -74,6 +74,10 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred trying to load root user from db %v", err)
 	}
 
+	if rootUser == nil {
+		t.Error("Root user not found in the db...")
+	}
+
 	if rootUser.UserroleId != int(db.ROOT_USER) {
 		t.Error("Root user loaded from db is not set as a root user role type")
 	}
@@ -82,6 +86,10 @@ func TestDeleteUsersPost(t *testing.T) {
 
 	if err != nil {
 		t.Errorf("Error occurred trying to load admin user from db %v", err)
+	}
+
+	if adminUserNotRoot == nil {
+		t.Error("Admin user not found in the db...")
 	}
 
 	//above we've created the root user, next steps are to try and delete them using post form
@@ -116,7 +124,7 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred trying to read root user from db %v", err)
 	}
 
-	if rootUser.Username != "rootuser" {
+	if (rootUser == nil) || rootUser.Username != "rootuser" {
 		t.Errorf("Root user no longer exists but shouldn't have been deleted")
 	}
 
@@ -126,7 +134,7 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred trying to read admin user from db %v", err)
 	}
 
-	if adminUserNotRoot.Username == "adminuser" {
+	if (adminUserNotRoot != nil) && adminUserNotRoot.Username == "adminuser" {
 		t.Error("Admin user still exists but should have been deleted")
 	}
 }

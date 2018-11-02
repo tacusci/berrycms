@@ -365,9 +365,8 @@ func (pt *PagesTable) Update(db *sql.DB, p *Page) error {
 func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, pt.Name(), whereClause))
-	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, pt.Name()))
 	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, pt.Name()))
 }
 
 func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (*Page, error) {
@@ -388,6 +387,11 @@ func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (*Page, error) {
 		}
 	}
 
+	//page not found, therefore don't return blank page struct
+	if p.UUID == "" {
+		return nil, fmt.Errorf("Page not found in table %s", pt.Name())
+	}
+
 	return p, nil
 }
 
@@ -397,6 +401,10 @@ func (pt *PagesTable) SelectByUUID(db *sql.DB, uuid string) (*Page, error) {
 	err := row.Scan(&p.PageId, &p.CreatedDateTime, &p.UUID, &p.Roleprotected, &p.AuthorUUID, &p.Title, &p.Route, &p.Content)
 	if err != nil {
 		return nil, err
+	}
+	//page not found, therefore don't return blank page struct
+	if p.UUID == "" {
+		return nil, fmt.Errorf("Page not found in table %s", pt.Name())
 	}
 	return p, nil
 }

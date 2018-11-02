@@ -98,7 +98,7 @@ func TestNewUsersPost(t *testing.T) {
 	}
 
 	ut := db.UsersTable{}
-	if user, err := ut.SelectByUsername(db.Conn, "testuser222"); err != nil || user.Username != "testuser222" {
+	if user, err := ut.SelectByUsername(db.Conn, "testuser222"); err != nil || user == nil || user.Username != "testuser222" {
 		t.Errorf("Test post new user, didn't actually create the new user")
 	}
 
