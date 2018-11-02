@@ -169,7 +169,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	}
 	pm.Unlock()
 
-	html, err := plush.Render("<html>"+htmlHead+"<%= pagecontent %></html>", ctx)
+	html, err := plush.Render("<html>"+htmlHead+"<body><%= pagecontent %></body></html>", ctx)
 	if err != nil {
 		Error(w, err)
 		return err
