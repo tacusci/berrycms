@@ -54,7 +54,11 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 		if err != nil {
 			logging.Error(err.Error())
-			Error(w, err)
+			continue
+		}
+
+		if userToDelete == nil {
+			continue
 		}
 
 		//don't allow deletion of the root user account
