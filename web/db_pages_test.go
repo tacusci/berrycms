@@ -52,7 +52,7 @@ func TestSavedPageGet(t *testing.T) {
 	}
 
 	if bodyText, err := ioutil.ReadAll(resp.Body); err == nil {
-		if "<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><p>This is a test page!</p></html>" != string(bodyText) {
+		if "<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><body><p>This is a test page!</p></body></html>" != string(bodyText) {
 			t.Errorf("Fetched page content does not match expected content")
 		}
 	}
