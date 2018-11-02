@@ -36,7 +36,7 @@ func init() {
 
 func TestDeleteUsersPost(t *testing.T) {
 	ut := db.UsersTable{}
-	userToCreate := db.User{
+	userToCreate := &db.User{
 		Username:        "rootuser",
 		CreatedDateTime: time.Now().Unix(),
 		Email:           "root@local.com",
@@ -46,7 +46,7 @@ func TestDeleteUsersPost(t *testing.T) {
 		AuthHash:        util.HashAndSalt([]byte("testingrootpass")),
 	}
 
-	adminUserNotRoot := db.User{
+	adminUserNotRoot := &db.User{
 		Username:        "adminuser",
 		CreatedDateTime: time.Now().Unix(),
 		Email:           "admin@local.com",

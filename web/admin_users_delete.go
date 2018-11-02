@@ -66,14 +66,16 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 			}
 
 			//make sure that the logged in user is not the same as user to delete
-			if loggedInUser.UUID != userToDelete.UUID {
+			//the first checking for nil pointer condition evals before the second, that way no nil pointer exception occurs
+			if (loggedInUser == nil) || (loggedInUser.UUID != userToDelete.UUID) {
 				rows, err := pt.Select(db.Conn, "uuid", fmt.Sprintf("authoruuid = '%s'", userToDelete.UUID))
-				defer rows.Close()
 
 				if err != nil {
 					logging.Error(err.Error())
 					Error(w, err)
 				}
+
+				defer rows.Close()
 
 				rowCount := 0
 				for rows.Next() {
