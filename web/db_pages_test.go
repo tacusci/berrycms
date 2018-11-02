@@ -25,7 +25,7 @@ func TestSavedPageGet(t *testing.T) {
 	resp := responseRecorder.Result()
 
 	if resp.StatusCode != http.StatusNotFound {
-		t.Errorf("Test get retrieved a response which is not 404...")
+		t.Errorf("Test get retrieved a response which is not 404 for page which doesn't exist...")
 	}
 
 	pt := db.PagesTable{}
