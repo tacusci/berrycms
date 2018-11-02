@@ -116,7 +116,7 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred trying to read root user from db %v", err)
 	}
 
-	if rootUser.Username != "rootuser" {
+	if (rootUser == nil) || rootUser.Username != "rootuser" {
 		t.Errorf("Root user no longer exists but shouldn't have been deleted")
 	}
 
@@ -126,7 +126,7 @@ func TestDeleteUsersPost(t *testing.T) {
 		t.Errorf("Error occurred trying to read admin user from db %v", err)
 	}
 
-	if adminUserNotRoot.Username == "adminuser" {
+	if (adminUserNotRoot != nil) && adminUserNotRoot.Username == "adminuser" {
 		t.Error("Admin user still exists but should have been deleted")
 	}
 }
