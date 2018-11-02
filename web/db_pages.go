@@ -15,10 +15,9 @@
 package web
 
 import (
-	"fmt"
+	"github.com/tacusci/logging"
 	"html/template"
 	"net/http"
-	"time"
 
 	quill "github.com/dchenk/go-render-quill"
 	"github.com/gobuffalo/plush"
@@ -34,28 +33,16 @@ type SavedPageHandler struct {
 //Get handles get requests to URI
 func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pt := db.PagesTable{}
-	//JUST FOR LIVE/HOT ROUTE REMAPPING TESTING
-	if r.RequestURI == "/addnew" {
-		for i := 0; i < 51; i++ {
-			pt.Insert(db.Conn, &db.Page{
-				CreatedDateTime: time.Now().Unix(),
-				Title:           fmt.Sprintf("Carbon %d", i),
-				Route:           fmt.Sprintf("/carbonite-%d", i),
-				Content:         fmt.Sprintf("<h2>Carbonite %d</h2>", i),
-				Roleprotected:   true,
-			})
-		}
-		sph.Router.Reload()
-	}
-	rows, err := pt.Select(db.Conn, "content, route", fmt.Sprintf("route = '%s'", r.RequestURI))
+
+	p, err := pt.SelectByRoute(db.Conn, r.RequestURI)
+
 	if err != nil {
-		Error(w, err)
-		return
+		logging.Error(err.Error())
 	}
-	defer rows.Close()
-	p := &db.Page{}
-	for rows.Next() {
-		rows.Scan(&p.Content, &p.Route)
+
+	if p == nil {
+		fourOhFour(w, r)
+		return
 	}
 
 	ctx := plush.NewContext()
