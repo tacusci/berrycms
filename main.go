@@ -56,13 +56,13 @@ func parseCmdArgs() {
 	flag.Parse()
 
 	loggingLevel := logging.InfoLevel
+	logging.ColorLogLevelLabelOnly = true
 
 	if *debugLevel {
 		logging.SetLevel(logging.DebugLevel)
 		return
 	}
 	logging.SetLevel(loggingLevel)
-	logging.ColorLogLevelLabelOnly = true
 }
 
 func main() {
