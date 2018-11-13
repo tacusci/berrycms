@@ -62,6 +62,7 @@ func parseCmdArgs() {
 		return
 	}
 	logging.SetLevel(loggingLevel)
+	logging.ColorLogLevelLabelOnly = true
 }
 
 func main() {
