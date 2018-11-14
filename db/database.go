@@ -171,5 +171,5 @@ func createTables(db *sql.DB) {
 }
 
 func getTables() []Table {
-	return []Table{&UsersTable{}, &PagesTable{}, &AuthSessionsTable{}}
+	return []Table{&SystemInfoTable{}, &UsersTable{}, &PagesTable{}, &AuthSessionsTable{}}
 }

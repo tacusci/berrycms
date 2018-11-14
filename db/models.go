@@ -540,6 +540,26 @@ func (ast *AuthSessionsTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(ast, m)
 }
 
+type SystemInfoTable struct {
+	Version string `tbl:NN`
+}
+
+func (sit *SystemInfoTable) Init(db *sql.DB) {}
+
+func (sit *SystemInfoTable) Name() string { return "systeminfo" }
+
+func (sit *SystemInfoTable) buildFields() []Field {
+	return buildFieldsFromTable(sit)
+}
+
+func (sit *SystemInfoTable) buildInsertStatement(m Model) string {
+	return buildInsertStatementFromTable(sit, m)
+}
+
+func (sit *SystemInfoTable) buildPreparedInsertStatement(m Model) string {
+	return buildPreparedInsertStatementFromTable(sit, m)
+}
+
 // ******** End Auth Table ********
 
 // ****************************************** END TABLES ******************************************
@@ -665,6 +685,18 @@ func (as *AuthSession) BuildFields() []Field {
 
 func (as *AuthSession) Validate() bool {
 	return len(as.UserUUID) > 0 && len(as.SessionUUID) > 0
+}
+
+type SystemInfo struct {
+	Version string `json:"version"`
+}
+
+func (si *SystemInfo) TableName() string {
+	return "systeminfo"
+}
+
+func (si *SystemInfo) BuildFields() []Field {
+	return buildFieldsFromModel(si)
 }
 
 // ****************************************** END MODELS ******************************************
