@@ -220,7 +220,7 @@ type ActivityLogMiddleware struct {
 
 func (alm *ActivityLogMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if f, err := os.OpenFile(alm.LogLoc, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660); err == nil {
+		if f, err := os.OpenFile(alm.LogLoc, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660); err == nil {
 			defer f.Close()
 			f.WriteString(fmt.Sprintf("%s\n", r.RequestURI))
 		}
