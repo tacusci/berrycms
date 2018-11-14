@@ -35,7 +35,7 @@ const (
 
 type options struct {
 	devMode     bool
-	port        int
+	port        uint
 	addr        string
 	sql         string
 	sqlUsername string
@@ -48,7 +48,7 @@ func parseCmdArgs() *options {
 
 	debugLevel := flag.Bool("dbg", false, "Set logging to debug")
 	flag.BoolVar(&opts.devMode, "dev", false, "Turn on development mode")
-	flag.IntVar(&opts.port, "p", 8080, "Port to listen for HTTP requests on")
+	flag.UintVar(&opts.port, "p", 8080, "Port to listen for HTTP requests on")
 	flag.StringVar(&opts.addr, "a", "0.0.0.0", "IP address to listen against if multiple network adapters")
 	flag.StringVar(&opts.sql, "db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
 	flag.StringVar(&opts.sqlUsername, "dbuser", "berryadmin", "Database server username, ignored if using sqlite")
