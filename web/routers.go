@@ -224,8 +224,7 @@ func (alm *ActivityLogMiddleware) Middleware(next http.Handler) http.Handler {
 		if f, err := os.OpenFile(alm.LogLoc, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0660); err == nil {
 			defer f.Close()
 			var sb bytes.Buffer
-			sb.WriteString(logging.GetTimeString())
-			sb.WriteString(fmt.Sprintf(" (%s -> %s %s)", r.RemoteAddr, r.Method, r.RequestURI))
+			sb.WriteString(fmt.Sprintf("%s (%s -> %s %s)", logging.GetTimeString(), r.RemoteAddr, r.Method, r.RequestURI))
 			userAgent := r.UserAgent()
 			if len(userAgent) > 0 {
 				sb.WriteString(fmt.Sprintf(" [User Agent: '%s']", userAgent))
