@@ -33,25 +33,27 @@ const (
 	VERSION = "v0.0.1a"
 )
 
-var (
-	devMode     *bool
-	port        *int
-	addr        *string
-	sql         *string
-	sqlUsername *string
-	sqlPassword *string
-	sqlAddress  *string
-)
+type options struct {
+	devMode     bool
+	port        int
+	addr        string
+	sql         string
+	sqlUsername string
+	sqlPassword string
+	sqlAddress  string
+}
 
-func parseCmdArgs() {
+func parseCmdArgs() *options {
+	opts := &options{}
+
 	debugLevel := flag.Bool("dbg", false, "Set logging to debug")
-	devMode = flag.Bool("dev", false, "Turn on development mode")
-	port = flag.Int("p", 8080, "Port to listen for HTTP requests on")
-	addr = flag.String("a", "0.0.0.0", "IP address to listen against if multiple network adapters")
-	sql = flag.String("db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
-	sqlUsername = flag.String("dbuser", "berryadmin", "Database server username, ignored if using sqlite")
-	sqlPassword = flag.String("dbpass", "", "Database server password, ignored if using sqlite")
-	sqlAddress = flag.String("dbaddr", "/", "Database server location, ignored if using sqlite")
+	flag.BoolVar(&opts.devMode, "dev", false, "Turn on development mode")
+	flag.IntVar(&opts.port, "p", 8080, "Port to listen for HTTP requests on")
+	flag.StringVar(&opts.addr, "a", "0.0.0.0", "IP address to listen against if multiple network adapters")
+	flag.StringVar(&opts.sql, "db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
+	flag.StringVar(&opts.sqlUsername, "dbuser", "berryadmin", "Database server username, ignored if using sqlite")
+	flag.StringVar(&opts.sqlPassword, "dbpass", "", "Database server password, ignored if using sqlite")
+	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
 
 	flag.Parse()
 
@@ -60,39 +62,41 @@ func parseCmdArgs() {
 
 	if *debugLevel {
 		logging.SetLevel(logging.DebugLevel)
-		return
+		return opts
 	}
 	logging.SetLevel(loggingLevel)
+
+	return opts
 }
 
 func main() {
-	parseCmdArgs()
+	opts := parseCmdArgs()
 
 	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
 
-	switch *sql {
+	switch opts.sql {
 	case "sqlite":
 		db.Connect(db.SQLITE, "", "berrycms")
 	case "mysql":
-		db.Connect(db.MySQL, fmt.Sprintf("%s:%s@%s", *sqlUsername, *sqlPassword, *sqlAddress), "berrycms")
+		db.Connect(db.MySQL, fmt.Sprintf("%s:%s@%s", opts.sqlUsername, opts.sqlPassword, opts.sqlAddress), "berrycms")
 	default:
-		logging.ErrorAndExit(fmt.Sprintf("Unknown database server type %s...", *sql))
+		logging.ErrorAndExit(fmt.Sprintf("Unknown database server type %s...", opts.sql))
 	}
 
-	if *devMode {
+	if opts.devMode {
 		db.Wipe()
 	}
 
 	db.Setup()
 
-	if *devMode {
+	if opts.devMode {
 		db.CreateTestData()
 	}
 
 	go db.Heartbeat()
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", *addr, *port),
+		Addr:         fmt.Sprintf("%s:%d", opts.addr, opts.port),
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
