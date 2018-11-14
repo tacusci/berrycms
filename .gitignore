@@ -16,3 +16,4 @@ berry
 *.db
 log.txt
 access.log
+activity.log
