@@ -34,13 +34,14 @@ const (
 )
 
 type options struct {
-	devMode     bool
-	port        uint
-	addr        string
-	sql         string
-	sqlUsername string
-	sqlPassword string
-	sqlAddress  string
+	devMode        bool
+	port           uint
+	addr           string
+	sql            string
+	sqlUsername    string
+	sqlPassword    string
+	sqlAddress     string
+	activityLogLoc string
 }
 
 func parseCmdArgs() *options {
@@ -54,6 +55,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.sqlUsername, "dbuser", "berryadmin", "Database server username, ignored if using sqlite")
 	flag.StringVar(&opts.sqlPassword, "dbpass", "", "Database server password, ignored if using sqlite")
 	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
+	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
 
 	flag.Parse()
 
@@ -103,7 +105,8 @@ func main() {
 	}
 
 	rs := web.MutableRouter{
-		Server: srv,
+		Server:         srv,
+		ActivityLogLoc: opts.activityLogLoc,
 	}
 	rs.Reload()
 

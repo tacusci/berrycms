@@ -15,3 +15,4 @@ berrycms
 berry
 *.db
 log.txt
+access.log

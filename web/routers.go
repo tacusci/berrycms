@@ -37,6 +37,7 @@ type MutableRouter struct {
 	Server         *http.Server
 	mu             sync.Mutex
 	Root           *mux.Router
+	ActivityLogLoc string
 	staticwatcher  *watcher.Watcher
 	pluginswatcher *watcher.Watcher
 	pm             *plugins.Manager
@@ -106,8 +107,14 @@ func (mr *MutableRouter) Reload() {
 	}
 	go mr.monitorPlugins("./plugins", mr.pluginswatcher)
 
-	amw := AuthMiddleware{Router: mr}
-	r.Use(amw.Middleware)
+	alm := ActivityLogMiddleware{
+		Router: mr,
+		LogLoc: mr.ActivityLogLoc,
+	}
+	r.Use(alm.Middleware)
+
+	am := AuthMiddleware{Router: mr}
+	r.Use(am.Middleware)
 
 	mr.Swap(r)
 }
@@ -204,6 +211,21 @@ func (mr *MutableRouter) monitorPlugins(sd string, w *watcher.Watcher) {
 	if err := w.Start(time.Millisecond * 500); err != nil {
 		logging.Error(err.Error())
 	}
+}
+
+type ActivityLogMiddleware struct {
+	Router *MutableRouter
+	LogLoc string
+}
+
+func (alm *ActivityLogMiddleware) Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if f, err := os.OpenFile(alm.LogLoc, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660); err == nil {
+			defer f.Close()
+			f.WriteString(fmt.Sprintf("%s\n", r.RequestURI))
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 //AuthMiddleware authentication struct with auth helper functions
