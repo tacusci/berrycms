@@ -33,6 +33,7 @@ var Conn *sql.DB
 var Type DBType
 
 const (
+	VERSION           = "v0.0.1a"
 	dbFileName string = "./berrycms.db"
 
 	MySQL  DBType = iota

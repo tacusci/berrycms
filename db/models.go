@@ -544,7 +544,12 @@ type SystemInfoTable struct {
 	Version string `tbl:NN`
 }
 
-func (sit *SystemInfoTable) Init(db *sql.DB) {}
+func (sit *SystemInfoTable) Init(db *sql.DB) {
+	err := sit.Insert(db, &SystemInfo{Version: VERSION})
+	if err != nil {
+		logging.ErrorAndExit(fmt.Sprintf("Issue creating version string record: %s", err.Error()))
+	}
+}
 
 func (sit *SystemInfoTable) Name() string { return "systeminfo" }
 

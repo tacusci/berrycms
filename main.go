@@ -29,10 +29,6 @@ import (
 	"github.com/tacusci/logging"
 )
 
-const (
-	VERSION = "v0.0.1a"
-)
-
 type options struct {
 	devMode        bool
 	port           uint
@@ -74,7 +70,7 @@ func parseCmdArgs() *options {
 func main() {
 	opts := parseCmdArgs()
 
-	fmt.Printf("🍓 Berry CMS %s 🍓\n", VERSION)
+	fmt.Printf("🍓 Berry CMS %s 🍓\n", db.VERSION)
 
 	switch opts.sql {
 	case "sqlite":
