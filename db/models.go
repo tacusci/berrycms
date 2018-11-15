@@ -548,6 +548,24 @@ func (sit *SystemInfoTable) Init(db *sql.DB) {}
 
 func (sit *SystemInfoTable) Name() string { return "systeminfo" }
 
+func (sit *SystemInfoTable) Insert(db *sql.DB, systemInfo *SystemInfo) error {
+	insertStatement := sit.buildPreparedInsertStatement(systemInfo)
+	_, err := db.Exec(insertStatement, systemInfo.Version)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (sit *SystemInfoTable) Update(db *sql.DB, as *SystemInfo) error {
+	updateStatement := fmt.Sprintf("UPDATE %s SET version = ?", sit.Name())
+	_, err := db.Exec(updateStatement, sit.Version)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (sit *SystemInfoTable) buildFields() []Field {
 	return buildFieldsFromTable(sit)
 }
