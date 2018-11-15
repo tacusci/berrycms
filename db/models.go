@@ -315,6 +315,13 @@ func (ut *UsersTable) buildPreparedInsertStatement(m Model) string {
 
 // ******** End UserTable ********
 
+// ******** Start GroupTable ********
+
+type GroupTable struct {
+}
+
+// ******** End GroupTable ********
+
 // ******** Start Pages Table ********
 type PagesTable struct {
 	Pageid          int    `tbl:"PKNNAIUI"`
@@ -540,6 +547,10 @@ func (ast *AuthSessionsTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(ast, m)
 }
 
+// ******** End Auth Table ********
+
+// ******** Start SystemInfo Table ********
+
 type SystemInfoTable struct {
 	Version string `tbl:NN`
 }
@@ -583,7 +594,7 @@ func (sit *SystemInfoTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(sit, m)
 }
 
-// ******** End Auth Table ********
+// ******** End SystemInfo Table ********
 
 // ****************************************** END TABLES ******************************************
 /////////////////////////////////////////////////////////////////////////////////
