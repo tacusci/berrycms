@@ -318,11 +318,34 @@ func (ut *UsersTable) buildPreparedInsertStatement(m Model) string {
 // ******** Start GroupTable ********
 
 type GroupTable struct {
+	Groupid         int    `tbl:"PKNNAIUI"`
+	CreatedDateTime int64  `tbl:"NNDT"`
+	UUID            string `tbl:"NNUI"`
+	Title           string `tbl:"NNUI"`
+}
+
+func (gt *GroupTable) Init(db *sql.DB) {}
+
+func (gt *GroupTable) Name() string {
+	return "groups"
+}
+
+func (gt *GroupTable) buildFields() []Field {
+	return buildFieldsFromTable(gt)
+}
+
+func (gt *GroupTable) buildInsertStatement(m Model) string {
+	return buildInsertStatementFromTable(gt, m)
+}
+
+func (gt *GroupTable) buildPreparedInsertStatement(m Model) string {
+	return buildPreparedInsertStatementFromTable(gt, m)
 }
 
 // ******** End GroupTable ********
 
 // ******** Start Pages Table ********
+
 type PagesTable struct {
 	Pageid          int    `tbl:"PKNNAIUI"`
 	CreatedDateTime int64  `tbl:"NNDT"`
