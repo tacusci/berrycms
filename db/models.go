@@ -330,6 +330,38 @@ func (gt *GroupTable) Name() string {
 	return "groups"
 }
 
+func (gt *GroupTable) Insert(db *sql.DB, g *Group) error {
+	if g.UUID != "" {
+		return fmt.Errorf("Page to insert already has UUID %s", g.UUID)
+	}
+
+	if g.UUID == "" {
+		newUUID, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		g.UUID = newUUID.String()
+		insertStatement := gt.buildPreparedInsertStatement(g)
+		_, err = db.Exec(insertStatement, g.CreatedDateTime, g.UUID, g.Title)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (gt *GroupTable) Update(db *sql.DB, g *Group) error {
+	if g.Validate() {
+		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, title = ? WHERE uuid = ?", gt.Name())
+		_, err := db.Exec(updateStatement, g.CreatedDateTime, g.Title, g.UUID)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New("Group to insert already has UUID")
+}
+
 func (gt *GroupTable) buildFields() []Field {
 	return buildFieldsFromTable(gt)
 }
@@ -342,7 +374,33 @@ func (gt *GroupTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(gt, m)
 }
 
-// ******** End GroupTable ********
+// ******** End Group Table ********
+
+// ******** Start Group Membership Table ********
+
+type GroupMembershipTable struct {
+	GroupMembershipid int    `tbl:"PKNNAIUI"`
+	GroupUUID         string `tbl:"NN"`
+	UserUUID          string `tbl:"NN"`
+}
+
+func (gmt *GroupMembershipTable) Init(db *sql.DB) {}
+
+func (gmt *GroupMembershipTable) Name() string {
+	return "groupmemberships"
+}
+
+func (gmt *GroupMembershipTable) buildFields() []Field {
+	return buildFieldsFromTable(gmt)
+}
+
+func (gmt *GroupMembershipTable) buildInsertStatement(m Model) string {
+	return buildInsertStatementFromTable(gmt, m)
+}
+
+func (gmt *GroupMembershipTable) buildPreparedInsertStatementFromTable(m Model) string {
+	return buildPreparedInsertStatementFromTable(gmt, m)
+}
 
 // ******** Start Pages Table ********
 
@@ -687,6 +745,25 @@ func (u *User) Validate() error {
 		return fmt.Errorf("Missing password")
 	}
 	return nil
+}
+
+type Group struct {
+	Groupid         int    `tbl:"AI" json:"groupid"`
+	CreatedDateTime int64  `json:"createddatetime"`
+	UUID            string `json:"UUID"`
+	Title           string `json:"title"`
+}
+
+func (g *Group) TableName() string {
+	return "groups"
+}
+
+func (g *Group) BuildFields() []Field {
+	return buildFieldsFromModel(g)
+}
+
+func (g *Group) Validate() bool {
+	return len(g.UUID) > 0
 }
 
 //UserRole describes the content of a userrole entry, it should match the columns present in the userrole table
