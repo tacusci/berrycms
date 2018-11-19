@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -324,7 +325,25 @@ type GroupTable struct {
 	Title           string `tbl:"NNUI"`
 }
 
-func (gt *GroupTable) Init(db *sql.DB) {}
+func (gt *GroupTable) Init(db *sql.DB) {
+	adminGroup := &Group{
+		CreatedDateTime: time.Now().Unix(),
+		Title:           "Admins",
+	}
+	gt.Insert(db, adminGroup)
+
+	modGroup := &Group{
+		CreatedDateTime: time.Now().Unix(),
+		Title:           "Moderators",
+	}
+	gt.Insert(db, modGroup)
+
+	userGroup := &Group{
+		CreatedDateTime: time.Now().Unix(),
+		Title:           "Users",
+	}
+	gt.Insert(db, userGroup)
+}
 
 func (gt *GroupTable) Name() string {
 	return "groups"
