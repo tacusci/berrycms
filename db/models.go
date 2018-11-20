@@ -381,6 +381,33 @@ func (gt *GroupTable) Update(db *sql.DB, g *Group) error {
 	return errors.New("Group to insert already has UUID")
 }
 
+func (gt *GroupTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gt.Name(), whereClause))
+	} else {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gt.Name()))
+	}
+}
+
+func (gt *GroupTable) SelectByTitle(db *sql.DB, groupTitle string) (*Group, error) {
+	g := &Group{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE title = '%s'", gt.Name(), groupTitle))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&g.Groupid, &g.CreatedDateTime, &g.UUID, &g.Title)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g, nil
+}
+
 func (gt *GroupTable) buildFields() []Field {
 	return buildFieldsFromTable(gt)
 }
