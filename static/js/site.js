@@ -2,7 +2,7 @@ $(document).ready(function() {
 
     // Variables
     var $nav = $('.navbar');
-    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null) {
+    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null && $nav.offset() !== undefined) {
       var $navOffsetTop = $nav.offset().top;
     }
     var $body = $('body'),
@@ -62,8 +62,10 @@ $(document).ready(function() {
   
     function resize() {
       $body.removeClass('has-docked-nav')
-      navOffsetTop = $nav.offset().top
-      onScroll()
+      if ($nav !== undefined) {
+        navOffsetTop = $nav.offset().top
+        onScroll()
+      }
     }
   
     function onScroll() {
