@@ -22,8 +22,14 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		Error(w, err)
 	}
 
-	defer rows.Close()
+	rows.Close()
 
 	gmt := db.GroupMembershipTable{}
+	rows, err = gmt.Select(db.Conn, "createddatetime", "uuid", "groupuuid", "useruuid")
 
+	if err != nil {
+		Error(w, err)
+	}
+
+	rows.Close()
 }

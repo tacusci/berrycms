@@ -186,7 +186,7 @@ func (ut *UsersTable) InsertMultiple(db *sql.DB, us []*User) error {
 
 //Insert adds user struct to users table, it also sets default values
 func (ut *UsersTable) Insert(db *sql.DB, u *User) error {
-
+	//TODO: change this to simply call validate()
 	if u.UUID != "" {
 		return fmt.Errorf("User to insert already has UUID %s", u.UUID)
 	}
@@ -350,6 +350,7 @@ func (gt *GroupTable) Name() string {
 }
 
 func (gt *GroupTable) Insert(db *sql.DB, g *Group) error {
+	//TODO: change this to simply call validate()
 	if g.UUID != "" {
 		return fmt.Errorf("Page to insert already has UUID %s", g.UUID)
 	}
@@ -436,6 +437,33 @@ func (gmt *GroupMembershipTable) Name() string {
 	return "groupmemberships"
 }
 
+func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
+	//TODO: change this to simply call validate()
+	if gm.UUID != "" {
+		return fmt.Errorf("Group membership to insert already has UUID %s", gm.UUID)
+	}
+
+	if gm.UUID == "" {
+		newUUID, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+		gm.UUID = newUUID.String()
+		insertStatement := gmt.buildPreparedInsertStatement(gm)
+		_, err = db.Exec(insertStatement, gm.CreatedDateTime, gm.UUID, gm.GroupUUID, gm.UserUUID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (gmt *GroupMembershipTable) Update(db *sql.DB, gm *GroupMembership) error {
+	if gm.Validate() {
+		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, groupuuid = ?, useruuid = ? WHERE uuid = ?", gmt.Name())
+	}
+}
+
 func (gmt *GroupMembershipTable) buildFields() []Field {
 	return buildFieldsFromTable(gmt)
 }
@@ -444,7 +472,7 @@ func (gmt *GroupMembershipTable) buildInsertStatement(m Model) string {
 	return buildInsertStatementFromTable(gmt, m)
 }
 
-func (gmt *GroupMembershipTable) buildPreparedInsertStatementFromTable(m Model) string {
+func (gmt *GroupMembershipTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(gmt, m)
 }
 
@@ -468,6 +496,7 @@ func (pt *PagesTable) Name() string {
 }
 
 func (pt *PagesTable) Insert(db *sql.DB, p *Page) error {
+	//TODO: change this to simply call validate()
 	if p.UUID != "" {
 		return fmt.Errorf("Page to insert already has UUID %s", p.UUID)
 	}
@@ -810,6 +839,26 @@ func (g *Group) BuildFields() []Field {
 
 func (g *Group) Validate() bool {
 	return len(g.UUID) > 0
+}
+
+type GroupMembership struct {
+	Groupmembershipid int    `tbl:"AI" json:"groupmembershipid"`
+	CreatedDateTime   int64  `json:"createddatetime"`
+	UUID              string `json:"UUID"`
+	GroupUUID         string `json:"GroupUUID"`
+	UserUUID          string `json:"UserUUID"`
+}
+
+func (gm *GroupMembership) TableName() string {
+	return "groupmemberships"
+}
+
+func (gm *GroupMembership) BuildFields() []Field {
+	return buildFieldsFromModel(gm)
+}
+
+func (gm *GroupMembership) Validate() bool {
+	return len(gm.UUID) > 0
 }
 
 //UserRole describes the content of a userrole entry, it should match the columns present in the userrole table
