@@ -36,11 +36,12 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "createddatetime, uuid, title, route, authoruuid", "")
-	defer rows.Close()
 
 	if err != nil {
 		Error(w, err)
 	}
+
+	defer rows.Close()
 
 	ut := db.UsersTable{}
 

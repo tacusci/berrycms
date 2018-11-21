@@ -1,8 +1,9 @@
 package web
 
 import (
-	// "github.com/tacusci/berrycms/db"
 	"net/http"
+
+	"github.com/tacusci/berrycms/db"
 )
 
 type AdminUserGroupsHandler struct {
@@ -11,7 +12,18 @@ type AdminUserGroupsHandler struct {
 }
 
 func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
-	// groups := make([]db.Group, 0)
+	groups := make([]db.Group, 0)
+	groupMemberships := make([]db.GroupMembership, 0)
 
-	// gt := db.GroupTable{}
+	gt := db.GroupTable{}
+	rows, err := gt.Select(db.Conn, "createddatetime, uuid, title", "")
+
+	if err != nil {
+		Error(w, err)
+	}
+
+	defer rows.Close()
+
+	gmt := db.GroupMembershipTable{}
+
 }
