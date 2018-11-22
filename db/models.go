@@ -459,9 +459,12 @@ func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
 }
 
 func (gmt *GroupMembershipTable) Update(db *sql.DB, gm *GroupMembership) error {
-	if gm.Validate() {
-		updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, groupuuid = ?, useruuid = ? WHERE uuid = ?", gmt.Name())
+	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, groupuuid = ?, useruuid = ? WHERE uuid = ?", gmt.Name())
+	_, err := db.Exec(updateStatement, gm.UUID, gm.GroupUUID, gm.UserUUID, gm.UUID)
+	if err != nil {
+		return err
 	}
+	return nil
 }
 
 func (gmt *GroupMembershipTable) buildFields() []Field {
@@ -518,7 +521,7 @@ func (pt *PagesTable) Insert(db *sql.DB, p *Page) error {
 
 func (pt *PagesTable) Update(db *sql.DB, p *Page) error {
 	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, roleprotected = ?, authoruuid = ?, title = ?, route = ?, content = ? WHERE uuid = ?", pt.Name())
-	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)
+	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)feef
 	if err != nil {
 		return err
 	}
