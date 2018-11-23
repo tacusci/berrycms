@@ -385,9 +385,8 @@ func (gt *GroupTable) Update(db *sql.DB, g *Group) error {
 func (gt *GroupTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gt.Name(), whereClause))
-	} else {
-		return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gt.Name()))
 	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gt.Name()))
 }
 
 func (gt *GroupTable) SelectByTitle(db *sql.DB, groupTitle string) (*Group, error) {
@@ -467,6 +466,13 @@ func (gmt *GroupMembershipTable) Update(db *sql.DB, gm *GroupMembership) error {
 	return nil
 }
 
+func (gmt *GroupMembershipTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gmt.Name(), whereClause))
+	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gmt.Name()))
+}
+
 func (gmt *GroupMembershipTable) buildFields() []Field {
 	return buildFieldsFromTable(gmt)
 }
@@ -521,7 +527,7 @@ func (pt *PagesTable) Insert(db *sql.DB, p *Page) error {
 
 func (pt *PagesTable) Update(db *sql.DB, p *Page) error {
 	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, roleprotected = ?, authoruuid = ?, title = ?, route = ?, content = ? WHERE uuid = ?", pt.Name())
-	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)feef
+	_, err := db.Exec(updateStatement, p.CreatedDateTime, p.UUID, p.Roleprotected, p.AuthorUUID, p.Title, p.Route, p.Content, p.UUID)
 	if err != nil {
 		return err
 	}
@@ -535,6 +541,7 @@ func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, pt.Name()))
 }
 
+//TODO: Should really consider changing this to call the existing select func
 func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (*Page, error) {
 	p := &Page{}
 
