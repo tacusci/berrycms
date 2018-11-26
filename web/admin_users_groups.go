@@ -2,9 +2,10 @@ package web
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/logging"
-	"net/http"
 
 	"github.com/tacusci/berrycms/db"
 )
@@ -40,7 +41,20 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 			groupMembership := db.GroupMembership{}
 			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.UUID, &groupMembership.GroupUUID, &groupMembership.UserUUID)
 
-			logging.Debug(fmt.Sprintf("Found group memmbership for group of UUID: %s", groupMembership.GroupUUID))
+			ut := db.UsersTable{}
+
+			userRows, err := ut.Select(db.Conn, "createddatetime, userroleid, uuid, username, authhash, firstname, lastname, email", fmt.Sprintf("uuid = '%s'", groupMembership.UserUUID))
+			if err != nil {
+				Error(w, err)
+			}
+
+			for userRows.Next() {
+				user := db.User{}
+				userRows.Scan(&user.CreatedDateTime, &user.UserroleId, &user.UUID, &user.Username, &user.AuthHash, &user.FirstName, &user.LastName, &user.Email)
+				logging.Debug(fmt.Sprintf("Found user of UUID %s in group %s", user.UUID, group.UUID))
+			}
+
+			userRows.Close()
 		}
 
 		groupMembershipRows.Close()
