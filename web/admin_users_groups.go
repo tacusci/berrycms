@@ -18,7 +18,6 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	var groupMemberships = make([]db.GroupMembership, 0)
 
 	groupTable := db.GroupTable{}
-
 	groupRows, err := groupTable.Select(db.Conn, "*", "")
 
 	if err != nil {
@@ -29,12 +28,10 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	for groupRows.Next() {
 		g := db.Group{}
+
 		groupRows.Scan(&g.CreatedDateTime, &g.UUID, &g.Title)
-
 		groups = append(groups, g)
-
 		groupMembershipTable := db.GroupMembershipTable{}
-
 		groupMembershipRows, err := groupMembershipTable.Select(db.Conn, "*", "groupuuid = "+g.UUID)
 
 		if err != nil {
@@ -45,12 +42,10 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 		for groupMembershipRows.Next() {
 			gm := db.GroupMembership{}
+
 			groupMembershipRows.Scan(&gm.CreatedDateTime, &gm.UUID, &gm.GroupUUID, &gm.UserUUID)
-
 			groupMemberships = append(groupMemberships, gm)
-
 			userTable := db.UsersTable{}
-
 			userRows, err := userTable.Select(db.Conn, "*", "uuid = "+gm.UserUUID)
 
 			if err != nil {
