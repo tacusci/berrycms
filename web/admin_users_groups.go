@@ -18,15 +18,32 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	gt := db.GroupTable{}
 
-	rows, err := gt.Select(db.Conn, "createddatetime, uuid, title", "")
+	groupRows, err := gt.Select(db.Conn, "createddatetime, uuid, title", "")
 	if err != nil {
 		Error(w, err)
 	}
 
-	for rows.Next() {
+	defer groupRows.Close()
+
+	for groupRows.Next() {
 		group := db.Group{}
-		rows.Scan(&group.CreatedDateTime, &group.UUID, &group.Title)
-		logging.Debug(fmt.Sprintf("Loaded group {CT: %s, UUID: %s, Title: %s}", UnixToTimeString(group.CreatedDateTime), group.UUID, group.Title))
+		groupRows.Scan(&group.CreatedDateTime, &group.UUID, &group.Title)
+
+		gmt := db.GroupMembershipTable{}
+
+		groupMembershipRows, err := gmt.Select(db.Conn, "groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", group.UUID))
+		if err != nil {
+			Error(w, err)
+		}
+
+		for groupMembershipRows.Next() {
+			groupMembership := db.GroupMembership{}
+			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.UUID, &groupMembership.GroupUUID, &groupMembership.UserUUID)
+
+			logging.Debug(fmt.Sprintf("Found group memmbership for group of UUID: %s", groupMembership.GroupUUID))
+		}
+
+		groupMembershipRows.Close()
 	}
 
 	pctx := plush.NewContext()
