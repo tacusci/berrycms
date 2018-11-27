@@ -430,7 +430,30 @@ type GroupMembershipTable struct {
 	UserUUID          string `tbl:"NN"`
 }
 
-func (gmt *GroupMembershipTable) Init(db *sql.DB) {}
+func (gmt *GroupMembershipTable) Init(db *sql.DB) {
+	gt := GroupTable{}
+	adminGroup, err := gt.SelectByTitle(db, "Admins")
+
+	if err != nil {
+		//this is in the database initialisation step so nothing wrong with crashing out completely
+		logging.ErrorAndExit(fmt.Sprintf("Error occurred trying to fetch 'Admins' user group from DB: %s", err.Error()))
+	}
+
+	ut := UsersTable{}
+	rootUser, err := ut.SelectRootUser(db)
+
+	adminGroupMembership := &GroupMembership{
+		CreatedDateTime: time.Now().Unix(),
+		GroupUUID:       adminGroup.UUID,
+		UserUUID:        rootUser.UUID,
+	}
+
+	err = gmt.Insert(db, adminGroupMembership)
+
+	if err != nil {
+		logging.ErrorAndExit(fmt.Sprintf("Unable to add root user to administration group"))
+	}
+}
 
 func (gmt *GroupMembershipTable) Name() string {
 	return "groupmemberships"
