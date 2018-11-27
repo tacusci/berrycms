@@ -426,6 +426,7 @@ func (gt *GroupTable) buildPreparedInsertStatement(m Model) string {
 
 type GroupMembershipTable struct {
 	GroupMembershipid int    `tbl:"PKNNAIUI"`
+	CreatedDateTime   int64  `tbl:"NN"`
 	GroupUUID         string `tbl:"NN"`
 	UserUUID          string `tbl:"NN"`
 }
@@ -451,7 +452,7 @@ func (gmt *GroupMembershipTable) Init(db *sql.DB) {
 	err = gmt.Insert(db, adminGroupMembership)
 
 	if err != nil {
-		logging.ErrorAndExit(fmt.Sprintf("Unable to add root user to administration group"))
+		logging.ErrorAndExit(fmt.Sprintf("Unable to add root user to administration group: %s", err.Error()))
 	}
 }
 
@@ -460,29 +461,8 @@ func (gmt *GroupMembershipTable) Name() string {
 }
 
 func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
-	//TODO: change this to simply call validate()
-	if gm.UUID != "" {
-		return fmt.Errorf("Group membership to insert already has UUID %s", gm.UUID)
-	}
-
-	if gm.UUID == "" {
-		newUUID, err := uuid.NewV4()
-		if err != nil {
-			return err
-		}
-		gm.UUID = newUUID.String()
-		insertStatement := gmt.buildPreparedInsertStatement(gm)
-		_, err = db.Exec(insertStatement, gm.CreatedDateTime, gm.UUID, gm.GroupUUID, gm.UserUUID)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (gmt *GroupMembershipTable) Update(db *sql.DB, gm *GroupMembership) error {
-	updateStatement := fmt.Sprintf("UPDATE %s SET createddatetime = ?, uuid = ?, groupuuid = ?, useruuid = ? WHERE uuid = ?", gmt.Name())
-	_, err := db.Exec(updateStatement, gm.UUID, gm.GroupUUID, gm.UserUUID, gm.UUID)
+	insertStatement := gmt.buildPreparedInsertStatement(gm)
+	_, err := db.Exec(insertStatement, gm.CreatedDateTime, gm.GroupUUID, gm.UserUUID)
 	if err != nil {
 		return err
 	}
@@ -877,7 +857,6 @@ func (g *Group) Validate() bool {
 type GroupMembership struct {
 	Groupmembershipid int    `tbl:"AI" json:"groupmembershipid"`
 	CreatedDateTime   int64  `json:"createddatetime"`
-	UUID              string `json:"UUID"`
 	GroupUUID         string `json:"GroupUUID"`
 	UserUUID          string `json:"UserUUID"`
 }
@@ -888,10 +867,6 @@ func (gm *GroupMembership) TableName() string {
 
 func (gm *GroupMembership) BuildFields() []Field {
 	return buildFieldsFromModel(gm)
-}
-
-func (gm *GroupMembership) Validate() bool {
-	return len(gm.UUID) > 0
 }
 
 //UserRole describes the content of a userrole entry, it should match the columns present in the userrole table

@@ -39,7 +39,7 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 		for groupMembershipRows.Next() {
 			groupMembership := db.GroupMembership{}
-			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.UUID, &groupMembership.GroupUUID, &groupMembership.UserUUID)
+			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
 
 			ut := db.UsersTable{}
 
