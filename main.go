@@ -30,7 +30,8 @@ import (
 )
 
 type options struct {
-	devMode        bool
+	testData       bool
+	wipe           bool
 	port           uint
 	addr           string
 	sql            string
@@ -44,7 +45,8 @@ func parseCmdArgs() *options {
 	opts := &options{}
 
 	debugLevel := flag.Bool("dbg", false, "Set logging to debug")
-	flag.BoolVar(&opts.devMode, "dev", false, "Turn on development mode")
+	flag.BoolVar(&opts.testData, "testdb", false, "Creates testing data")
+	flag.BoolVar(&opts.wipe, "wipe", false, "Completely wipes database")
 	flag.UintVar(&opts.port, "p", 8080, "Port to listen for HTTP requests on")
 	flag.StringVar(&opts.addr, "a", "0.0.0.0", "IP address to listen against if multiple network adapters")
 	flag.StringVar(&opts.sql, "db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
@@ -81,13 +83,13 @@ func main() {
 		logging.ErrorAndExit(fmt.Sprintf("Unknown database server type %s...", opts.sql))
 	}
 
-	if opts.devMode {
+	if opts.wipe {
 		db.Wipe()
 	}
 
 	db.Setup()
 
-	if opts.devMode {
+	if opts.testData {
 		db.CreateTestData()
 	}
 
