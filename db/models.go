@@ -431,30 +431,8 @@ type GroupMembershipTable struct {
 	UserUUID          string `tbl:"NN"`
 }
 
-func (gmt *GroupMembershipTable) Init(db *sql.DB) {
-	gt := GroupTable{}
-	adminGroup, err := gt.SelectByTitle(db, "Admins")
-
-	if err != nil {
-		//this is in the database initialisation step so nothing wrong with crashing out completely
-		logging.ErrorAndExit(fmt.Sprintf("Error occurred trying to fetch 'Admins' user group from DB: %s", err.Error()))
-	}
-
-	ut := UsersTable{}
-	rootUser, err := ut.SelectRootUser(db)
-
-	adminGroupMembership := &GroupMembership{
-		CreatedDateTime: time.Now().Unix(),
-		GroupUUID:       adminGroup.UUID,
-		UserUUID:        rootUser.UUID,
-	}
-
-	err = gmt.Insert(db, adminGroupMembership)
-
-	if err != nil {
-		logging.ErrorAndExit(fmt.Sprintf("Unable to add root user to administration group: %s", err.Error()))
-	}
-}
+//Init initialise table to include default memeberships
+func (gmt *GroupMembershipTable) Init(db *sql.DB) {}
 
 func (gmt *GroupMembershipTable) Name() string {
 	return "groupmemberships"
@@ -467,6 +445,24 @@ func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
 		return err
 	}
 	return nil
+}
+
+func (gmt *GroupMembershipTable) AddUserToGroup(db *sql.DB, u *User, groupTitle string) error {
+	gt := GroupTable{}
+	if group, err := gt.SelectByTitle(db, groupTitle); err != nil {
+		gmt := GroupMembershipTable{}
+		err = gmt.Insert(db, &GroupMembership{
+			GroupUUID: group.UUID,
+			UserUUID:  u.UUID,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	} else {
+		//this else is necessary since err is only in scope inside if statement
+		return err
+	}
 }
 
 func (gmt *GroupMembershipTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {

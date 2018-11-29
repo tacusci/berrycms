@@ -16,6 +16,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -101,10 +102,18 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 			AuthHash:        util.HashAndSalt([]byte(authHash)),
 		}
 
-		err := ut.Insert(db.Conn, userToCreate)
-
-		if err != nil {
+		if err := ut.Insert(db.Conn, userToCreate); err != nil {
 			logging.Error(err.Error())
+		}
+
+		if postRequestForNewRootUser {
+			if rootUser, err := ut.SelectRootUser(db.Conn); err != nil {
+				logging.Debug(fmt.Sprintf("Adding root user of UUID: %s to admins group", rootUser.UUID))
+				gmt := db.GroupMembershipTable{}
+				if err := gmt.AddUserToGroup(db.Conn, rootUser, "Admins"); err != nil {
+					logging.Error(err.Error())
+				}
+			}
 		}
 	} else {
 		//need to add setting error message on screen
