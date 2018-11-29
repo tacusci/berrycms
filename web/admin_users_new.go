@@ -101,10 +101,21 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 			AuthHash:        util.HashAndSalt([]byte(authHash)),
 		}
 
-		err := ut.Insert(db.Conn, userToCreate)
+		if err := ut.Insert(db.Conn, userToCreate); err != nil {
+			Error(w, err)
+		}
 
-		if err != nil {
-			logging.Error(err.Error())
+		if postRequestForNewRootUser {
+			logging.Debug("Root user POST form recieved")
+			rootUser, err := ut.SelectRootUser(db.Conn)
+
+			if err != nil {
+				logging.Error("Unable to retrieve root user")
+				Error(w, err)
+			}
+
+			gmt := db.GroupMembershipTable{}
+			gmt.AddUserToGroup(db.Conn, rootUser, "Admins")
 		}
 	} else {
 		//need to add setting error message on screen

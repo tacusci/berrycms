@@ -186,7 +186,7 @@ func (ut *UsersTable) InsertMultiple(db *sql.DB, us []*User) error {
 
 //Insert adds user struct to users table, it also sets default values
 func (ut *UsersTable) Insert(db *sql.DB, u *User) error {
-
+	//TODO: change this to simply call validate()
 	if u.UUID != "" {
 		return fmt.Errorf("User to insert already has UUID %s", u.UUID)
 	}
@@ -350,6 +350,7 @@ func (gt *GroupTable) Name() string {
 }
 
 func (gt *GroupTable) Insert(db *sql.DB, g *Group) error {
+	//TODO: change this to simply call validate()
 	if g.UUID != "" {
 		return fmt.Errorf("Page to insert already has UUID %s", g.UUID)
 	}
@@ -381,6 +382,32 @@ func (gt *GroupTable) Update(db *sql.DB, g *Group) error {
 	return errors.New("Group to insert already has UUID")
 }
 
+func (gt *GroupTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gt.Name(), whereClause))
+	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gt.Name()))
+}
+
+func (gt *GroupTable) SelectByTitle(db *sql.DB, groupTitle string) (*Group, error) {
+	g := &Group{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE title = '%s'", gt.Name(), groupTitle))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&g.Groupid, &g.CreatedDateTime, &g.UUID, &g.Title)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g, nil
+}
+
 func (gt *GroupTable) buildFields() []Field {
 	return buildFieldsFromTable(gt)
 }
@@ -399,14 +426,54 @@ func (gt *GroupTable) buildPreparedInsertStatement(m Model) string {
 
 type GroupMembershipTable struct {
 	GroupMembershipid int    `tbl:"PKNNAIUI"`
+	CreatedDateTime   int64  `tbl:"NN"`
 	GroupUUID         string `tbl:"NN"`
 	UserUUID          string `tbl:"NN"`
 }
 
+//Init initialise table to include default memeberships
 func (gmt *GroupMembershipTable) Init(db *sql.DB) {}
 
 func (gmt *GroupMembershipTable) Name() string {
 	return "groupmemberships"
+}
+
+func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
+	insertStatement := gmt.buildPreparedInsertStatement(gm)
+	_, err := db.Exec(insertStatement, gm.CreatedDateTime, gm.GroupUUID, gm.UserUUID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (gmt *GroupMembershipTable) AddUserToGroup(db *sql.DB, u *User, groupTitle string) error {
+	gt := GroupTable{}
+	group, err := gt.SelectByTitle(db, groupTitle)
+
+	if err != nil {
+		return err
+	}
+
+	logging.Debug(fmt.Sprintf("Found group to add to of UUID %s from group title %s", group.UUID, groupTitle))
+
+	err = gmt.Insert(db, &GroupMembership{
+		GroupUUID: group.UUID,
+		UserUUID:  u.UUID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (gmt *GroupMembershipTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
+	if len(whereClause) > 0 {
+		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gmt.Name(), whereClause))
+	}
+	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, gmt.Name()))
 }
 
 func (gmt *GroupMembershipTable) buildFields() []Field {
@@ -417,7 +484,7 @@ func (gmt *GroupMembershipTable) buildInsertStatement(m Model) string {
 	return buildInsertStatementFromTable(gmt, m)
 }
 
-func (gmt *GroupMembershipTable) buildPreparedInsertStatementFromTable(m Model) string {
+func (gmt *GroupMembershipTable) buildPreparedInsertStatement(m Model) string {
 	return buildPreparedInsertStatementFromTable(gmt, m)
 }
 
@@ -441,6 +508,7 @@ func (pt *PagesTable) Name() string {
 }
 
 func (pt *PagesTable) Insert(db *sql.DB, p *Page) error {
+	//TODO: change this to simply call validate()
 	if p.UUID != "" {
 		return fmt.Errorf("Page to insert already has UUID %s", p.UUID)
 	}
@@ -476,6 +544,7 @@ func (pt *PagesTable) Select(db *sql.DB, whatToSelect string, whereClause string
 	return db.Query(fmt.Sprintf("SELECT %s FROM %s", whatToSelect, pt.Name()))
 }
 
+//TODO: Should really consider changing this to call the existing select func
 func (pt *PagesTable) SelectByRoute(db *sql.DB, route string) (*Page, error) {
 	p := &Page{}
 
@@ -783,6 +852,21 @@ func (g *Group) BuildFields() []Field {
 
 func (g *Group) Validate() bool {
 	return len(g.UUID) > 0
+}
+
+type GroupMembership struct {
+	Groupmembershipid int    `tbl:"AI" json:"groupmembershipid"`
+	CreatedDateTime   int64  `json:"createddatetime"`
+	GroupUUID         string `json:"GroupUUID"`
+	UserUUID          string `json:"UserUUID"`
+}
+
+func (gm *GroupMembership) TableName() string {
+	return "groupmemberships"
+}
+
+func (gm *GroupMembership) BuildFields() []Field {
+	return buildFieldsFromModel(gm)
 }
 
 //UserRole describes the content of a userrole entry, it should match the columns present in the userrole table
