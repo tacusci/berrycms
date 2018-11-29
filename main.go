@@ -85,7 +85,6 @@ func main() {
 
 	if opts.wipe {
 		db.Wipe()
-		db.CreateTestData()
 	}
 
 	db.Setup()
@@ -93,7 +92,7 @@ func main() {
 	if opts.testData {
 		db.CreateTestData()
 	}
-  
+
 	go db.Heartbeat()
 
 	srv := &http.Server{
