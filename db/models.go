@@ -450,6 +450,7 @@ func (gmt *GroupMembershipTable) Insert(db *sql.DB, gm *GroupMembership) error {
 func (gmt *GroupMembershipTable) AddUserToGroup(db *sql.DB, u *User, groupTitle string) error {
 	gt := GroupTable{}
 	if group, err := gt.SelectByTitle(db, groupTitle); err != nil {
+		logging.Debug(fmt.Sprintf("Found group to add to of UUID %s from group title %s", group.UUID, groupTitle))
 		gmt := GroupMembershipTable{}
 		err = gmt.Insert(db, &GroupMembership{
 			GroupUUID: group.UUID,

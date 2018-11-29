@@ -83,13 +83,10 @@ func main() {
 
 	if opts.devMode {
 		db.Wipe()
+		db.CreateTestData()
 	}
 
 	db.Setup()
-
-	if opts.devMode {
-		db.CreateTestData()
-	}
 
 	go db.Heartbeat()
 

@@ -40,6 +40,8 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	defer groupRows.Close()
 
+	groupMembershipsExist := false
+
 	for groupRows.Next() {
 		group := db.Group{}
 		groupRows.Scan(&group.CreatedDateTime, &group.UUID, &group.Title)
@@ -52,6 +54,7 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for groupMembershipRows.Next() {
+			groupMembershipsExist = true
 			groupMembership := db.GroupMembership{}
 			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
 
@@ -72,6 +75,12 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		groupMembershipRows.Close()
+	}
+
+	if groupMembershipsExist {
+		logging.Debug("Group memberships exist")
+	} else {
+		logging.Debug("Group memberships don't exist")
 	}
 
 	pctx := plush.NewContext()
