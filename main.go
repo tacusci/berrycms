@@ -15,12 +15,14 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -32,6 +34,7 @@ import (
 type options struct {
 	testData       bool
 	wipe           bool
+	yesToAll       bool
 	port           uint
 	addr           string
 	sql            string
@@ -47,6 +50,7 @@ func parseCmdArgs() *options {
 	debugLevel := flag.Bool("dbg", false, "Set logging to debug")
 	flag.BoolVar(&opts.testData, "testdb", false, "Creates testing data")
 	flag.BoolVar(&opts.wipe, "wipe", false, "Completely wipes database")
+	flag.BoolVar(&opts.yesToAll, "y", false, "Automatically agree to cli confirmation requests")
 	flag.UintVar(&opts.port, "p", 8080, "Port to listen for HTTP requests on")
 	flag.StringVar(&opts.addr, "a", "0.0.0.0", "IP address to listen against if multiple network adapters")
 	flag.StringVar(&opts.sql, "db", "sqlite", "Database server type to try to connect to [sqlite/mysql]")
@@ -84,7 +88,12 @@ func main() {
 	}
 
 	if opts.wipe {
-		db.Wipe()
+		//if yes to all if statement won't evaluate next condition
+		if opts.yesToAll || askForConfirmation("Wiping the database is irreversible, are you sure?") {
+			logging.Info("Wiping database...")
+			db.Wipe()
+		}
+		logging.Info("Skipping wiping database...")
 	}
 
 	db.Setup()
@@ -118,6 +127,28 @@ func main() {
 
 	if err != nil {
 		logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+	}
+}
+
+func askForConfirmation(s string) bool {
+	reader := bufio.NewReader(os.Stdin)
+
+	for {
+		fmt.Printf("%s [y/n]: ", s)
+
+		response, err := reader.ReadString('\n')
+
+		if err != nil {
+			logging.ErrorAndExit(err.Error())
+		}
+
+		response = strings.ToLower(strings.TrimSpace(response))
+
+		if response == "y" || response == "yes" {
+			return true
+		} else if response == "n" || response == "no" {
+			return false
+		}
 	}
 }
 
