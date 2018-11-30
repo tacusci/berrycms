@@ -90,10 +90,10 @@ func main() {
 	if opts.wipe {
 		//if yes to all if statement won't evaluate next condition
 		if opts.yesToAll || askForConfirmation("Wiping the database is irreversible, are you sure?") {
-			logging.Info("Wiping database...")
 			db.Wipe()
+		} else {
+			logging.Info("Skipping wiping database...")
 		}
-		logging.Info("Skipping wiping database...")
 	}
 
 	db.Setup()
