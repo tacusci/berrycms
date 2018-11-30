@@ -30,58 +30,50 @@ type AdminUserGroupsHandler struct {
 }
 
 func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
+	groups := make([]db.Group, 0)
+	groupMemberships := make([]db.GroupMembership, 0)
 
-	gt := db.GroupTable{}
+	groupTable := db.GroupTable{}
+	rows, err := groupTable.Select(db.Conn, "createddatetime, uuid, title", "")
 
-	groupRows, err := gt.Select(db.Conn, "createddatetime, uuid, title", "")
 	if err != nil {
-		Error(w, err)
+		logging.Error(err.Error())
 	}
 
-	defer groupRows.Close()
-
-	groupMembershipsExist := false
-
-	for groupRows.Next() {
+	for rows.Next() {
 		group := db.Group{}
-		groupRows.Scan(&group.CreatedDateTime, &group.UUID, &group.Title)
+		err := rows.Scan(&group.CreatedDateTime, &group.UUID, &group.Title)
 
-		gmt := db.GroupMembershipTable{}
-
-		groupMembershipRows, err := gmt.Select(db.Conn, "groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", group.UUID))
 		if err != nil {
-			Error(w, err)
+			logging.Error(err.Error())
+			continue
 		}
 
-		for groupMembershipRows.Next() {
-			groupMembershipsExist = true
+		groups = append(groups, group)
+
+		groupMembershipTable := db.GroupMembershipTable{}
+		rows, err := groupMembershipTable.Select(db.Conn, "createddatetime, groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", group.UUID))
+
+		if err != nil {
+			logging.Error(err.Error())
+			continue
+		}
+
+		for rows.Next() {
 			groupMembership := db.GroupMembership{}
-			groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
+			err := rows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
 
-			ut := db.UsersTable{}
-
-			userRows, err := ut.Select(db.Conn, "createddatetime, userroleid, uuid, username, authhash, firstname, lastname, email", fmt.Sprintf("uuid = '%s'", groupMembership.UserUUID))
 			if err != nil {
-				Error(w, err)
+				logging.Error(err.Error())
+				continue
 			}
 
-			for userRows.Next() {
-				user := db.User{}
-				userRows.Scan(&user.CreatedDateTime, &user.UserroleId, &user.UUID, &user.Username, &user.AuthHash, &user.FirstName, &user.LastName, &user.Email)
-				logging.Debug(fmt.Sprintf("Found user of UUID %s in group %s", user.UUID, group.UUID))
-			}
-
-			userRows.Close()
+			groupMemberships = append(groupMemberships, groupMembership)
 		}
-
-		groupMembershipRows.Close()
 	}
 
-	if groupMembershipsExist {
-		logging.Debug("Group memberships exist")
-	} else {
-		logging.Debug("Group memberships don't exist")
-	}
+	logging.Debug(fmt.Sprintf("Loaded %d groups from DB...", len(groups)))
+	logging.Debug(fmt.Sprintf("Loaded %d group memberships from DB...", len(groupMemberships)))
 
 	pctx := plush.NewContext()
 	pctx.Set("unixtostring", UnixToTimeString)
