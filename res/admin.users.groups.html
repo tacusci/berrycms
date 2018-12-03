@@ -4,7 +4,7 @@
         <li class="navbar-item"><a class="navbar-link" href="/admin/users/groups/new">New</a></li>
         <li class="navbar-item"><button id="" class="navbar-input">Delete</button></li>
         <%= contentOf("navdashboardfooter") %>
-        <table id="user-list" class="u-full-width">
+        <table id="group-list" class="u-full-width">
             <thead>
                 <tr>
                     <th style="padding: 0px 0px;"><input id="selectallgroups" style="margin-top: 1.4rem;" type="checkbox"></th>
@@ -12,5 +12,17 @@
                     <th>Title</th>
                 </tr>
             </thead>
+            <tbody>
+                <%= if (groups && len(groups) > 0) { %>
+                    <%= for (group) in groups { %>
+                        <tr>
+                            <td id="<%= group.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+                            <td><%= unixtostring(group.CreatedDateTime) %></td>
+                            <td><%= group.Title %></td>
+                        </tr>
+                    <% } %>
+                <% } %>
+            </tbody>
+        </table>
     </div>
 </body>
