@@ -85,6 +85,10 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			route:  "/admin/users/groups",
 			Router: router,
 		},
+		&AdminUserGroupsNewHandler{
+			route:  "/admin/users/groups/new",
+			Router: router,
+		},
 	}
 }
 
