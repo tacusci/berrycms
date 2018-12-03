@@ -32,6 +32,7 @@ type AdminUserGroupsHandler struct {
 func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	groups := make([]db.Group, 0)
 	groupMemberships := make([]db.GroupMembership, 0)
+	users := make([]db.User, 0)
 
 	groupTable := db.GroupTable{}
 	rows, err := groupTable.Select(db.Conn, "createddatetime, uuid, title", "")
@@ -69,11 +70,28 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 			}
 
 			groupMemberships = append(groupMemberships, groupMembership)
+
+			usersTable := db.UsersTable{}
+			rows, err := usersTable.Select(db.Conn, "createddatetime, userroleid, uuid, username, authhash, firstname, lastname, email", fmt.Sprintf("uuid = '%s'", groupMembership.UserUUID))
+
+			if err != nil {
+				logging.Error(err.Error())
+				continue
+			}
+
+			for rows.Next() {
+				user := db.User{}
+				err := rows.Scan(&user.CreatedDateTime, &user.UserroleId, &user.UUID, &user.Username, &user.AuthHash, &user.FirstName, &user.LastName, &user.Email)
+
+				if err != nil {
+					logging.Error(err.Error())
+					continue
+				}
+
+				users = append(users, user)
+			}
 		}
 	}
-
-	logging.Debug(fmt.Sprintf("Loaded %d groups from DB...", len(groups)))
-	logging.Debug(fmt.Sprintf("Loaded %d group memberships from DB...", len(groupMemberships)))
 
 	pctx := plush.NewContext()
 	pctx.Set("unixtostring", UnixToTimeString)
