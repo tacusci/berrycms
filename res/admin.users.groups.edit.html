@@ -1,0 +1,30 @@
+<body>
+    <div class="container">
+        <%= contentOf("navdashboardheader") %>
+        <%= contentOf("navdashboardfooter") %>
+        <table id="group-users-list" class="u-full-width">
+            <thead>
+                <tr>
+                    <th style="padding: 0px 0px;"><input id="selectallgroupusers" style="margin-top: 1.4rem;" type="checkbox"></th>
+                    <th>Date/Time</th>
+                    <th>Username</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%= if (users && len(users) > 0) { %>
+                    <%= for (user) in users { %>
+                        <%= if (users && len(users) > 0) { %>
+                            <%= for (user) in users { %>
+                                <tr>
+                                    <td id="<%= user.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+                                    <td><%= unixtostring(user.CreatedDateTime) %></td>
+                                    <td><%= user.Username %></td>
+                                </tr>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</body>

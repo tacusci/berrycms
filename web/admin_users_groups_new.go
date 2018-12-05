@@ -38,11 +38,6 @@ func (augnh *AdminUserGroupsNewHandler) Post(w http.ResponseWriter, r *http.Requ
 
 	gt := db.GroupTable{}
 
-	if err != nil {
-		logging.Error(err.Error())
-		http.Redirect(w, r, augnh.route, http.StatusFound)
-	}
-
 	groupToCreate := &db.Group{
 		CreatedDateTime: time.Now().Unix(),
 		Title:           r.PostFormValue("title"),
