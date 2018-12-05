@@ -1,6 +1,8 @@
 <body>
     <div class="container">
         <%= contentOf("navdashboardheader") %>
+        <li class="navbar-item"><a class="navbar-link" href="/admin/users/groups/edit/<%= groupuuid %>/add">Add</a></li>
+		<li class="navbar-item"><button id="groupusersremove" class="navbar-input">Remove</button></li>
         <%= contentOf("navdashboardfooter") %>
         <table id="group-users-list" class="u-full-width">
             <thead>

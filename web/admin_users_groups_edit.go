@@ -47,6 +47,7 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 	pctx := plush.NewContext()
 	pctx.Set("title", "Edit Group")
 	pctx.Set("submitroute", r.RequestURI)
+	pctx.Set("groupuuid", vars["uuid"])
 	pctx.Set("users", users)
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("quillenabled", false)
