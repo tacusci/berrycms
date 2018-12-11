@@ -85,7 +85,9 @@ func (mr *MutableRouter) Reload() {
 
 	ut := db.UsersTable{}
 	if !ut.RootUserExists() {
-		aunh := AdminUsersNewHandler{}
+		aunh := AdminUsersNewHandler{
+			Router: mr,
+		}
 		//add explicit mapping of root user creation handler routes
 		r.HandleFunc("/admin/users/root/new", aunh.Get).Methods("GET")
 		r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")
