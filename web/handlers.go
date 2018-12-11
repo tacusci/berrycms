@@ -93,15 +93,15 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 			Router: router,
 		},
 		&AdminUserGroupsNewHandler{
-			route:  "/admin/users/groups/new",
+			route:  adminHiddenPrefix + "/admin/users/groups/new",
 			Router: router,
 		},
 		&AdminUserGroupsEditHandler{
-			route:  "/admin/users/groups/edit/{uuid}",
+			route:  adminHiddenPrefix + "/admin/users/groups/edit/{uuid}",
 			Router: router,
 		},
 		&AdminUserGroupsEditAddHandler{
-			route:  "/admin/users/groups/edit/{uuid}/add",
+			route:  adminHiddenPrefix + "/admin/users/groups/edit/{uuid}/add",
 			Router: router,
 		},
 	}
