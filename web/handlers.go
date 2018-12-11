@@ -40,49 +40,56 @@ type Handler interface {
 
 //GetDefaultHandlers get fixed list of all default handlers
 func GetDefaultHandlers(router *MutableRouter) []Handler {
+
+	var adminHiddenPrefix = ""
+
+	if router.AdminHidden {
+		adminHiddenPrefix = fmt.Sprintf("/%s", router.AdminHiddenPassword)
+	}
+
 	return []Handler{
 		&LoginHandler{
-			route:  "/login",
+			route:  adminHiddenPrefix + "/login",
 			Router: router,
 		},
 		&LogoutHandler{
-			route:  "/logout",
+			route:  adminHiddenPrefix + "/logout",
 			Router: router,
 		},
 		&AdminHandler{
-			route:  "/admin",
+			route:  adminHiddenPrefix + "/admin",
 			Router: router,
 		},
 		&AdminUsersHandler{
-			route:  "/admin/users",
+			route:  adminHiddenPrefix + "/admin/users",
 			Router: router,
 		},
 		&AdminUsersNewHandler{
-			route:  "/admin/users/new",
+			route:  adminHiddenPrefix + "/admin/users/new",
 			Router: router,
 		},
 		&AdminUsersDeleteHandler{
-			route:  "/admin/users/delete",
+			route:  adminHiddenPrefix + "/admin/users/delete",
 			Router: router,
 		},
 		&AdminPagesHandler{
-			route:  "/admin/pages",
+			route:  adminHiddenPrefix + "/admin/pages",
 			Router: router,
 		},
 		&AdminPagesNewHandler{
-			route:  "/admin/pages/new",
+			route:  adminHiddenPrefix + "/admin/pages/new",
 			Router: router,
 		},
 		&AdminPagesEditHandler{
-			route:  "/admin/pages/edit/{uuid}",
+			route:  adminHiddenPrefix + "/admin/pages/edit/{uuid}",
 			Router: router,
 		},
 		&AdminPagesDeleteHandler{
-			route:  "/admin/pages/delete",
+			route:  adminHiddenPrefix + "/admin/pages/delete",
 			Router: router,
 		},
 		&AdminUserGroupsHandler{
-			route:  "/admin/users/groups",
+			route:  adminHiddenPrefix + "/admin/users/groups",
 			Router: router,
 		},
 	}

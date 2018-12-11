@@ -15,6 +15,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/plush"
@@ -49,6 +50,7 @@ func (uh *AdminUsersHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("users", users)
 	pctx.Set("title", "Users")
 	pctx.Set("quillenabled", false)
+	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", uh.Router.AdminHiddenPassword))
 	pctx.Set("unixtostring", UnixToTimeString)
 
 	RenderDefault(w, "admin.users.html", pctx)

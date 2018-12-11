@@ -1,7 +1,7 @@
 <body>
     <div class="container">
       <%= contentOf("navdashboardheader") %>
-      <li class="navbar-item"><a class="navbar-link" href="/admin/users/new">New</a></li>
+      <li class="navbar-item"><a class="navbar-link" href="<%= adminhiddenpassword %>/admin/users/new">New</a></li>
       <li class="navbar-item"><button id="usersdelete" class="navbar-input">Delete</button></li>
       <%= contentOf("navdashboardfooter") %>
       <table id="user-list" class="u-full-width">

@@ -32,16 +32,17 @@ import (
 )
 
 type options struct {
-	testData       bool
-	wipe           bool
-	yesToAll       bool
-	port           uint
-	addr           string
-	sql            string
-	sqlUsername    string
-	sqlPassword    string
-	sqlAddress     string
-	activityLogLoc string
+	testData            bool
+	wipe                bool
+	yesToAll            bool
+	port                uint
+	addr                string
+	sql                 string
+	sqlUsername         string
+	sqlPassword         string
+	sqlAddress          string
+	activityLogLoc      string
+	adminHiddenPassword string
 }
 
 func parseCmdArgs() *options {
@@ -58,6 +59,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.sqlPassword, "dbpass", "", "Database server password, ignored if using sqlite")
 	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
 	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
+	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "Password required to access dashboard endpoints")
 
 	flag.Parse()
 
@@ -112,8 +114,10 @@ func main() {
 	}
 
 	rs := web.MutableRouter{
-		Server:         srv,
-		ActivityLogLoc: opts.activityLogLoc,
+		Server:              srv,
+		ActivityLogLoc:      opts.activityLogLoc,
+		AdminHidden:         len(opts.adminHiddenPassword) > 0,
+		AdminHiddenPassword: opts.adminHiddenPassword,
 	}
 	rs.Reload()
 

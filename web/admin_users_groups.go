@@ -96,6 +96,7 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("title", "Groups")
+	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", ugh.Router.AdminHiddenPassword))
 	pctx.Set("quillenabled", false)
 
 	RenderDefault(w, "admin.users.groups.html", pctx)

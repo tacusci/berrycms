@@ -35,13 +35,15 @@ import (
 
 //MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
-	Server         *http.Server
-	mu             sync.Mutex
-	Root           *mux.Router
-	ActivityLogLoc string
-	staticwatcher  *watcher.Watcher
-	pluginswatcher *watcher.Watcher
-	pm             *plugins.Manager
+	Server              *http.Server
+	mu                  sync.Mutex
+	Root                *mux.Router
+	AdminHidden         bool
+	AdminHiddenPassword string
+	ActivityLogLoc      string
+	staticwatcher       *watcher.Watcher
+	pluginswatcher      *watcher.Watcher
+	pm                  *plugins.Manager
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
@@ -83,7 +85,9 @@ func (mr *MutableRouter) Reload() {
 
 	ut := db.UsersTable{}
 	if !ut.RootUserExists() {
-		aunh := AdminUsersNewHandler{}
+		aunh := AdminUsersNewHandler{
+			Router: mr,
+		}
 		//add explicit mapping of root user creation handler routes
 		r.HandleFunc("/admin/users/root/new", aunh.Get).Methods("GET")
 		r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")

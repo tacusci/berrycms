@@ -16,6 +16,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -51,6 +52,7 @@ func (aunh *AdminUsersNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("title", "New User")
 		pctx.Set("navBarEnabled", true)
 		pctx.Set("newuserformaction", "/admin/users/new")
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", aunh.Router.AdminHiddenPassword))
 		pctx.Set("createuserlabel", "Create New User")
 	}
 	RenderDefault(w, "admin.users.new.html", pctx)
@@ -64,9 +66,21 @@ func (aunh *AdminUsersNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	// the new user form can normally only be accessed by a logged in user, so just redirect to users man page
 	if postRequestForNewRootUser {
 		// if the new root user has just been created there won't be a login session nor other users
-		defer http.Redirect(w, r, "/login", http.StatusFound)
+		var redirectURI = "/login"
+
+		if aunh.Router.AdminHidden {
+			redirectURI = fmt.Sprintf("/%s", aunh.Router.AdminHiddenPassword) + redirectURI
+		}
+
+		defer http.Redirect(w, r, redirectURI, http.StatusFound)
 	} else {
-		defer http.Redirect(w, r, "/admin/users", http.StatusFound)
+		var redirectURI = "/admin/users"
+
+		if aunh.Router.AdminHidden {
+			redirectURI = fmt.Sprintf("/%s", aunh.Router.AdminHiddenPassword) + redirectURI
+		}
+
+		defer http.Redirect(w, r, redirectURI, http.StatusFound)
 	}
 
 	err := r.ParseForm()
