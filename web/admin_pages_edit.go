@@ -54,6 +54,7 @@ func (apeh *AdminPagesEditHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("pagetitle", pageToEdit.Title)
 		pctx.Set("pageroute", pageToEdit.Route)
 		pctx.Set("pagecontent", template.HTML(string(html)))
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", apeh.Router.AdminHiddenPassword))
 		pctx.Set("quillenabled", true)
 		RenderDefault(w, "admin.pages.edit.html", pctx)
 	} else {

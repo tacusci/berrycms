@@ -15,6 +15,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/plush"
@@ -31,6 +32,7 @@ func (ah *AdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx := plush.NewContext()
 	pctx.Set("title", "Dashboard")
 	pctx.Set("quillenabled", false)
+	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", ah.Router.AdminHiddenPassword))
 	RenderDefault(w, "admin.html", pctx)
 }
 
