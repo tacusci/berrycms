@@ -260,7 +260,13 @@ func (amw *AuthMiddleware) Middleware(next http.Handler) http.Handler {
 func (amw *AuthMiddleware) HasPermissionsForRoute(r *http.Request) bool {
 	var routeIsProtected bool
 
-	routeIsProtected = strings.HasPrefix(r.RequestURI, "/admin")
+	var hiddenAdminPrefixURI = ""
+
+	if amw.Router.AdminHidden {
+		hiddenAdminPrefixURI = fmt.Sprintf("/%s", amw.Router.AdminHiddenPassword)
+	}
+
+	routeIsProtected = strings.HasPrefix(r.RequestURI, hiddenAdminPrefixURI+"/admin")
 
 	if routeIsProtected && strings.Compare(r.RequestURI, "/admin/users/root/new") == 0 {
 		ut := db.UsersTable{}
