@@ -50,6 +50,7 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("quillenabled", false)
 		pctx.Set("formhash", lh.mapFormToHash(w, r, "loginform"))
 		pctx.Set("loginerrormessage", "")
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", lh.Router.AdminHiddenPassword))
 
 		loginErrorStore, err := sessionsstore.Get(r, "passerrmsg")
 
@@ -67,7 +68,12 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 		RenderDefault(w, "login.html", pctx)
 	} else {
-		http.Redirect(w, r, "/admin", http.StatusFound)
+		var redirectURI = "/admin"
+
+		if lh.Router.AdminHidden {
+			redirectURI = fmt.Sprintf("/%s", lh.Router.AdminHiddenPassword) + redirectURI
+		}
+		http.Redirect(w, r, redirectURI, http.StatusFound)
 	}
 }
 
