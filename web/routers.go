@@ -35,13 +35,15 @@ import (
 
 //MutableRouter is a mutex lock for the mux router
 type MutableRouter struct {
-	Server         *http.Server
-	mu             sync.Mutex
-	Root           *mux.Router
-	ActivityLogLoc string
-	staticwatcher  *watcher.Watcher
-	pluginswatcher *watcher.Watcher
-	pm             *plugins.Manager
+	Server              *http.Server
+	mu                  sync.Mutex
+	Root                *mux.Router
+	AdminHidden         bool
+	AdminHiddenPassword string
+	ActivityLogLoc      string
+	staticwatcher       *watcher.Watcher
+	pluginswatcher      *watcher.Watcher
+	pm                  *plugins.Manager
 }
 
 //Swap takes a new mux router, locks accessing for old one, replaces it and then unlocks, keeps existing connections
