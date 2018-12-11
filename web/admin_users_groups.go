@@ -15,7 +15,6 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/plush"
@@ -31,8 +30,6 @@ type AdminUserGroupsHandler struct {
 
 func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	groups := make([]db.Group, 0)
-	groupMemberships := make([]db.GroupMembership, 0)
-	users := make([]db.User, 0)
 
 	groupTable := db.GroupTable{}
 	rows, err := groupTable.Select(db.Conn, "createddatetime, uuid, title", "")
@@ -51,46 +48,6 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		groups = append(groups, group)
-
-		groupMembershipTable := db.GroupMembershipTable{}
-		rows, err := groupMembershipTable.Select(db.Conn, "createddatetime, groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", group.UUID))
-
-		if err != nil {
-			logging.Error(err.Error())
-			continue
-		}
-
-		for rows.Next() {
-			groupMembership := db.GroupMembership{}
-			err := rows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
-
-			if err != nil {
-				logging.Error(err.Error())
-				continue
-			}
-
-			groupMemberships = append(groupMemberships, groupMembership)
-
-			usersTable := db.UsersTable{}
-			rows, err := usersTable.Select(db.Conn, "createddatetime, userroleid, uuid, username, authhash, firstname, lastname, email", fmt.Sprintf("uuid = '%s'", groupMembership.UserUUID))
-
-			if err != nil {
-				logging.Error(err.Error())
-				continue
-			}
-
-			for rows.Next() {
-				user := db.User{}
-				err := rows.Scan(&user.CreatedDateTime, &user.UserroleId, &user.UUID, &user.Username, &user.AuthHash, &user.FirstName, &user.LastName, &user.Email)
-
-				if err != nil {
-					logging.Error(err.Error())
-					continue
-				}
-
-				users = append(users, user)
-			}
-		}
 	}
 
 	pctx := plush.NewContext()
@@ -98,6 +55,7 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("title", "Groups")
 	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", ugh.Router.AdminHiddenPassword))
 	pctx.Set("quillenabled", false)
+	pctx.Set("groups", groups)
 
 	RenderDefault(w, "admin.users.groups.html", pctx)
 }
