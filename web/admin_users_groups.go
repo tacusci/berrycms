@@ -15,6 +15,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gobuffalo/plush"
