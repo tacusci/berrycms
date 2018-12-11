@@ -38,7 +38,10 @@ func TestNewUsersGet(t *testing.T) {
 	//need this to force working directory contain /res folder
 	os.Chdir("../")
 	//will need to handle both new user and new root user routes
-	aunh := AdminUsersNewHandler{}
+	mr := &MutableRouter{}
+	aunh := AdminUsersNewHandler{
+		Router: mr,
+	}
 	req := httptest.NewRequest("GET", handlerRouteNewRootUser, nil)
 	responseRecorder := httptest.NewRecorder()
 
@@ -51,7 +54,10 @@ func TestNewUsersGet(t *testing.T) {
 	}
 
 	//test handle get request for new user
-	aunh = AdminUsersNewHandler{}
+	mr = &MutableRouter{}
+	aunh = AdminUsersNewHandler{
+		Router: mr,
+	}
 	req = httptest.NewRequest("GET", handlerRouteNewUser, nil)
 	responseRecorder = httptest.NewRecorder()
 
@@ -65,7 +71,11 @@ func TestNewUsersGet(t *testing.T) {
 }
 
 func TestNewUsersPost(t *testing.T) {
-	aunh := AdminUsersNewHandler{}
+
+	mr := &MutableRouter{}
+	aunh := AdminUsersNewHandler{
+		Router: mr,
+	}
 	req := httptest.NewRequest("POST", handlerRouteNewUser, nil)
 	responseRecorder := httptest.NewRecorder()
 
