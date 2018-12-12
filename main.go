@@ -59,7 +59,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.sqlPassword, "dbpass", "", "Database server password, ignored if using sqlite")
 	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
 	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
-	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "Password required to access dashboard endpoints")
+	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
 
 	flag.Parse()
 
