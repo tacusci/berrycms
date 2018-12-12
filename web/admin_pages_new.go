@@ -47,9 +47,14 @@ func (apnh *AdminPagesNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
+	var redirectURI = "/admin/pages/new"
+	if apnh.Router.AdminHidden {
+		redirectURI = fmt.Sprintf("/%s", apnh.Router.AdminHiddenPassword) + redirectURI
+	}
+
 	if err != nil {
 		logging.Error(err.Error())
-		http.Redirect(w, r, "/admin/pages/new", http.StatusFound)
+		http.Redirect(w, r, redirectURI, http.StatusFound)
 	}
 
 	pt := db.PagesTable{}
@@ -59,7 +64,7 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		logging.Error(err.Error())
-		http.Redirect(w, r, "/admin/pages/new", http.StatusFound)
+		http.Redirect(w, r, redirectURI, http.StatusFound)
 	}
 
 	pageToCreate := &db.Page{
@@ -84,7 +89,13 @@ func (apnh *AdminPagesNewHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	apnh.Router.Reload()
 
-	http.Redirect(w, r, fmt.Sprintf("/admin/pages/edit/%s", pageToCreate.UUID), http.StatusFound)
+	redirectURI = "/admin/pages/edit/%s"
+
+	if apnh.Router.AdminHidden {
+		redirectURI = fmt.Sprintf("/%s", apnh.Router.AdminHiddenPassword) + redirectURI
+	}
+
+	http.Redirect(w, r, fmt.Sprintf(redirectURI, pageToCreate.UUID), http.StatusFound)
 }
 
 //Route get URI route for handler

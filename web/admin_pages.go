@@ -16,11 +16,10 @@ package web
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
+	"net/http"
 )
 
 //AdminPagesHandler handler to contain pointer to core router and the URI string

@@ -33,7 +33,14 @@ func (audh *AdminUsersDeleteHandler) Get(w http.ResponseWriter, r *http.Request)
 
 //Post handles post requests to URI
 func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request) {
-	defer http.Redirect(w, r, "/admin/users", http.StatusFound)
+
+	var redirectURI = "/admin/users"
+
+	if audh.Router.AdminHidden {
+		redirectURI = fmt.Sprintf("/%s", audh.Router.AdminHiddenPassword) + redirectURI
+	}
+
+	defer http.Redirect(w, r, redirectURI, http.StatusFound)
 
 	err := r.ParseForm()
 

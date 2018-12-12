@@ -128,7 +128,7 @@ $(document).ready(function() {
           var form = document.createElement("form");
           form.setAttribute("id", "deleteform");
           form.setAttribute("method", "POST");
-          form.setAttribute("action", "/admin/users/delete");
+          form.setAttribute("action", window.location.pathname + "/delete");
 
           form._submit_function_ = form.submit;
 

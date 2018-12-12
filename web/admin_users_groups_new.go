@@ -60,7 +60,13 @@ func (augnh *AdminUserGroupsNewHandler) Post(w http.ResponseWriter, r *http.Requ
 
 	augnh.Router.Reload()
 
-	http.Redirect(w, r, fmt.Sprintf("/admin/users/groups/edit/%s", groupToCreate.UUID), http.StatusFound)
+	var redirectURI = "/admin/users/groups/edit/%s"
+
+	if augnh.Router.AdminHidden {
+		redirectURI = fmt.Sprintf("/%s", augnh.Router.AdminHiddenPassword) + redirectURI
+	}
+
+	http.Redirect(w, r, fmt.Sprintf(redirectURI, groupToCreate.UUID), http.StatusFound)
 }
 
 //Route get URI route for handler
