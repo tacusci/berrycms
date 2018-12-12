@@ -15,11 +15,10 @@
 package web
 
 import (
-	"net/http"
-
+	"fmt"
 	"github.com/tacusci/berrycms/db"
-
 	"github.com/tacusci/logging"
+	"net/http"
 )
 
 //AdminPagesDeleteHandler handler to contain pointer to core router and the URI string
@@ -51,7 +50,13 @@ func (apdh *AdminPagesDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 		apdh.Router.Reload()
 	}
 
-	http.Redirect(w, r, "/admin/pages", http.StatusFound)
+	var redirectURI = "/admin/pages"
+
+	if apdh.Router.AdminHidden {
+		redirectURI = fmt.Sprintf("/%s", apdh.Router.AdminHiddenPassword) + redirectURI
+	}
+
+	http.Redirect(w, r, redirectURI, http.StatusFound)
 }
 
 //Route get URI route for handler
