@@ -94,10 +94,11 @@ $(document).ready(function() {
       if (pagesToDeleteUUIDs.length > 0) {
 
         if (confirm("Delete " + String(pagesToDeleteUUIDs.length) + " page" + ((pagesToDeleteUUIDs.length > 1) ? "s?" : "?"))) {
+          console.log()
           var form = document.createElement("form");
           form.setAttribute("id", "deleteform");
           form.setAttribute("method", "POST");
-          form.setAttribute("action", "/admin/pages/delete");
+          form.setAttribute("action", window.location.pathname + "/delete");
   
           form._submit_function_ = form.submit;
   

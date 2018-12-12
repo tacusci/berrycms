@@ -18,7 +18,7 @@
                         <tr>
                             <td id="<%= group.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
                             <td><%= unixtostring(group.CreatedDateTime) %></td>
-                            <td><a href="/admin/users/groups/edit/<%= group.UUID %>"><%= group.Title %></a></td>
+                            <td><a href="<%= adminhiddenpassword %>/admin/users/groups/edit/<%= group.UUID %>"><%= group.Title %></a></td>
                         </tr>
                     <% } %>
                 <% } %>

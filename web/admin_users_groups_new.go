@@ -2,11 +2,12 @@ package web
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
-	"net/http"
-	"time"
 )
 
 //AdminUserGroupsNewHandler handler to contain pointer to core router and the URI string
@@ -23,6 +24,7 @@ func (augnh *AdminUserGroupsNewHandler) Get(w http.ResponseWriter, r *http.Reque
 	pctx.Set("pagetitle", "")
 	pctx.Set("pageroute", "")
 	pctx.Set("pagecontent", "")
+	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", augnh.Router.AdminHiddenPassword))
 	pctx.Set("quillenabled", false)
 	RenderDefault(w, "admin.users.groups.new.html", pctx)
 }
