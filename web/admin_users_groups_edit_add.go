@@ -1,13 +1,7 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
-
-	"github.com/tacusci/logging"
-
-	"github.com/gorilla/mux"
-	"github.com/tacusci/berrycms/db"
 )
 
 //AdminUserGroupsEditAddHandler contains response functions for pages admin page
