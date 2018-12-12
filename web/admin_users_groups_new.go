@@ -24,7 +24,10 @@ func (augnh *AdminUserGroupsNewHandler) Get(w http.ResponseWriter, r *http.Reque
 	pctx.Set("pagetitle", "")
 	pctx.Set("pageroute", "")
 	pctx.Set("pagecontent", "")
-	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", augnh.Router.AdminHiddenPassword))
+	pctx.Set("adminhiddenpassword", "")
+	if augnh.Router.AdminHidden {
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", augnh.Router.AdminHiddenPassword))
+	}
 	pctx.Set("quillenabled", false)
 	RenderDefault(w, "admin.users.groups.new.html", pctx)
 }

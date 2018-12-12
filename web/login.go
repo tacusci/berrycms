@@ -50,7 +50,10 @@ func (lh *LoginHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("quillenabled", false)
 		pctx.Set("formhash", lh.mapFormToHash(w, r, "loginform"))
 		pctx.Set("loginerrormessage", "")
-		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", lh.Router.AdminHiddenPassword))
+		pctx.Set("adminhiddenpassword", "")
+		if lh.Router.AdminHidden {
+			pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", lh.Router.AdminHiddenPassword))
+		}
 
 		loginErrorStore, err := sessionsstore.Get(r, "passerrmsg")
 

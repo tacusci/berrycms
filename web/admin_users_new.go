@@ -52,7 +52,10 @@ func (aunh *AdminUsersNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("title", "New User")
 		pctx.Set("navBarEnabled", true)
 		pctx.Set("newuserformaction", "/admin/users/new")
-		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", aunh.Router.AdminHiddenPassword))
+		pctx.Set("adminhiddenpassword", "")
+		if aunh.Router.AdminHidden {
+			pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", aunh.Router.AdminHiddenPassword))
+		}
 		pctx.Set("createuserlabel", "Create New User")
 	}
 	RenderDefault(w, "admin.users.new.html", pctx)

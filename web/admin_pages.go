@@ -64,7 +64,10 @@ func (aph *AdminPagesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("quillenabled", false)
 	pctx.Set("pages", pages)
 	pctx.Set("authors", authors)
-	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", aph.Router.AdminHiddenPassword))
+	pctx.Set("adminhiddenpassword", "")
+	if aph.Router.AdminHidden {
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", aph.Router.AdminHiddenPassword))
+	}
 
 	RenderDefault(w, "admin.pages.html", pctx)
 }

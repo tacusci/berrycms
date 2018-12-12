@@ -39,7 +39,10 @@ func (apnh *AdminPagesNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("pageroute", "")
 	pctx.Set("pagecontent", "")
 	pctx.Set("quillenabled", true)
-	pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", apnh.Router.AdminHiddenPassword))
+	pctx.Set("adminhiddenpassword", "")
+	if apnh.Router.AdminHidden {
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", apnh.Router.AdminHiddenPassword))
+	}
 	RenderDefault(w, "admin.pages.new.html", pctx)
 }
 
