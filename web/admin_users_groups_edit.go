@@ -51,6 +51,10 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 	pctx.Set("users", users)
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("quillenabled", false)
+	pctx.Set("adminhiddenpassword", "")
+	if augeh.Router.AdminHidden {
+		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", augeh.Router.AdminHiddenPassword))
+	}
 	RenderDefault(w, "admin.users.groups.edit.html", pctx)
 }
 
