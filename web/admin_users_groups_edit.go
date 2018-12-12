@@ -2,11 +2,12 @@ package web
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
-	"net/http"
 )
 
 type AdminUserGroupsEditHandler struct {
@@ -15,20 +16,25 @@ type AdminUserGroupsEditHandler struct {
 }
 
 func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Request) {
-	var users = make([]db.User, 0)
 	vars := mux.Vars(r)
 	gmt := db.GroupMembershipTable{}
 
-	rows, err := gmt.Select(db.Conn, "createddatetime, groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", vars["uuid"]))
+	//retrieve every membership for this group
+	groupMembershipRows, err := gmt.Select(db.Conn, "createddatetime, groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", vars["uuid"]))
 	if err != nil {
 		logging.Error(err.Error())
 		w.Write([]byte("Group memberships not found"))
 		return
 	}
 
-	for rows.Next() {
+	defer groupMembershipRows.Close()
+
+	var usersInGroup = make([]db.User, 0)
+
+	//read each membership into struct
+	for groupMembershipRows.Next() {
 		groupMembership := db.GroupMembership{}
-		err := rows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
+		err := groupMembershipRows.Scan(&groupMembership.CreatedDateTime, &groupMembership.GroupUUID, &groupMembership.UserUUID)
 		if err != nil {
 			logging.Error(err.Error())
 			continue
@@ -36,19 +42,56 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 
 		ut := db.UsersTable{}
 
+		//read each user of each membership into struct and add to users in group list
 		user, err := ut.SelectByUUID(db.Conn, groupMembership.UserUUID)
 		if err != nil {
 			logging.Error(err.Error())
 			continue
 		}
-		users = append(users, *user)
+		usersInGroup = append(usersInGroup, *user)
+	}
+
+	//retrieve list of all existing users
+	ut := db.UsersTable{}
+	userRows, err := ut.Select(db.Conn, "*", "")
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
+
+	defer userRows.Close()
+
+	var usersNotInGroup = make([]db.User, 0)
+
+	u := &db.User{}
+
+	//read each existing user into struct and add to users not in group list if not already in the in group list
+	for userRows.Next() {
+		err = userRows.Scan(&u.UserId, &u.CreatedDateTime, &u.UserroleId, &u.UUID, &u.Username, &u.AuthHash, &u.FirstName, &u.LastName, &u.Email)
+		if err != nil {
+			logging.Error(err.Error())
+			continue
+		}
+
+		userInGroup := false
+		for _, user := range usersInGroup {
+			if u.UUID == user.UUID {
+				userInGroup = true
+				break
+			}
+		}
+
+		if !userInGroup {
+			usersNotInGroup = append(usersNotInGroup, *u)
+		}
 	}
 
 	pctx := plush.NewContext()
 	pctx.Set("title", "Edit Group")
 	pctx.Set("submitroute", r.RequestURI)
 	pctx.Set("groupuuid", vars["uuid"])
-	pctx.Set("users", users)
+	pctx.Set("usersInGroup", usersInGroup)
+	pctx.Set("usersNotInGroup", usersNotInGroup)
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("quillenabled", false)
 	pctx.Set("adminhiddenpassword", "")

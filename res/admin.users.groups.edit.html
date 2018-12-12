@@ -1,22 +1,22 @@
 <body>
     <div class="container">
         <%= contentOf("navdashboardheader") %>
-        <li class="navbar-item"><a class="navbar-link" href="<%= adminhiddenpassword %>/admin/users/groups/edit/<%= groupuuid %>/add">Add</a></li>
-		<li class="navbar-item"><button id="groupusersremove" class="navbar-input">Remove</button></li>
+        <li class="navbar-item"><a class="navbar-link" href="<%= adminhiddenpassword %>/admin/usersInGroup/groups/edit/<%= groupuuid %>/add">Add</a></li>
+		<li class="navbar-item"><button id="groupusersInGroupremove" class="navbar-input">Remove</button></li>
         <%= contentOf("navdashboardfooter") %>
-        <table id="group-users-list" class="u-full-width">
+        <table id="group-usersInGroup-list" class="u-full-width">
             <thead>
                 <tr>
-                    <th style="padding: 0px 0px;"><input id="selectallgroupusers" style="margin-top: 1.4rem;" type="checkbox"></th>
+                    <th style="padding: 0px 0px;"><input id="selectallgroupusersInGroup" style="margin-top: 1.4rem;" type="checkbox"></th>
                     <th>Date/Time</th>
                     <th>Username</th>
                 </tr>
             </thead>
             <tbody>
-                <%= if (users && len(users) > 0) { %>
-                    <%= for (user) in users { %>
-                        <%= if (users && len(users) > 0) { %>
-                            <%= for (user) in users { %>
+                <%= if (usersInGroup && len(usersInGroup) > 0) { %>
+                    <%= for (user) in usersInGroup { %>
+                        <%= if (usersInGroup && len(usersInGroup) > 0) { %>
+                            <%= for (user) in usersInGroup { %>
                                 <tr>
                                     <td id="<%= user.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
                                     <td><%= unixtostring(user.CreatedDateTime) %></td>
