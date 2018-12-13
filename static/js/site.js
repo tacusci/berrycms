@@ -58,7 +58,7 @@ $(document).ready(function() {
       $('html, body').animate({
           scrollTop: $("#elementtoScrollToID").offset().top
       }, 2000);
-  });
+    });
   
     function resize() {
       $body.removeClass('has-docked-nav')
