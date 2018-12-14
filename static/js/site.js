@@ -145,6 +145,37 @@ $(document).ready(function() {
       }
     })
 
+    $("#adduserstogroup").click(function() {
+
+      var usesrToAddUUIDs = [];
+
+      $("#users-not-in-group-list tr").each(function(){
+        collectAllCheckedBoxIDs(this, usesrToAddUUIDs);
+      })
+
+      if (usesrToAddUUIDs.length > 0) {
+        if (confirm("Add " + String(usesrToAddUUIDs.length) + " user" + ((usesrToAddUUIDs.length > 1) ? "s" : "") + " to group?")) {
+          var form = document.createElement("form");
+          form.setAttribute("id", "addusertogroupform");
+          form.setAttribute("method", "POST");
+          form.setAttribute("action", window.location.pathname + "/add");
+
+          form._submit_function_ = form.submit;
+
+          for (var i = 0; i < usesrToAddUUIDs.length; i++) {
+            var hiddenfield = document.createElement("input");
+            hiddenfield.setAttribute("type", "hidden")
+            hiddenField.setAttribute("name", String(i));
+            hiddenField.setAttribute("value", usersToDeleteUUIDs[i]);
+            form.appendChild(hiddenField);
+          }
+          document.body.appendChild(form);
+          form._submit_function_();
+          }
+        }
+      }
+    })
+
     $("#selectallpages").change(function() {
       var selectAll = this.checked;
       $("#page-list tr").each(function(){
