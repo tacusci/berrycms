@@ -208,7 +208,10 @@ body {
 .modal-content {
   background-color: #fefefe;
   margin: auto;
-  padding: 20px;
+  padding-right: 15px;
+  padding-left: 15px;
+  padding-bottom: 15px;
+  padding-top: 1px;
   border: 1px solid #888;
   width: 80%;
 }
@@ -217,6 +220,7 @@ body {
 .close {
   color: #aaaaaa;
   float: right;
+  line-height: 1em;
   font-size: 28px;
   font-weight: bold;
 }
