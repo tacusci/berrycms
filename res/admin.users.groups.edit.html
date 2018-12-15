@@ -14,13 +14,13 @@
             </thead>
             <tbody>
                 <%= if (usersInGroup && len(usersInGroup) > 0) { %>
-                    <%= for (user) in usersInGroup { %>
+                    <%= for (userInGroup) in usersInGroup { %>
                         <%= if (usersInGroup && len(usersInGroup) > 0) { %>
-                            <%= for (user) in usersInGroup { %>
+                            <%= for (userInGroup) in usersInGroup { %>
                                 <tr>
-                                    <td id="<%= user.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
-                                    <td><%= unixtostring(user.CreatedDateTime) %></td>
-                                    <td><%= user.Username %></td>
+                                    <td id="<%= userInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+                                    <td><%= unixtostring(userInGroup.CreatedDateTime) %></td>
+                                    <td><%= userInGroup.Username %></td>
                                 </tr>
                             <% } %>
                         <% } %>
@@ -42,13 +42,13 @@
                     </thead>
                     <tbody>
                         <%= if (usersNotInGroup && len(usersNotInGroup) > 0) { %>
-                            <%= for (user) in usersNotInGroup { %>
+                            <%= for (userNotInGroup) in usersNotInGroup { %>
                                 <%= if (usersNotInGroup && len(usersNotInGroup) > 0) { %>
-                                    <%= for (user) in usersNotInGroup { %>
+                                    <%= for (userNotInGroup) in usersNotInGroup { %>
                                         <tr>
-                                            <td id="<%= user.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
-                                            <td><%= unixtostring(user.CreatedDateTime) %></td>
-                                            <td><%= user.Username %></td>
+                                            <td id="<%= userNotInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+                                            <td><%= unixtostring(userNotInGroup.CreatedDateTime) %></td>
+                                            <td><%= userNotInGroup.Username %></td>
                                         </tr>
                                     <% } %>
                                 <% } %>
