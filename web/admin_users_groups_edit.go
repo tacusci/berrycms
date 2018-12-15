@@ -76,14 +76,12 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 		userInGroup := false
 		for _, user := range usersInGroup {
 			if u.UUID == user.UUID {
-				logging.Debug(fmt.Sprintf("User %s is in group already", u.Username))
 				userInGroup = true
 				break
 			}
 		}
 
 		if !userInGroup {
-			logging.Debug(fmt.Sprintf("User %s is not in group", u.Username))
 			usersNotInGroup = append(usersNotInGroup, *u)
 		}
 	}

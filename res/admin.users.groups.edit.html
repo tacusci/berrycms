@@ -4,6 +4,8 @@
         <li class="navbar-item"><button id="add-users-to-group" class="navbar-input">Add</button></li>
 		<li class="navbar-item"><button id="remove-users-from-group" class="navbar-input">Remove</button></li>
         <%= contentOf("navdashboardfooter") %>
+        <h2>Number of users in group -> <%= len(usersInGroup) %></h2>
+        <h2>Number of users not in group -> <%= len(usersNotInGroup) %></h2>
         <table id="users-in-group-list" class="u-full-width">
             <thead>
                 <tr>
