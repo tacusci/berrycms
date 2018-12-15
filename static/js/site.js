@@ -163,15 +163,14 @@ $(document).ready(function() {
           form._submit_function_ = form.submit;
 
           for (var i = 0; i < usesrToAddUUIDs.length; i++) {
-            var hiddenfield = document.createElement("input");
-            hiddenfield.setAttribute("type", "hidden")
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden")
             hiddenField.setAttribute("name", String(i));
-            hiddenField.setAttribute("value", usersToDeleteUUIDs[i]);
+            hiddenField.setAttribute("value", usesrToAddUUIDs[i]);
             form.appendChild(hiddenField);
           }
           document.body.appendChild(form);
           form._submit_function_();
-          }
         }
       }
     })
