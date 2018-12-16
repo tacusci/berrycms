@@ -86,9 +86,22 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
+	gt := db.GroupTable{}
+	rows, err := gt.Select(db.Conn, "title", fmt.Sprintf("uuid = '%s'", vars["uuid"]))
+	if err != nil {
+		Error(w, err)
+		return
+	}
+
+	var groupTitle string
+	if rows.Next() {
+		rows.Scan(&groupTitle)
+	}
+
 	pctx := plush.NewContext()
 	pctx.Set("title", "Edit Group")
 	pctx.Set("submitroute", r.RequestURI)
+	pctx.Set("grouptitle", groupTitle)
 	pctx.Set("groupuuid", vars["uuid"])
 	pctx.Set("usersInGroup", usersInGroup)
 	pctx.Set("usersNotInGroup", usersNotInGroup)
