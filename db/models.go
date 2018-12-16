@@ -469,6 +469,22 @@ func (gmt *GroupMembershipTable) AddUserToGroup(db *sql.DB, u *User, groupTitle 
 	return nil
 }
 
+func (gmt *GroupMembershipTable) DeleteUserFromGroup(db *sql.DB, u *User) (int64, error) {
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE useruuid = ?", gmt.Name()), u.UUID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	numDeleted, err := res.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return numDeleted, nil
+}
+
 func (gmt *GroupMembershipTable) Select(db *sql.DB, whatToSelect string, whereClause string) (*sql.Rows, error) {
 	if len(whereClause) > 0 {
 		return db.Query(fmt.Sprintf("SELECT %s FROM %s WHERE %s", whatToSelect, gmt.Name(), whereClause))
