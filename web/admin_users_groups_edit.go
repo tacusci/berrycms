@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -22,8 +23,7 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 	//retrieve every membership for this group
 	groupMembershipRows, err := gmt.Select(db.Conn, "createddatetime, groupuuid, useruuid", fmt.Sprintf("groupuuid = '%s'", vars["uuid"]))
 	if err != nil {
-		logging.Error(err.Error())
-		w.Write([]byte("Group memberships not found"))
+		Error(w, errors.New("Group memberships not found"))
 		return
 	}
 
