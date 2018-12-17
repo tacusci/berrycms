@@ -27,9 +27,7 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	defer groupMembershipRows.Close()
-
-	var usersInGroup = make([]db.User, 0)
+	usersInGroup := make([]db.User, 0)
 
 	//read each membership into struct
 	for groupMembershipRows.Next() {
@@ -51,17 +49,17 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 		usersInGroup = append(usersInGroup, *user)
 	}
 
+	groupMembershipRows.Close()
+
 	//retrieve list of all existing users
 	ut := db.UsersTable{}
 	userRows, err := ut.Select(db.Conn, "*", "")
 	if err != nil {
-		logging.Error(err.Error())
+		Error(w, err)
 		return
 	}
 
-	defer userRows.Close()
-
-	var usersNotInGroup = make([]db.User, 0)
+	usersNotInGroup := make([]db.User, 0)
 
 	u := &db.User{}
 
@@ -86,17 +84,21 @@ func (augeh *AdminUserGroupsEditHandler) Get(w http.ResponseWriter, r *http.Requ
 		}
 	}
 
+	userRows.Close()
+
 	gt := db.GroupTable{}
-	rows, err := gt.Select(db.Conn, "title", fmt.Sprintf("uuid = '%s'", vars["uuid"]))
+	groupRows, err := gt.Select(db.Conn, "title", fmt.Sprintf("uuid = '%s'", vars["uuid"]))
 	if err != nil {
 		Error(w, err)
 		return
 	}
 
 	var groupTitle string
-	if rows.Next() {
-		rows.Scan(&groupTitle)
+	if groupRows.Next() {
+		groupRows.Scan(&groupTitle)
 	}
+
+	groupRows.Close()
 
 	pctx := plush.NewContext()
 	pctx.Set("title", "Edit Group")
