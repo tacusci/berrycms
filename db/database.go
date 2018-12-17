@@ -89,34 +89,19 @@ func Close() {
 func CreateTestData() {
 	logging.Debug("Creating test user...")
 	usersTable := UsersTable{}
-	err := usersTable.Insert(Conn, &User{
-		Username:        "jdoe",
-		CreatedDateTime: time.Now().Unix(),
-		FirstName:       "John",
-		LastName:        "Doe",
-		AuthHash:        util.HashAndSalt([]byte("iamjohndoe")),
-		Email:           "person@place.com",
-	})
-	rootUser := User{}
-	rows, err := usersTable.Select(Conn, "UUID", fmt.Sprintf("userid = 1 AND userroleid = %d", ROOT_USER))
-	if err != nil {
-		logging.Error("Unable to fetch root user...")
-		return
-	}
-	for rows.Next() {
-		rows.Scan(&rootUser.UUID)
-	}
-	logging.Debug("Creating test page...")
-	pagesTable := PagesTable{}
-	err = pagesTable.Insert(Conn, &Page{
-		CreatedDateTime: time.Now().Unix(),
-		AuthorUUID:      rootUser.UUID,
-		Title:           "Add New",
-		Route:           "/addnew",
-		Content:         "<html><body><h2>Adding Carbonite page...</h2></body></html>",
-	})
-	if err != nil {
-		logging.Error(err.Error())
+	for i := 0; i < 51; i++ {
+		err := usersTable.Insert(Conn, &User{
+			Username:        fmt.Sprintf("jdoe%d", i),
+			CreatedDateTime: time.Now().Unix(),
+			FirstName:       "John",
+			LastName:        "Doe",
+			AuthHash:        util.HashAndSalt([]byte("iamjohndoe")),
+			Email:           fmt.Sprintf("person@place%d.com", i),
+		})
+
+		if err != nil {
+			logging.Error(err.Error())
+		}
 	}
 }
 
