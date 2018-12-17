@@ -36,8 +36,11 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	rows, err := groupTable.Select(db.Conn, "createddatetime, uuid, title", "")
 
 	if err != nil {
-		logging.Error(err.Error())
+		Error(w, err)
+		return
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		group := db.Group{}
