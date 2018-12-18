@@ -10,7 +10,9 @@
                 <tr>
                     <th style="padding: 0px 0px;"><input id="selectallusersingroup" style="margin-top: 1.4rem;" type="checkbox"></th>
                     <th>Date/Time</th>
+                    <th>Name</th>
                     <th>Username</th>
+                    <th>Email</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,7 +21,9 @@
                         <tr>
                             <td id="<%= userInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
                             <td><%= unixtostring(userInGroup.CreatedDateTime) %></td>
+                            <td><%= userInGroup.FirstName %> <%=userInGroup.LastName %></td>
                             <td><%= userInGroup.Username %></td>
+                            <td><%= userInGroup.Email %></td>
                         </tr>
                     <% } %>
                 <% } %>
@@ -38,7 +42,9 @@
                             <tr>
                                 <th style="padding: 0px 0px;"><input id="selectallusersnotingroup" style="margin-top: 1.4rem;" type="checkbox"></th>
                                 <th>Date/Time</th>
+                                <th>Name</th>
                                 <th>Username</th>
+                                <th>Email</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -47,7 +53,9 @@
                                     <tr>
                                         <td id="<%= userNotInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
                                         <td><%= unixtostring(userNotInGroup.CreatedDateTime) %></td>
+                                        <td><%= userNotInGroup.FirstName %> <%=userNotInGroup.LastName %></td>
                                         <td><%= userNotInGroup.Username %></td>
+                                        <td><%= userNotInGroup.Email %></td>
                                     </tr>
                                 <% } %>
                             <% } %>
