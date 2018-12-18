@@ -4,7 +4,7 @@
         <li class="navbar-item"><button id="add-users-to-group" class="navbar-input" style="margin-right: 35px;">Add</button></li>
 		<li class="navbar-item"><button id="remove-users-from-group" class="navbar-input">Remove</button></li>
         <%= contentOf("navdashboardfooter") %>
-        <h2>Edit group - <%= grouptitle %></h2>
+        <h3>Edit group - <%= grouptitle %></h3>
         <table id="users-in-group-list" class="u-full-width">
             <thead>
                 <tr>
@@ -28,28 +28,36 @@
 
         <div id="users-not-in-group-list-modal" class="modal">
             <div class="modal-content container">
-                <span class="close">&times;</span>
-                <table id="users-not-in-group-list" class="u-full-width">
-                    <thead>
-                        <tr>
-                            <th style="padding: 0px 0px;"><input id="selectallusersnotingroup" style="margin-top: 1.4rem;" type="checkbox"></th>
-                            <th>Date/Time</th>
-                            <th>Username</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%= if (usersNotInGroup && len(usersNotInGroup) > 0) { %>
-                            <%= for (userNotInGroup) in usersNotInGroup { %>
-                                <tr>
-                                    <td id="<%= userNotInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
-                                    <td><%= unixtostring(userNotInGroup.CreatedDateTime) %></td>
-                                    <td><%= userNotInGroup.Username %></td>
-                                </tr>
+                <div class="row">
+                    <span class="close">&times;</span>
+                </div>
+
+                <div class="row" style="max-height: 45em; overflow: auto;">
+                    <table id="users-not-in-group-list" class="u-full-width">
+                        <thead>
+                            <tr>
+                                <th style="padding: 0px 0px;"><input id="selectallusersnotingroup" style="margin-top: 1.4rem;" type="checkbox"></th>
+                                <th>Date/Time</th>
+                                <th>Username</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%= if (usersNotInGroup && len(usersNotInGroup) > 0) { %>
+                                <%= for (userNotInGroup) in usersNotInGroup { %>
+                                    <tr>
+                                        <td id="<%= userNotInGroup.UUID %>" class="td-nopadding"><input style="margin-top: 1.4rem;" type="checkbox"></td>
+                                        <td><%= unixtostring(userNotInGroup.CreatedDateTime) %></td>
+                                        <td><%= userNotInGroup.Username %></td>
+                                    </tr>
+                                <% } %>
                             <% } %>
-                        <% } %>
-                    </tbody>
-                </table>
-                <button id="adduserstogroup" class="button-primary" style="margin-bottom: 0em;">Add</button>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row" style="padding-top: 1em;">
+                    <button id="adduserstogroup" class="button-primary" style="margin-bottom: 0em;">Add</button>
+                </div>
             </div>
         </div>
     </div>
