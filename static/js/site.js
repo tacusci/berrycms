@@ -2,7 +2,7 @@ $(document).ready(function() {
 
     // Variables
     var $nav = $('.navbar');
-    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null && $nav.offset() !== undefined) {
+    if ($nav !== undefined && $nav !== null && $nav.top !== undefined && $nav.top !== null) {
       var $navOffsetTop = $nav.offset().top;
     }
     var $body = $('body'),
@@ -69,10 +69,10 @@ $(document).ready(function() {
     }
   
     function onScroll() {
-      if(navOffsetTop < $window.scrollTop() && !$body.hasClass('has-docked-nav')) {
+      if(typeof navOffsetTop !== "undefined" && navOffsetTop < $window.scrollTop() && !$body.hasClass('has-docked-nav')) {
         $body.addClass('has-docked-nav')
       }
-      if(navOffsetTop > $window.scrollTop() && $body.hasClass('has-docked-nav')) {
+      if(typeof navOffsetTop !== "undefined" && navOffsetTop > $window.scrollTop() && $body.hasClass('has-docked-nav')) {
         $body.removeClass('has-docked-nav')
       }
     }
