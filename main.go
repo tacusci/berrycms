@@ -91,7 +91,7 @@ func main() {
 
 	if opts.wipe {
 		//if yes to all if statement won't evaluate next condition
-		if opts.yesToAll || askForConfirmation("Wiping the database is irreversible, are you sure?") {
+		if opts.yesToAll || askConfirmToWipe() {
 			db.Wipe()
 		} else {
 			logging.Info("Skipping wiping database...")
@@ -134,11 +134,12 @@ func main() {
 	}
 }
 
-func askForConfirmation(s string) bool {
+func askConfirmToWipe() bool {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Printf("%s [y/n]: ", s)
+		logging.YellowOutput("⚠ Wiping the database is irreversible, are you sure? ⚠ ")
+		fmt.Printf(" [y/n]: ")
 
 		response, err := reader.ReadString('\n')
 
