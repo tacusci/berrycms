@@ -198,6 +198,7 @@ body {
   z-index: 1; /* Sit on top */
   left: 0;
   top: 0;
+  padding-bottom: 5%;
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
@@ -209,7 +210,7 @@ body {
 .modal-content {
   background-color: #fefefe;
   min-width: 80%;
-  min-height: 200px;
+  min-height: 100px;
   max-height: 70%;
   display: flex;
   flex-direction: column;
