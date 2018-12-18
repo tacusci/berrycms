@@ -209,7 +209,7 @@ body {
 /* Modal Content */
 .modal-content {
   background-color: #fefefe;
-  min-width: 80%;
+  min-width: 65%;
   min-height: 100px;
   max-height: 70%;
   display: flex;
