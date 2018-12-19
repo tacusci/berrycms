@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cheggaaa/pb"
+
 	"github.com/tacusci/berrycms/util"
 
 	"github.com/tacusci/logging"
@@ -87,9 +89,15 @@ func Close() {
 
 //CreateTestData fill database with known test data for development/testing purposes
 func CreateTestData() {
-	logging.Debug("Creating test user...")
+	numTestUsers := 50
+
 	usersTable := UsersTable{}
-	for i := 0; i < 51; i++ {
+
+	bar := pb.New(numTestUsers).Prefix("Creating test users").SetWidth(80).SetMaxWidth(80)
+
+	bar.Start()
+
+	for i := 0; i < numTestUsers; i++ {
 		err := usersTable.Insert(Conn, &User{
 			Username:        fmt.Sprintf("jdoe%d", i),
 			CreatedDateTime: time.Now().Unix(),
@@ -102,7 +110,11 @@ func CreateTestData() {
 		if err != nil {
 			logging.Error(err.Error())
 		}
+
+		bar.Increment()
 	}
+
+	bar.Finish()
 }
 
 func Heartbeat() {
@@ -139,8 +151,12 @@ func Setup() {
 }
 
 func createTables(db *sql.DB) {
-	logging.Debug("Creating all database tables...")
 	tablesToCreate := getTables()
+
+	bar := pb.New(len(tablesToCreate)).Prefix("Creating database tables").SetWidth(80).SetMaxWidth(80)
+
+	bar.Start()
+
 	for _, tableToCreate := range tablesToCreate {
 		tableCreateStatement := createStatement(tableToCreate)
 
@@ -153,7 +169,11 @@ func createTables(db *sql.DB) {
 		if err != nil {
 			logging.Error(err.Error())
 		}
+
+		bar.Increment()
 	}
+
+	bar.Finish()
 }
 
 func getTables() []Table {
