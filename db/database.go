@@ -95,7 +95,7 @@ func CreateTestData() {
 
 	bar := progressbar.NewOptions(
 		numTestUsers,
-		progressbar.OptionSetDescription("Creating test users..."),
+		progressbar.OptionSetDescription("Creating test users...     "),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "▒",
 			SaucerPadding: " ",
