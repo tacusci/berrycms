@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cheggaaa/pb"
+	"github.com/schollz/progressbar"
 
 	"github.com/tacusci/berrycms/util"
 
@@ -93,9 +93,15 @@ func CreateTestData() {
 
 	usersTable := UsersTable{}
 
-	bar := pb.New(numTestUsers).Prefix("Creating test users").SetWidth(80).SetMaxWidth(80)
-
-	bar.Start()
+	bar := progressbar.NewOptions(
+		numTestUsers,
+		progressbar.OptionSetDescription("Creating test users..."),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "▒",
+			SaucerPadding: " ",
+			BarStart:      "|",
+			BarEnd:        "|",
+		}))
 
 	for i := 0; i < numTestUsers; i++ {
 		err := usersTable.Insert(Conn, &User{
@@ -110,11 +116,11 @@ func CreateTestData() {
 		if err != nil {
 			logging.Error(err.Error())
 		}
-
-		bar.Increment()
+		bar.Add(1)
 	}
 
-	bar.Finish()
+	//force further output to be shoved onto next line
+	println()
 }
 
 func Heartbeat() {
@@ -153,11 +159,20 @@ func Setup() {
 func createTables(db *sql.DB) {
 	tablesToCreate := getTables()
 
-	bar := pb.New(len(tablesToCreate)).Prefix("Creating database tables").SetWidth(80).SetMaxWidth(80)
-
-	bar.Start()
+	bar := progressbar.NewOptions(
+		len(tablesToCreate),
+		progressbar.OptionSetDescription("Creating database tables..."),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "▒",
+			SaucerHead:    "▒",
+			SaucerPadding: " ",
+			BarStart:      "|",
+			BarEnd:        "|",
+		}))
 
 	for _, tableToCreate := range tablesToCreate {
+		bar.Add(1)
+
 		tableCreateStatement := createStatement(tableToCreate)
 
 		logging.Debug(fmt.Sprintf("Creating table %s...", tableToCreate.Name()))
@@ -170,10 +185,11 @@ func createTables(db *sql.DB) {
 			logging.Error(err.Error())
 		}
 
-		bar.Increment()
+		bar.Add(1)
 	}
 
-	bar.Finish()
+	//force further output to be shoved onto next line
+	println()
 }
 
 func getTables() []Table {
