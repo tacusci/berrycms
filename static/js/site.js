@@ -24,6 +24,7 @@ $(document).ready(function() {
       $popoverLink.on('click', openPopover)
       $document.on('click', closePopover)
       $('a[href^="#"]').on('click', smoothScroll)
+      $body.addClass('has-docked-nav');
     }
   
     function smoothScroll(e) {
