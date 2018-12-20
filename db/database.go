@@ -95,13 +95,7 @@ func CreateTestData() {
 
 	bar := progressbar.NewOptions(
 		numTestUsers,
-		progressbar.OptionSetDescription("Creating test users...     "),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "▒",
-			SaucerPadding: " ",
-			BarStart:      "|",
-			BarEnd:        "|",
-		}))
+		progressbar.OptionSetDescription("Creating test users...     "), util.ProgressBarOptions)
 
 	for i := 0; i < numTestUsers; i++ {
 		err := usersTable.Insert(Conn, &User{
@@ -161,14 +155,7 @@ func createTables(db *sql.DB) {
 
 	bar := progressbar.NewOptions(
 		len(tablesToCreate),
-		progressbar.OptionSetDescription("Creating database tables..."),
-		progressbar.OptionSetTheme(progressbar.Theme{
-			Saucer:        "▒",
-			SaucerHead:    "▒",
-			SaucerPadding: " ",
-			BarStart:      "|",
-			BarEnd:        "|",
-		}))
+		progressbar.OptionSetDescription("Creating database tables..."), util.ProgressBarOptions)
 
 	for _, tableToCreate := range tablesToCreate {
 		bar.Add(1)
