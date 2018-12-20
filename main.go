@@ -63,7 +63,7 @@ func parseCmdArgs() *options {
 
 	flag.Parse()
 
-	loggingLevel := logging.InfoLevel
+	loggingLevel := logging.WarnLevel
 	logging.ColorLogLevelLabelOnly = true
 
 	if *debugLevel {
@@ -89,10 +89,13 @@ func main() {
 		logging.ErrorAndExit(fmt.Sprintf("Unknown database server type %s...", opts.sql))
 	}
 
+	var wipeOccurred bool
+
 	if opts.wipe {
 		//if yes to all if statement won't evaluate next condition
 		if opts.yesToAll || askConfirmToWipe() {
 			db.Wipe()
+			wipeOccurred = true
 		} else {
 			logging.Info("Skipping wiping database...")
 		}
@@ -100,8 +103,15 @@ func main() {
 
 	db.Setup()
 
-	if opts.testData {
-		db.CreateTestData()
+	//if wipe never happened but test data creation requested, display message/warning
+	if !wipeOccurred && opts.testData {
+		logging.Warn("Wipe not carried out, skipping creating test data...")
+	}
+
+	if wipeOccurred {
+		if opts.testData {
+			db.CreateTestData()
+		}
 	}
 
 	go db.Heartbeat()
