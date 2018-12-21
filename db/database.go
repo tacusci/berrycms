@@ -97,8 +97,10 @@ func CreateTestData() {
 		numTestUsers,
 		progressbar.OptionSetDescription("Creating test users...     "), util.ProgressBarOptions)
 
+	var usersToInsert []*User
+
 	for i := 0; i < numTestUsers; i++ {
-		err := usersTable.Insert(Conn, &User{
+		usersToInsert = append(usersToInsert, &User{
 			Username:        fmt.Sprintf("jdoe%d", i),
 			CreatedDateTime: time.Now().Unix(),
 			FirstName:       "John",
@@ -106,11 +108,13 @@ func CreateTestData() {
 			AuthHash:        util.HashAndSalt([]byte("iamjohndoe")),
 			Email:           fmt.Sprintf("person@place%d.com", i),
 		})
-
-		if err != nil {
-			logging.Error(err.Error())
-		}
 		bar.Add(1)
+	}
+
+	err := usersTable.InsertMultiple(Conn, usersToInsert)
+	if err != nil {
+		logging.Error(err.Error())
+		return
 	}
 
 	//force further output to be shoved onto next line

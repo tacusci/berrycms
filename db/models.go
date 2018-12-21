@@ -177,10 +177,41 @@ func (ut *UsersTable) RootUserExists() bool {
 
 //InsertMultiple takes a slice of user structs and passes them all to 'Insert'
 func (ut *UsersTable) InsertMultiple(db *sql.DB, us []*User) error {
-	var err error
-	for i := range us {
-		err = ut.Insert(db, us[i])
+	var valuesToInsert []interface{}
+	insertStatement := ut.buildPreparedInsertStatement(us[0])
+
+	for i, u := range us {
+		if i > 0 && i < len(us) {
+			insertStatement += ", "
+		}
+
+		if i > 0 {
+			insertStatement += buildValuesList(u)
+		}
+
+		if u.UUID == "" {
+			newUUID, err := uuid.NewV4()
+			if err != nil {
+				return err
+			}
+			u.UUID = newUUID.String()
+			if u.UserroleId == 0 {
+				u.UserroleId = 3
+			}
+		}
+
+		valuesToInsert = append(valuesToInsert, u.CreatedDateTime)
+		valuesToInsert = append(valuesToInsert, u.UserroleId)
+		valuesToInsert = append(valuesToInsert, u.UUID)
+		valuesToInsert = append(valuesToInsert, u.Username)
+		valuesToInsert = append(valuesToInsert, u.AuthHash)
+		valuesToInsert = append(valuesToInsert, u.FirstName)
+		valuesToInsert = append(valuesToInsert, u.LastName)
+		valuesToInsert = append(valuesToInsert, u.Email)
 	}
+	logging.Debug(fmt.Sprintf("Running insert statement %s", insertStatement))
+	_, err := db.Exec(insertStatement, valuesToInsert...)
+
 	return err
 }
 
@@ -207,6 +238,7 @@ func (ut *UsersTable) Insert(db *sql.DB, u *User) error {
 			u.UserroleId = 3
 		}
 		insertStatement := ut.buildPreparedInsertStatement(u)
+		logging.Debug(fmt.Sprintf("Running insert statement %s", insertStatement))
 		_, err = db.Exec(insertStatement, u.CreatedDateTime, u.UserroleId, u.UUID, u.Username, u.AuthHash, u.FirstName, u.LastName, u.Email)
 		if err != nil {
 			return err
@@ -1017,7 +1049,15 @@ func buildPreparedInsertStatementFromTable(t Table, m Model) string {
 			}
 		}
 	}
-	insertStatementBuilder.WriteString(") VALUES (")
+	insertStatementBuilder.WriteString(") VALUES  ")
+	insertStatementBuilder.WriteString(buildValuesList(m))
+
+	return insertStatementBuilder.String()
+}
+
+func buildValuesList(m Model) string {
+	var insertStatementBuilder bytes.Buffer
+	insertStatementBuilder.WriteString("(")
 
 	modelFields := m.BuildFields()
 	modelFieldsCount := len(modelFields)
