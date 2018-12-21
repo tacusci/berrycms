@@ -102,7 +102,7 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 					ut.DeleteByUUID(db.Conn, userToDelete.UUID)
 					gmt := db.GroupMembershipTable{}
 					//will delete user from all groups, maybe this should be a different function?
-					gmt.DeleteUserFromGroup(db.Conn, userToDelete)
+					gmt.DeleteUserFromGroup(db.Conn, userToDelete, &db.Group{UUID: "*"})
 				}
 			}
 		}
