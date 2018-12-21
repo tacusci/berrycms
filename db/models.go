@@ -177,10 +177,18 @@ func (ut *UsersTable) RootUserExists() bool {
 
 //InsertMultiple takes a slice of user structs and passes them all to 'Insert'
 func (ut *UsersTable) InsertMultiple(db *sql.DB, us []*User) error {
+	if len(us) == 0 {
+		return errors.New("At least one user must be in list")
+	}
+
 	var valuesToInsert []interface{}
 	insertStatement := ut.buildPreparedInsertStatement(us[0])
 
 	for i, u := range us {
+		if err := u.Validate(); err != nil {
+			return err
+		}
+
 		if i > 0 && i < len(us) {
 			insertStatement += ", "
 		}
