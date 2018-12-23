@@ -94,7 +94,10 @@ func main() {
 	var wipeOccurred bool
 
 	if opts.wipe {
-		//if yes to all if statement won't evaluate next condition
+		//if yes to all flag is was used, user won't be prompted
+		//to confirm as if statement won't continue evaluating
+		//conditions eg., the bool val returned by 'askConfirmToWipe'
+		//so it'll never be called
 		if opts.yesToAll || askConfirmToWipe() {
 			db.Wipe()
 			wipeOccurred = true
