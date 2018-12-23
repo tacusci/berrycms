@@ -148,7 +148,6 @@ func main() {
 		if err != nil {
 			//only bother outputting error returned from listening server if we're not already trying to shutdown
 			logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
-			os.Exit(1)
 		}
 	}
 
