@@ -45,6 +45,8 @@ type options struct {
 	adminHiddenPassword string
 }
 
+var shuttingDown bool
+
 func parseCmdArgs() *options {
 	opts := &options{}
 
@@ -139,9 +141,15 @@ func main() {
 	logging.Info(fmt.Sprintf("Starting http server @ %s 🌏 ...", srv.Addr))
 	err := srv.ListenAndServe()
 
-	if err != nil {
-		logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+	if !shuttingDown {
+		if err != nil {
+			//only bother outputting error returned from listening server if we're not already trying to shutdown
+			logging.ErrorAndExit(fmt.Sprintf("☠️  Error starting server (%s) ☠️", err.Error()))
+			os.Exit(1)
+		}
 	}
+
+	logging.Info("Shutting down... BYE! 👋")
 }
 
 func askConfirmToWipe() bool {
@@ -175,13 +183,12 @@ func listenForStopSig(srv *http.Server, wc *chan bool) {
 	logging.Debug("Stopping clearing old sessions...")
 	//send a terminate command to the session clearing goroutine's channel
 	*wc <- true
+	shuttingDown = true
 	logging.Error(fmt.Sprintf("☠️  Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
 	logging.Info("Closing DB connection...")
 	db.Close()
 	logging.Info("Stopping HTTP server...")
-	logging.Info("Shutting down... BYE! 👋")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	srv.Shutdown(ctx)
-	os.Exit(0)
 }
