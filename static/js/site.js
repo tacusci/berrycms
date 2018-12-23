@@ -176,6 +176,36 @@ $(document).ready(function() {
       }
     })
 
+    $("#remove-users-from-group").click(function() {
+
+      var usesrToRemoveUUIDs = [];
+
+      $("#users-in-group-list tr").each(function(){
+        collectAllCheckedBoxIDs(this, usesrToRemoveUUIDs);
+      })
+
+      if (usesrToRemoveUUIDs.length > 0) {
+        if (confirm("Remove " + String(usesrToRemoveUUIDs.length) + " user" + ((usesrToRemoveUUIDs.length > 1) ? "s" : "") + " from group?")) {
+          var form = document.createElement("form");
+          form.setAttribute("id", "removeuserfromgroupform");
+          form.setAttribute("method", "POST");
+          form.setAttribute("action", window.location.pathname + "/remove");
+
+          form._submit_function_ = form.submit;
+
+          for (var i = 0; i < usesrToRemoveUUIDs.length; i++) {
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden")
+            hiddenField.setAttribute("name", String(i));
+            hiddenField.setAttribute("value", usesrToRemoveUUIDs[i]);
+            form.appendChild(hiddenField);
+          }
+          document.body.appendChild(form);
+          form._submit_function_();
+        }
+      }
+    })
+
     $("#selectallpages").change(function() {
       var selectAll = this.checked;
       $("#page-list tr").each(function(){
