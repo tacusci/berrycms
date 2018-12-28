@@ -86,7 +86,7 @@ func (augerh *AdminUserGroupsEditRemoveHandler) Post(w http.ResponseWriter, r *h
 				continue
 			}
 
-			gmt.DeleteUserFromGroup(db.Conn, userToRemove, &db.Group{UUID: groupUUID})
+			gmt.DeleteUserFromGroup(db.Conn, userToRemove, groupToRemoveFrom)
 		}
 	}
 }
