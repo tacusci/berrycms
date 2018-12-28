@@ -3,10 +3,11 @@ package web
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
-	"net/http"
 )
 
 //AdminUserGroupsEditAddHandler contains response functions for pages admin page
@@ -63,6 +64,8 @@ func (augeah *AdminUserGroupsEditAddHandler) Post(w http.ResponseWriter, r *http
 		for rows.Next() {
 			rows.Scan(&groupTitle)
 		}
+
+		rows.Close()
 
 		for _, v := range r.PostForm {
 			userToAdd, err := ut.SelectByUUID(db.Conn, v[0])

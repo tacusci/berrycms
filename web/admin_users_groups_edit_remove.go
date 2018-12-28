@@ -3,10 +3,11 @@ package web
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
-	"net/http"
 )
 
 //AdminUserGroupsEditRemoveHandler contains response functions for pages admin page
@@ -46,11 +47,33 @@ func (augerh *AdminUserGroupsEditRemoveHandler) Post(w http.ResponseWriter, r *h
 
 	ut := db.UsersTable{}
 	gmt := db.GroupMembershipTable{}
+	gt := db.GroupTable{}
 	amw := AuthMiddleware{}
 
 	loggedInUser, err := amw.LoggedInUser(r)
 
 	if loggedInUser != nil {
+
+		rows, err := gt.Select(db.Conn, "uuid, title", fmt.Sprintf("uuid = '%s'", groupUUID))
+		if err != nil {
+			Error(w, err)
+			return
+		}
+
+		var groupToRemoveFrom *db.Group
+
+		if rows.Next() {
+			groupToRemoveFrom = &db.Group{}
+			rows.Scan(&groupToRemoveFrom.UUID, &groupToRemoveFrom.Title)
+		}
+
+		rows.Close()
+
+		if groupToRemoveFrom == nil {
+			Error(w, fmt.Errorf("Unable to read group of UUID %s from database", groupUUID))
+			return
+		}
+
 		for _, v := range r.PostForm {
 			userToRemove, err := ut.SelectByUUID(db.Conn, v[0])
 			if err != nil {
@@ -58,7 +81,8 @@ func (augerh *AdminUserGroupsEditRemoveHandler) Post(w http.ResponseWriter, r *h
 				continue
 			}
 
-			if userToRemove == nil {
+			//don't allow the root user to be removed from the admins user group
+			if userToRemove == nil || (groupToRemoveFrom.Title == "Admins" && userToRemove.UserroleId == int(db.ROOT_USER)) {
 				continue
 			}
 
