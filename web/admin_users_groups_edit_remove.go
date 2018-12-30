@@ -67,7 +67,11 @@ func (augerh *AdminUserGroupsEditRemoveHandler) Post(w http.ResponseWriter, r *h
 			rows.Scan(&groupToRemoveFrom.UUID, &groupToRemoveFrom.Title)
 		}
 
-		rows.Close()
+		err = rows.Close()
+		if err != nil {
+			Error(w, err)
+			return
+		}
 
 		if groupToRemoveFrom == nil {
 			Error(w, fmt.Errorf("Unable to read group of UUID %s from database", groupUUID))
