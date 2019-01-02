@@ -12,6 +12,11 @@ type RobotsHandler struct {
 }
 
 func (rh *RobotsHandler) Get(w http.ResponseWriter, r *http.Request) {
+	//if the robots .txt file cache hasn't been created then technically there is no robots page
+	if robots.RobotsCache == nil {
+		fourOhFour(w, r)
+		return
+	}
 	robotsCacheContent, err := robots.RobotsCache.Get([]byte("robots"))
 	if err != nil {
 		Error(w, err)
