@@ -58,7 +58,8 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
 
-	err := robots.GenerateFile()
+	//creates robots.txt file and loads into in-memory cache
+	err := robots.Generate()
 	if err != nil {
 		logging.Error(err.Error())
 	}

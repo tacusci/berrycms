@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
 )
 
-func GenerateFile() error {
+var RobotsCache *freecache.Cache
+
+func Generate() error {
 
 	sb := bytes.Buffer{}
 
@@ -51,5 +54,16 @@ func GenerateFile() error {
 
 	}
 
+	return nil
+}
+
+func Cache(sb *bytes.Buffer) error {
+	RobotsCache = freecache.NewCache(len(sb.Bytes()))
+	key := []byte("robots")
+	val := sb.Bytes()
+	err := RobotsCache.Set(key, val, 0)
+	if err != nil {
+		return err
+	}
 	return nil
 }
