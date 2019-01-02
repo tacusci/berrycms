@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/tacusci/berrycms/robots"
-	"github.com/tacusci/logging"
 )
 
 type RobotsHandler struct {
@@ -18,7 +17,8 @@ func (rh *RobotsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		Error(w, err)
 		return
 	}
-	logging.Info(string(robotsCacheContent))
+
+	w.Write(robotsCacheContent)
 }
 
 func (rh *RobotsHandler) Post(w http.ResponseWriter, r *http.Request) {}
