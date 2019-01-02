@@ -17,7 +17,6 @@ package web
 import (
 	"bytes"
 	"fmt"
-	"github.com/tacusci/berrycms/robots"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -25,11 +24,13 @@ import (
 	"strings"
 	"sync"
 	"time"
+
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/radovskyb/watcher"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
+	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
 
@@ -56,6 +57,11 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
+
+	err := robots.GenerateFile()
+	if err != nil {
+		logging.Error(err.Error())
+	}
 
 	if mr.staticwatcher != nil {
 		mr.staticwatcher.Close()
@@ -121,8 +127,6 @@ func (mr *MutableRouter) Reload() {
 	r.Use(am.Middleware)
 
 	mr.Swap(r)
-
-	robots.GenerateFile()
 }
 
 func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
