@@ -1,14 +1,16 @@
 package robots
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/tacusci/berrycms/db"
-	"strings"
 )
 
 func GenerateFile() error {
 
-	sb := strings.Builder{}
+	sb := bytes.Buffer{}
 
 	sb.WriteString("User-agent: *\n")
 	//block indexing admin pages
@@ -42,7 +44,11 @@ func GenerateFile() error {
 	}
 
 	if writtenMoreRoutes {
-		fmt.Println(sb.String())
+		err := ioutil.WriteFile("./static/robots.txt", sb.Bytes(), 0644)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil

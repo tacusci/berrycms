@@ -25,7 +25,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
 	"github.com/gobuffalo/plush"
 	"github.com/gorilla/mux"
 	"github.com/radovskyb/watcher"
