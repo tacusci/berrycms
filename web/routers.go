@@ -17,6 +17,7 @@ package web
 import (
 	"bytes"
 	"fmt"
+	"github.com/tacusci/berrycms/robots"
 	"html/template"
 	"io/ioutil"
 	"net/http"
@@ -68,7 +69,6 @@ func (mr *MutableRouter) Reload() {
 	mr.pluginswatcher = watcher.New()
 
 	r := mux.NewRouter()
-
 	logging.Debug("Mapping default admin routes...")
 
 	for _, handler := range GetDefaultHandlers(mr) {
@@ -122,6 +122,8 @@ func (mr *MutableRouter) Reload() {
 	r.Use(am.Middleware)
 
 	mr.Swap(r)
+
+	robots.GenerateFile()
 }
 
 func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
