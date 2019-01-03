@@ -42,6 +42,7 @@ type MutableRouter struct {
 	AdminHidden         bool
 	AdminHiddenPassword string
 	ActivityLogLoc      string
+	NoRobots            bool
 	staticwatcher       *watcher.Watcher
 	pluginswatcher      *watcher.Watcher
 	pm                  *plugins.Manager
@@ -58,10 +59,12 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
 
-	//creates robots.txt file and loads into in-memory cache
-	err := robots.Generate()
-	if err != nil {
-		logging.Error(err.Error())
+	if !mr.NoRobots {
+		//creates a robot string and loads into in-memory cache
+		err := robots.Generate()
+		if err != nil {
+			logging.Error(err.Error())
+		}
 	}
 
 	if mr.staticwatcher != nil {

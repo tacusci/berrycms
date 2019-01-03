@@ -43,6 +43,7 @@ type options struct {
 	sqlAddress          string
 	activityLogLoc      string
 	adminHiddenPassword string
+	noRobots            bool
 }
 
 var shuttingDown bool
@@ -62,6 +63,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
 	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
 	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
+	flag.BoolVar(&opts.noRobots, "nrtxt", false, "Don't provide a robots.txt URI")
 
 	flag.Parse()
 
@@ -133,6 +135,7 @@ func main() {
 		ActivityLogLoc:      opts.activityLogLoc,
 		AdminHidden:         len(opts.adminHiddenPassword) > 0,
 		AdminHiddenPassword: opts.adminHiddenPassword,
+		NoRobots:            opts.noRobots,
 	}
 	rs.Reload()
 
