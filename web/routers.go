@@ -30,6 +30,7 @@ import (
 	"github.com/radovskyb/watcher"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
+	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
 
@@ -41,6 +42,7 @@ type MutableRouter struct {
 	AdminHidden         bool
 	AdminHiddenPassword string
 	ActivityLogLoc      string
+	NoRobots            bool
 	staticwatcher       *watcher.Watcher
 	pluginswatcher      *watcher.Watcher
 	pm                  *plugins.Manager
@@ -57,6 +59,14 @@ func (mr *MutableRouter) Swap(root *mux.Router) {
 //Reload map all admin/default page routes and load saved page routes from DB
 func (mr *MutableRouter) Reload() {
 
+	if !mr.NoRobots {
+		//creates a robot string and loads into in-memory cache
+		err := robots.Generate()
+		if err != nil {
+			logging.Error(err.Error())
+		}
+	}
+
 	if mr.staticwatcher != nil {
 		mr.staticwatcher.Close()
 	}
@@ -68,7 +78,6 @@ func (mr *MutableRouter) Reload() {
 	mr.pluginswatcher = watcher.New()
 
 	r := mux.NewRouter()
-
 	logging.Debug("Mapping default admin routes...")
 
 	for _, handler := range GetDefaultHandlers(mr) {
