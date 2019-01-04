@@ -97,23 +97,23 @@ func (m *Manager) Plugins() *[]Plugin {
 }
 
 func (m *Manager) loadFromDir(dir string) error {
-	if files, err := ioutil.ReadDir(m.dir); err == nil {
-		for i := range files {
-			file := files[i]
-			fileFullPath := fmt.Sprintf("%s%s%s", dir, string(os.PathSeparator), file.Name())
-			// if found directory, call this function to process that directory too
-			if file.IsDir() {
-				m.loadFromDir(fileFullPath)
-			}
-			fileNameParts := strings.Split(file.Name(), ".")
-			if len(fileNameParts) > 1 {
-				if fileNameParts[len(fileNameParts)-1] == "js" {
-					m.loadPlugin(fileFullPath)
-				}
+	files, err := ioutil.ReadDir(m.dir)
+	if err != nil {
+		return err
+	}
+	for i := range files {
+		file := files[i]
+		fileFullPath := fmt.Sprintf("%s%s%s", dir, string(os.PathSeparator), file.Name())
+		// if found directory, call this function to process that directory too
+		if file.IsDir() {
+			m.loadFromDir(fileFullPath)
+		}
+		fileNameParts := strings.Split(file.Name(), ".")
+		if len(fileNameParts) > 1 {
+			if fileNameParts[len(fileNameParts)-1] == "js" {
+				m.loadPlugin(fileFullPath)
 			}
 		}
-	} else {
-		return err
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.vm.Set("InfoLog", PluginInfoLog)
 		plugin.vm.Set("DebugLog", PluginDebugLog)
 		plugin.vm.Set("ErrorLog", PluginErrorLog)
-		plugin.vm.Set("TokenizeHTML", TokenizeHTML)
+		plugin.vm.Set("tokenize", tokenize)
 		plugin.vm.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
