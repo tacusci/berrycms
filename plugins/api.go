@@ -61,7 +61,7 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 }
 
 // DOM MANIPULATION
-func TokenizeHTML(call otto.FunctionCall) otto.Value {
+func tokenize(call otto.FunctionCall) otto.Value {
 	logging.Debug(fmt.Sprintf("Plugin wants to tokenize %s", call.Argument(0).String()))
 
 	z := html.NewTokenizer(strings.NewReader(call.Argument(0).String()))
