@@ -23,7 +23,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-// LOGGING
+// ******** LOGGING FUNCS ********
 func PluginInfoLog(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
@@ -60,7 +60,9 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-// DOM MANIPULATION
+// ******** END LOGGING FUNCS ********
+
+// ******** DOM MANIPULATION ********
 func tokenize(call otto.FunctionCall) otto.Value {
 	logging.Debug(fmt.Sprintf("Plugin wants to tokenize %s", call.Argument(0).String()))
 
@@ -75,3 +77,5 @@ func tokenize(call otto.FunctionCall) otto.Value {
 	}
 	return otto.Value{}
 }
+
+// ******** END DOM MANIPULATION ********
