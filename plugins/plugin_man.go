@@ -137,6 +137,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.vm.Set("InfoLog", PluginInfoLog)
 		plugin.vm.Set("DebugLog", PluginDebugLog)
 		plugin.vm.Set("ErrorLog", PluginErrorLog)
+		plugin.vm.Set("TokenizeHTML", TokenizeHTML)
 		plugin.vm.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)

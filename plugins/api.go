@@ -16,11 +16,14 @@ package plugins
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tacusci/logging"
+	"golang.org/x/net/html"
 )
 
+// LOGGING
 func PluginInfoLog(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
@@ -53,6 +56,22 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 		}
 	} else {
 		logging.Error(err.Error())
+	}
+	return otto.Value{}
+}
+
+// DOM MANIPULATION
+func TokenizeHTML(call otto.FunctionCall) otto.Value {
+	logging.Debug(fmt.Sprintf("Plugin wants to tokenize %s", call.Argument(0).String()))
+
+	z := html.NewTokenizer(strings.NewReader(call.Argument(0).String()))
+	for {
+		tt := z.Next()
+		if tt == html.ErrorToken {
+			logging.Error(z.Err().Error())
+			return otto.Value{}
+		}
+		logging.Debug(tt.String())
 	}
 	return otto.Value{}
 }
