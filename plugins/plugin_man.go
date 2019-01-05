@@ -127,6 +127,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 			uuid:     uuidV4.String(),
 			vm:       otto.New(),
 			filePath: fileFullPath,
+			Doc:      &Document{},
 		}
 
 		if err := plugin.ParseFile(); err != nil {
@@ -137,7 +138,6 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.vm.Set("InfoLog", PluginInfoLog)
 		plugin.vm.Set("DebugLog", PluginDebugLog)
 		plugin.vm.Set("ErrorLog", PluginErrorLog)
-		plugin.vm.Set("tokenize", tokenize)
 		plugin.vm.Set("document", &Document{})
 		plugin.vm.Run(plugin.src)
 
@@ -148,4 +148,3 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 
 	return nil
 }
-
