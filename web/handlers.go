@@ -157,7 +157,11 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
-		val, _ := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
+		val, err := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
+		if err != nil {
+			logging.Error(err.Error())
+			return err
+		}
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
 
