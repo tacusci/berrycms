@@ -138,6 +138,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.vm.Set("DebugLog", PluginDebugLog)
 		plugin.vm.Set("ErrorLog", PluginErrorLog)
 		plugin.vm.Set("tokenize", tokenize)
+		plugin.vm.Set("document", &Document{})
 		plugin.vm.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
@@ -147,3 +148,15 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 
 	return nil
 }
+
+type Document struct{}
+
+func (d *Document) String() string {
+	return "To String"
+}
+
+func (d *Document) createElement(call otto.FunctionCall) {
+	elementToCreate := call.Argument(0).String()
+}
+
+func (d *Document) append() {}
