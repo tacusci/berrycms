@@ -149,14 +149,3 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 	return nil
 }
 
-type Document struct{}
-
-func (d *Document) String() string {
-	return "To String"
-}
-
-func (d *Document) createElement(call otto.FunctionCall) {
-	elementToCreate := call.Argument(0).String()
-}
-
-func (d *Document) append() {}

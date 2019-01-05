@@ -78,4 +78,16 @@ func tokenize(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
+type Document struct{}
+
+func (d *Document) String() string {
+	return "To String"
+}
+
+func (d *Document) createElement(call otto.FunctionCall) {
+	elementToCreate := call.Argument(0).String()
+}
+
+func (d *Document) append() {}
+
 // ******** END DOM MANIPULATION ********
