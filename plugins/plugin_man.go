@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gofrs/uuid"
 
 	"github.com/robertkrimen/otto"
@@ -35,7 +36,8 @@ type Plugin struct {
 	uuid     string
 	filePath string
 	src      string
-	vm       *otto.Otto
+	VM       *otto.Otto
+	Document *goquery.Document
 }
 
 func (p *Plugin) UUID() string { return p.uuid }
@@ -56,11 +58,11 @@ func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interfa
 		return otto.Value{}, err
 	}
 
-	if _, err := p.vm.Run(p.src); err != nil {
+	if _, err := p.VM.Run(p.src); err != nil {
 		return otto.Value{}, err
 	}
 
-	return p.vm.Call(funcName, this, argumentList)
+	return p.VM.Call(funcName, this, argumentList)
 }
 
 // Manager contains plugin collection and add utility and concurrent protection for executing
@@ -125,21 +127,20 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 	if uuidV4, err := uuid.NewV4(); err == nil {
 		plugin := Plugin{
 			uuid:     uuidV4.String(),
-			vm:       otto.New(),
+			VM:       otto.New(),
 			filePath: fileFullPath,
-			Doc:      &Document{},
+			Document: &goquery.Document{},
 		}
 
 		if err := plugin.ParseFile(); err != nil {
 			return err
 		}
 
-		plugin.vm.Set("UUID", plugin.uuid)
-		plugin.vm.Set("InfoLog", PluginInfoLog)
-		plugin.vm.Set("DebugLog", PluginDebugLog)
-		plugin.vm.Set("ErrorLog", PluginErrorLog)
-		plugin.vm.Set("document", &Document{})
-		plugin.vm.Run(plugin.src)
+		plugin.VM.Set("UUID", plugin.uuid)
+		plugin.VM.Set("InfoLog", PluginInfoLog)
+		plugin.VM.Set("DebugLog", PluginDebugLog)
+		plugin.VM.Set("ErrorLog", PluginErrorLog)
+		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
 	} else {

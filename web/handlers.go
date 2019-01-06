@@ -20,8 +20,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/tacusci/berrycms/plugins"
 
 	"github.com/gobuffalo/plush"
@@ -157,6 +159,13 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
+		var err error
+		plugin.Document, err = goquery.NewDocumentFromReader(strings.NewReader("<html>" + htmlHead + p.Content + "</html>"))
+		if err != nil {
+			logging.Error(err.Error())
+			break
+		}
+		plugin.VM.Set("document", plugin.Document)
 		val, err := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
 		if err != nil {
 			logging.Error(err.Error())
