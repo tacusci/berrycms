@@ -152,20 +152,22 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 //		should be used and stop passing individual segments of the page
 //Render uses plush rendering engine to read page content from the DB and create HTML content
 func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Context) error {
-
 	// assume response is fine/OK
-	var code = http.StatusOK
+	var respCode = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
-	//render page from quill and plush
+	//render page from plush template
 	html, err := plush.Render("<html>"+htmlHead+"<body><%= pagecontent %></body></html>", ctx)
 	if err != nil {
 		Error(w, err)
 		return err
 	}
 
+	redirectRequested := false
+
 	pm := plugins.NewManager()
 
+	//have to lock as unfortunately do not support calling any plugin function twice at the exact same time
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
 		plugin.Document, err = goquery.NewDocumentFromReader(strings.NewReader(html))
@@ -174,64 +176,49 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			break
 		}
 		plugin.VM.Set("document", plugin.Document)
-		_, err := plugin.Call("onGetRender", nil, nil)
+		val, err := plugin.Call("onGetRender", nil, &p.Route)
 		if err != nil {
 			Error(w, err)
 			return err
 		}
-		plugin.Document.Find("head").Append("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
-		html, err = plugin.Document.Html()
-		if err != nil {
-			Error(w, err)
-			return err
-		}
-		/*
-			if &val != nil && val.IsObject() {
-				editedPage := val.Object()
 
-				if editedPageRoute, err := editedPage.Get("route"); err == nil {
-					if editedPageRoute.IsString() {
-						if editedPageRoute.String() != p.Route {
-							http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
-							return nil
+		if &val != nil && val.IsObject() {
+			editedPage := val.Object()
+
+			if editedPageRoute, err := editedPage.Get("route"); err == nil {
+				if editedPageRoute.IsString() {
+					//plugin has modified current page route, registering pending redirect
+					if editedPageRoute.String() != p.Route {
+						redirectRequested = true
+						//by default use status found
+						respCode = http.StatusFound
+						if modifiedStatusCode, err := editedPage.Get("code"); err == nil {
+							if modifiedStatusCode.IsNumber() {
+								if modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger(); err == nil {
+									respCode = int(modifiedStatusCodeInt)
+								}
+							}
 						}
-					}
-				}
-
-				if editedPageHeader, err := editedPage.Get("header"); err == nil {
-					if editedPageHeader.IsString() {
-						htmlHead = editedPageHeader.String()
-					}
-				} else {
-					logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-				}
-
-				if editedPageContent, err := editedPage.Get("body"); err == nil {
-					if editedPageContent.IsString() {
-						p.Content = editedPageContent.String()
-						ctx.Set("pagecontent", template.HTML(p.Content))
-					}
-				} else {
-					logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-				}
-
-				if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
-					if editedPageResponseCode.IsNumber() {
-						if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
-							code = int(responseCode)
-						} else {
-							logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-						}
+						p.Route = editedPageRoute.String()
 					}
 				}
 			}
-		*/
+		}
+		//no point in running other plugins
+		if redirectRequested {
+			break
+		}
 	}
 	pm.Unlock()
 
+	if redirectRequested {
+		http.Redirect(w, r, p.Route, respCode)
+		return nil
+	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.WriteHeader(code)
+	w.WriteHeader(respCode)
 	w.Write([]byte(html))
 	return err
 }
