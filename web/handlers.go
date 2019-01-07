@@ -214,11 +214,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 					p.Route = editedPageRoute.String()
 				}
 			}
-
-			if editedPageRoute, err := editedPage.Get("route"); err == nil {
-				if editedPageRoute.IsString() {
-				}
-			}
 		}
 
 		htmlFromDocument, err := plugin.Document.Html()
