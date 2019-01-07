@@ -185,25 +185,51 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 		if &val != nil && val.IsObject() {
 			editedPage := val.Object()
 
+			editedPageRoute, err := editedPage.Get("route")
+			//don't want to respond with 500 to user
+			if err != nil {
+				logging.Error(err.Error())
+				continue
+			}
+
+			if editedPageRoute.IsString() {
+				//plugin has modified current page route, registering pending redirect
+				if editedPageRoute.String() != p.Route {
+					redirectRequested = true
+					//by default use status found
+					respCode = http.StatusFound
+					modifiedStatusCode, err := editedPage.Get("code")
+					if err != nil {
+						logging.Error(err.Error())
+						continue
+					}
+					if modifiedStatusCode.IsNumber() {
+						modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
+						if err != nil {
+							logging.Error(err.Error())
+							continue
+						}
+						respCode = int(modifiedStatusCodeInt)
+					}
+					p.Route = editedPageRoute.String()
+				}
+			}
+
 			if editedPageRoute, err := editedPage.Get("route"); err == nil {
 				if editedPageRoute.IsString() {
-					//plugin has modified current page route, registering pending redirect
-					if editedPageRoute.String() != p.Route {
-						redirectRequested = true
-						//by default use status found
-						respCode = http.StatusFound
-						if modifiedStatusCode, err := editedPage.Get("code"); err == nil {
-							if modifiedStatusCode.IsNumber() {
-								if modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger(); err == nil {
-									respCode = int(modifiedStatusCodeInt)
-								}
-							}
-						}
-						p.Route = editedPageRoute.String()
-					}
 				}
 			}
 		}
+
+		htmlFromDocument, err := plugin.Document.Html()
+		if err != nil {
+			logging.Error(err.Error())
+			continue
+		}
+
+		//only set the returned HTML if retrieving it hasn't errored
+		html = htmlFromDocument
+
 		//no point in running other plugins
 		if redirectRequested {
 			break
