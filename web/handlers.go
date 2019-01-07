@@ -216,6 +216,11 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			}
 		}
 
+		//no point in running other plugins
+		if redirectRequested {
+			break
+		}
+
 		htmlFromDocument, err := plugin.Document.Html()
 		if err != nil {
 			logging.Error(err.Error())
@@ -224,11 +229,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 		//only set the returned HTML if retrieving it hasn't errored
 		html = htmlFromDocument
-
-		//no point in running other plugins
-		if redirectRequested {
-			break
-		}
 	}
 	pm.Unlock()
 
