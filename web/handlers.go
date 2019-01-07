@@ -174,7 +174,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			break
 		}
 		plugin.VM.Set("document", plugin.Document)
-		_, err := plugin.Call("onPreRender", nil, nil)
+		_, err := plugin.Call("onGetRender", nil, nil)
 		if err != nil {
 			Error(w, err)
 			return err

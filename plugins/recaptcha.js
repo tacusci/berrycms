@@ -3,7 +3,7 @@
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
 // args is a list, containing: 0 -> is the page URI, 1 -> is the page header, 2 -> is the page body
-function onPreRender() {
+function onGetRender() {
     //if (args[0] === "/recaptcha-test") {
     /*
     if (args[0] !== "/recaptcha-test") {
@@ -18,7 +18,7 @@ function onPreRender() {
     */
 }
 
-function onPostRender(args) {
+function onPostRecieve(args) {
     /*if (args[0] === "/recaptcha-test") {
         page = args[1]
         DebugLog(page + RECAPTCHASITEKEY);
