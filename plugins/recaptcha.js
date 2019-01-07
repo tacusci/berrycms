@@ -14,8 +14,8 @@ function onGetRender(args) {
     if (args[0] === "/insert-div-test") {
         //TODO: Add document modification test code
         document.Find("body").AppendHtml("<div>Div append test</div>")
-        return null;
     }
+
     return null;
 }
 
