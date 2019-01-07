@@ -16,7 +16,6 @@ package web
 
 import (
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -158,69 +157,78 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	var code = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 
-	pm := plugins.NewManager()
-
-	pm.Lock()
-	for _, plugin := range *pm.Plugins() {
-		var err error
-		plugin.Document, err = goquery.NewDocumentFromReader(strings.NewReader("<html>" + htmlHead + p.Content + "</html>"))
-		if err != nil {
-			logging.Error(err.Error())
-			break
-		}
-		plugin.VM.Set("document", plugin.Document)
-		val, err := plugin.Call("onPreRender", nil, &p.Route, &htmlHead, &p.Content)
-		if err != nil {
-			logging.Error(err.Error())
-			return err
-		}
-		if &val != nil && val.IsObject() {
-			editedPage := val.Object()
-
-			if editedPageRoute, err := editedPage.Get("route"); err == nil {
-				if editedPageRoute.IsString() {
-					if editedPageRoute.String() != p.Route {
-						http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
-						return nil
-					}
-				}
-			}
-
-			if editedPageHeader, err := editedPage.Get("header"); err == nil {
-				if editedPageHeader.IsString() {
-					htmlHead = editedPageHeader.String()
-				}
-			} else {
-				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-			}
-
-			if editedPageContent, err := editedPage.Get("body"); err == nil {
-				if editedPageContent.IsString() {
-					p.Content = editedPageContent.String()
-					ctx.Set("pagecontent", template.HTML(p.Content))
-				}
-			} else {
-				logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-			}
-
-			if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
-				if editedPageResponseCode.IsNumber() {
-					if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
-						code = int(responseCode)
-					} else {
-						logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
-					}
-				}
-			}
-		}
-	}
-	pm.Unlock()
-
+	//render page from quill and plush
 	html, err := plush.Render("<html>"+htmlHead+"<body><%= pagecontent %></body></html>", ctx)
 	if err != nil {
 		Error(w, err)
 		return err
 	}
+
+	pm := plugins.NewManager()
+
+	pm.Lock()
+	for _, plugin := range *pm.Plugins() {
+		plugin.Document, err = goquery.NewDocumentFromReader(strings.NewReader(html))
+		if err != nil {
+			logging.Error(err.Error())
+			break
+		}
+		plugin.VM.Set("document", plugin.Document)
+		_, err := plugin.Call("onPreRender", nil, nil)
+		if err != nil {
+			Error(w, err)
+			return err
+		}
+		plugin.Document.Find("head").Append("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
+		html, err = plugin.Document.Html()
+		if err != nil {
+			Error(w, err)
+			return err
+		}
+		/*
+			if &val != nil && val.IsObject() {
+				editedPage := val.Object()
+
+				if editedPageRoute, err := editedPage.Get("route"); err == nil {
+					if editedPageRoute.IsString() {
+						if editedPageRoute.String() != p.Route {
+							http.Redirect(w, r, editedPageRoute.String(), http.StatusFound)
+							return nil
+						}
+					}
+				}
+
+				if editedPageHeader, err := editedPage.Get("header"); err == nil {
+					if editedPageHeader.IsString() {
+						htmlHead = editedPageHeader.String()
+					}
+				} else {
+					logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+				}
+
+				if editedPageContent, err := editedPage.Get("body"); err == nil {
+					if editedPageContent.IsString() {
+						p.Content = editedPageContent.String()
+						ctx.Set("pagecontent", template.HTML(p.Content))
+					}
+				} else {
+					logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+				}
+
+				if editedPageResponseCode, err := editedPage.Get("code"); err == nil {
+					if editedPageResponseCode.IsNumber() {
+						if responseCode, err := editedPageResponseCode.ToInteger(); err == nil {
+							code = int(responseCode)
+						} else {
+							logging.Error(fmt.Sprintf("Error from plugin {%s} -> %s", plugin.UUID(), err.Error()))
+						}
+					}
+				}
+			}
+		*/
+	}
+	pm.Unlock()
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(code)
