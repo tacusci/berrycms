@@ -241,7 +241,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(respCode)
 	w.Write([]byte(html))
-	return err
+	return nil
 }
 
 //RenderStr uses plush rendering engine to read page content from the DB and create HTML content as string
