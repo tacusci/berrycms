@@ -11,9 +11,9 @@ function onGetRender(args) {
         };
     }
 
-    if (args[0] === "/insert-div-test") {
-        //TODO: Add document modification test code
-        document.Find("body").AppendHtml("<div>Div append test</div>")
+    if (args[0] === "/recaptcha-test") {
+        document.Find("head").AppendHtml("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
+        document.Find("body").AppendHtml("<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>")
     }
 
     return null;
