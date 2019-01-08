@@ -1,4 +1,4 @@
-// Copyright (c) 2018, tacusci ltd
+// Copyright (c) 2019, tacusci ltd
 //
 // Licensed under the GNU GENERAL PUBLIC LICENSE Version 3 (the "License");
 // you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			editedPageRoute, err := editedPage.Get("route")
 			//don't want to respond with 500 to user
 			if err != nil {
-				logging.Error(err.Error())
+				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 				continue
 			}
 
@@ -197,13 +197,13 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 					respCode = http.StatusFound
 					modifiedStatusCode, err := editedPage.Get("code")
 					if err != nil {
-						logging.Error(err.Error())
+						logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 						continue
 					}
 					if modifiedStatusCode.IsNumber() {
 						modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
 						if err != nil {
-							logging.Error(err.Error())
+							logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 							continue
 						}
 						respCode = int(modifiedStatusCodeInt)
