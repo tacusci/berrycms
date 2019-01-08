@@ -147,9 +147,6 @@ func RenderDefault(w http.ResponseWriter, template string, pctx *plush.Context) 
 	return err
 }
 
-//TODO: Completely rewrite this function with better interaction with plugin based page mutation
-//		the plush HTML render step should occur before plugin is invoiked and plugin document object
-//		should be used and stop passing individual segments of the page
 //Render uses plush rendering engine to read page content from the DB and create HTML content
 func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Context) error {
 	// assume response is fine/OK
