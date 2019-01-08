@@ -2,7 +2,8 @@
 
 function onGetRender(args) {
     if (args[0] === "/") {
-        InfoLog("Visited index page!")
+        //insert form to post
+        document.Find("body").AppendHtml("<form action= \"" + args[0] + "\" method=\"post\"><button type=\"submit\">Send</button></form>")
     }
 }
 
