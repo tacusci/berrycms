@@ -2,7 +2,7 @@
 
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
-// args is a list, containing: 0 -> is the page URI, 1 -> is the page header, 2 -> is the page body
+// args is a list, it only currently contains the URI of the requested page 
 function onGetRender(args) {
     if (args[0] === "/redirect-test") {
         return {
