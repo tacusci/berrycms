@@ -66,6 +66,11 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logging.Error(err.Error())
 	}
+
+	if p == nil {
+		fourOhFour(w, r)
+		return
+	}
 }
 
 //Route get URI route for handler
