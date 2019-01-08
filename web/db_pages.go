@@ -15,9 +15,10 @@
 package web
 
 import (
-	"github.com/tacusci/logging"
 	"html/template"
 	"net/http"
+
+	"github.com/tacusci/logging"
 
 	quill "github.com/dchenk/go-render-quill"
 	"github.com/gobuffalo/plush"
@@ -57,7 +58,15 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 //Post handles post requests to URI
-func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {}
+func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
+	pt := db.PagesTable{}
+
+	p, err := pt.SelectByRoute(db.Conn, r.RequestURI)
+
+	if err != nil {
+		logging.Error(err.Error())
+	}
+}
 
 //Route get URI route for handler
 func (sph *SavedPageHandler) Route() string { return sph.route }
@@ -66,4 +75,4 @@ func (sph *SavedPageHandler) Route() string { return sph.route }
 func (sph *SavedPageHandler) HandlesGet() bool { return true }
 
 //HandlesPost retrieve whether this handler handles post requests
-func (sph *SavedPageHandler) HandlesPost() bool { return false }
+func (sph *SavedPageHandler) HandlesPost() bool { return true }
