@@ -1,16 +1,12 @@
 language: go
 
 go:
-    - 1.1
-    - 1.2.x
-    - 1.3.x
-    - 1.4.x
-    - 1.5.x
-    - 1.6.x
-    - 1.7.x
-    - 1.8.x
-    - 1.9.x
-    - "1.10.x"
-    - 1.11.x
-    - tip
+  - "1.11"
 
+env:
+  - "PATH=/home/travis/gopath/bin:$PATH"
+
+install: true
+
+script:
+  - env GO111MODULE=on go build -v
