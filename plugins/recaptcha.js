@@ -22,5 +22,5 @@ function onGetRender(args) {
 function onPostRecieve(args) {}
 
 function main() {
-    InfoLog("Loaded plugin " + UUID);
+    InfoLog("Loaded plugin");
 }

@@ -175,8 +175,8 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 		plugin.VM.Set("document", plugin.Document)
 		val, err := plugin.Call("onGetRender", nil, &p.Route)
 		if err != nil {
-			Error(w, err)
-			return err
+			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+			continue
 		}
 
 		if &val != nil && val.IsObject() {
