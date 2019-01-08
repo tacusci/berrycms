@@ -21,7 +21,12 @@ function onGetRender(args) {
 }
 
 function onPostRecieve(args) {
-    InfoLog("Recieved post request")
+    if (args[0] === "/recaptcha-test") {
+        InfoLog("Recieved post request")
+        return {
+            route: "/recaptcha-test",
+        }
+    }
 }
 
 function main() {
