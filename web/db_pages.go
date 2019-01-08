@@ -59,7 +59,7 @@ func (sph *SavedPageHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 //Post handles post requests to URI
 func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
-	logging.Info("Recieved DB post request")
+
 }
 
 //Route get URI route for handler
