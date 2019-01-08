@@ -1,4 +1,4 @@
-Copyright (c) {{.Year}}, {{.Owner}}
+Copyright (c) {{.Year}} {{.Owner}}
 
 Licensed under the GNU GENERAL PUBLIC LICENSE Version 3 (the "License");
 you may not use this file except in compliance with the License.
