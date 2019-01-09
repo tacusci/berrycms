@@ -13,7 +13,7 @@ function onGetRender(args) {
 
     if (args[0] === "/recaptcha-test") {
         document.Find("head").AppendHtml("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
-        document.Find("body").AppendHtml("<form action= \"" + args[0] + "\" method=\"post\"><input type=\"text\"><button type=\"submit\">Send</button></form>")
+        document.Find("body").AppendHtml("<form action= \"" + args[0] + "\" method=\"post\"><input name=\"sometext\" type=\"text\"><button type=\"submit\">Send</button></form>")
         document.Find("body").AppendHtml("<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>")
     }
 
@@ -23,6 +23,7 @@ function onGetRender(args) {
 function onPostRecieve(args) {
     if (args[0] === "/recaptcha-test") {
         InfoLog("Recieved post request")
+        console.log(args[1].get("sometext"))
         return {
             route: "/recaptcha-test",
         }
