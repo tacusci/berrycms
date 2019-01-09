@@ -69,11 +69,19 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 	p, err := pt.SelectByRoute(db.Conn, r.RequestURI)
 
 	if err != nil {
-		logging.Error(err.Error())
+		Error(w, err)
+		return
 	}
 
 	if p == nil {
 		fourOhFour(w, r)
+		return
+	}
+
+	err = r.ParseForm()
+
+	if err != nil {
+		Error(w, err)
 		return
 	}
 
@@ -84,7 +92,12 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 	//have to lock as unfortunately do not support calling any plugin function twice at the exact same time
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
-		val, err := plugin.Call("onPostRecieve", nil, &p.Route)
+		postFormMap, err := plugin.VM.ToValue(r.PostForm)
+		if err != nil {
+			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+			continue
+		}
+		val, err := plugin.Call("onPostRecieve", nil, &p.Route, &postFormMap)
 		if err != nil {
 			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 			continue
