@@ -23,6 +23,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gofrs/uuid"
+	"github.com/tacusci/logging"
 
 	"github.com/robertkrimen/otto"
 )
@@ -63,6 +64,10 @@ func (p *Plugin) Call(funcName string, this interface{}, argumentList ...interfa
 	}
 
 	return p.VM.Call(funcName, this, argumentList)
+}
+
+func (p *Plugin) Error(err error) {
+	logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", p.UUID(), err.Error()))
 }
 
 // Manager contains plugin collection and add utility and concurrent protection for executing

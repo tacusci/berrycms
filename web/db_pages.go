@@ -98,7 +98,7 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 		}
 		val, err := plugin.Call("onPostRecieve", nil, &p.Route, r.PostForm)
 		if err != nil {
-			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+			plugin.Error(err)
 			continue
 		}
 
@@ -108,7 +108,7 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 			editedPageRoute, err := editedPage.Get("route")
 			//don't want to respond with 500 to user
 			if err != nil {
-				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+				plugin.Error(err)
 				continue
 			}
 
@@ -120,13 +120,13 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 					respCode = http.StatusFound
 					modifiedStatusCode, err := editedPage.Get("code")
 					if err != nil {
-						logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+						plugin.Error(err)
 						continue
 					}
 					if modifiedStatusCode.IsNumber() {
 						modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
 						if err != nil {
-							logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+							plugin.Error(err)
 							continue
 						}
 						respCode = int(modifiedStatusCodeInt)
