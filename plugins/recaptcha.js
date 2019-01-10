@@ -22,10 +22,10 @@ function onGetRender(args) {
 
 function onPostRecieve(args) {
     if (args[0] === "/recaptcha-test") {
-        InfoLog("Recieved post request")
-        console.log(args[1].get("sometext"))
+        InfoLog("Recieved post request");
+        console.log(args[1]["sometext"]);
         return {
-            route: "/recaptcha-test",
+            route: "/recaptcha-test"
         }
     }
 }
