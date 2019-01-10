@@ -147,7 +147,8 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 		p := db.Page{}
 		rows.Scan(&p.Route)
 		logging.Debug(fmt.Sprintf("Mapping database page route %s", p.Route))
-		r.HandleFunc(p.Route, savedPageHandler.Get)
+		r.HandleFunc(p.Route, savedPageHandler.Get).Methods("GET")
+		r.HandleFunc(p.Route, savedPageHandler.Post).Methods("POST")
 	}
 }
 
