@@ -22,7 +22,7 @@ import (
 	"github.com/tacusci/berrycms/db"
 )
 
-var RobotsCache *freecache.Cache
+var Cache *freecache.Cache
 
 func Generate() error {
 
@@ -55,17 +55,30 @@ func Generate() error {
 	}
 
 	robotsToCache := sb.Bytes()
-	Cache(&robotsToCache)
+	Set(&robotsToCache)
 
 	return nil
 }
 
-func Cache(val *[]byte) error {
-	RobotsCache = freecache.NewCache(len(*val))
+func Set(val *[]byte) error {
+	Cache = freecache.NewCache(len(*val))
 	key := []byte("robots")
-	err := RobotsCache.Set(key, *val, 0)
+	err := Cache.Set(key, *val, 0)
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func Add(val *[]byte) error {
+	key := []byte("robots")
+	existingVal, err := Cache.Get(key)
+	if err != nil {
+		return err
+	}
+	if len(existingVal) > 0 {
+		*val = append(*val, existingVal...)
+	}
+	Cache.Set(key, *val, 0)
 	return nil
 }
