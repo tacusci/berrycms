@@ -60,3 +60,10 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 }
 
 // ******** END LOGGING FUNCS ********
+
+// ******** ROBOTS UTILS FUNCS ********
+
+func AddRobotsEntry(call otto.FunctionCall) {
+}
+
+// ******** END ROBOTS UTILS FUNCS ********
