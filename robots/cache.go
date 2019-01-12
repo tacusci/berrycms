@@ -20,6 +20,7 @@ import (
 
 	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/logging"
 )
 
 var Cache *freecache.Cache
@@ -77,6 +78,7 @@ func Add(val *[]byte) error {
 		return err
 	}
 	if len(existingVal) > 0 {
+		logging.Debug(fmt.Sprintf("Adding \"%s\" to robots.txt cache", string(*val)))
 		*val = append(*val, existingVal...)
 	}
 	Cache.Set(key, *val, 0)
