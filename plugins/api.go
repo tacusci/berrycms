@@ -81,6 +81,8 @@ func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 
 // ******** END ROBOTS UTILS FUNCS ********
 
+// ******** MISC FUNCS ********
+
 func apiError(call *otto.FunctionCall, outputMessage string) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
@@ -92,3 +94,5 @@ func apiError(call *otto.FunctionCall, outputMessage string) otto.Value {
 	}
 	return otto.Value{}
 }
+
+// ******** END MISC FUNCS ********
