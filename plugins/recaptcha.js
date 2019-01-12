@@ -32,4 +32,5 @@ function onPostRecieve(args) {
 
 function main() {
     InfoLog("Loaded plugin");
+    AddToRobots("/some-test-uri", "something else")
 }
