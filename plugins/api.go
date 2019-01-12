@@ -66,7 +66,7 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 
 func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "'AddRobotsEntry' function takes only one argument")
+		apiError(&call, "too many arguments to call 'AddToRobots', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
