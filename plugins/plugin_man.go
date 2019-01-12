@@ -145,6 +145,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("InfoLog", PluginInfoLog)
 		plugin.VM.Set("DebugLog", PluginDebugLog)
 		plugin.VM.Set("ErrorLog", PluginErrorLog)
+		plugin.VM.Set("AddToRobots", AddRobotsEntry)
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)

@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/robertkrimen/otto"
+	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
 
@@ -64,6 +65,28 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 // ******** ROBOTS UTILS FUNCS ********
 
 func AddRobotsEntry(call otto.FunctionCall) {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "'AddRobotsEntry' function takes only one argument")
+		return
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'AddRobotsEntry' function expected string")
+		return
+	}
+	val := []byte(valPassed.String())
+	robots.Add(&val)
 }
 
 // ******** END ROBOTS UTILS FUNCS ********
+
+func apiError(call *otto.FunctionCall, outputMessage string) {
+	// unsafe, not confirming argument length
+	if uuid, err := call.Otto.Get("UUID"); err == nil {
+		if uuid.IsString() {
+			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", uuid.String(), outputMessage))
+		}
+	} else {
+		logging.Error(err.Error())
+	}
+}
