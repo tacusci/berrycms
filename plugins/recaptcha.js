@@ -8,7 +8,7 @@ function onGetRender(args) {
         return {
             route: "/",
             code: 302
-        };
+        }
     }
 
     if (args[0] === "/recaptcha-test") {
