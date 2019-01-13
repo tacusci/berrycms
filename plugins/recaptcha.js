@@ -32,6 +32,8 @@ function onPostRecieve(args) {
 
 function main() {
     InfoLog("Loaded plugin");
+    InfoLog("Adding \"Disallow: /some-test-uri\" to robots.txt")
     AddToRobots("Disallow: /some-test-uri")
+    InfoLog("Deleting \"Disallow: /some-test-uri\" from robots.txt")
     DelFromRobots("Disallow: /some-test-uri")
 }
