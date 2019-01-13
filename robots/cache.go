@@ -91,7 +91,7 @@ func Del(val *[]byte) error {
 		return err
 	}
 	if len(existingVal) > 0 {
-		*val = []byte(strings.Replace(string(existingVal), string(*val), "", 0))
+		*val = []byte(strings.Replace(string(existingVal), string(*val), "", -1))
 	}
 	Cache.Set(key, *val, 0)
 	return nil
