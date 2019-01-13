@@ -17,6 +17,7 @@ package robots
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
@@ -79,7 +80,21 @@ func Add(val *[]byte) error {
 	}
 	if len(existingVal) > 0 {
 		logging.Debug(fmt.Sprintf("Adding \"%s\" to robots.txt cache", string(*val)))
-		*val = append(*val, existingVal...)
+		*val = append(existingVal, *val...)
+	}
+	Cache.Set(key, *val, 0)
+	return nil
+}
+
+func Del(val *[]byte) error {
+	key := []byte("robots")
+	existingVal, err := Cache.Get(key)
+	if err != nil {
+		return err
+	}
+	if len(existingVal) > 0 {
+		logging.Debug(fmt.Sprintf("Deleting \"%s\" from robots.txt cache", string(*val)))
+		*val = []byte(strings.Replace(string(existingVal), string(*val), "", 0))
 	}
 	Cache.Set(key, *val, 0)
 	return nil
