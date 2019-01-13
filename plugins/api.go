@@ -79,6 +79,21 @@ func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
+func DelRobotsEntry(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'DelFromRobots', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'DelFromRobots' function expected string")
+		return otto.Value{}
+	}
+	val := []byte(valPassed.String())
+	robots.Del(&val)
+	return otto.Value{}
+}
+
 // ******** END ROBOTS UTILS FUNCS ********
 
 // ******** MISC FUNCS ********
