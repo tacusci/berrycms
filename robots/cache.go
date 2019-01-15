@@ -21,6 +21,7 @@ import (
 
 	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/logging"
 )
 
 var Cache *freecache.Cache
@@ -66,6 +67,7 @@ func Set(val *[]byte) error {
 	key := []byte("robots")
 	err := Cache.Set(key, *val, 0)
 	if err != nil {
+		logging.Error(err.Error())
 		return err
 	}
 	return nil
@@ -73,14 +75,14 @@ func Set(val *[]byte) error {
 
 func Add(val *[]byte) error {
 	key := []byte("robots")
+	*val = append(*val, []byte("\n")...)
 	existingVal, err := Cache.Get(key)
-	if err != nil {
-		return err
+	if err == nil && len(existingVal) > 0 {
+		if len(existingVal) > 0 {
+			*val = append(existingVal, *val...)
+		}
 	}
-	if len(existingVal) > 0 {
-		*val = append(existingVal, *val...)
-	}
-	Cache.Set(key, *val, 0)
+	Set(val)
 	return nil
 }
 
@@ -88,6 +90,7 @@ func Del(val *[]byte) error {
 	key := []byte("robots")
 	existingVal, err := Cache.Get(key)
 	if err != nil {
+		logging.Error(err.Error())
 		return err
 	}
 	if len(existingVal) > 0 {
