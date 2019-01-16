@@ -27,17 +27,12 @@ type RobotsHandler struct {
 
 func (rh *RobotsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	//if the robots .txt file cache hasn't been created then technically there is no robots page
-	if robots.Cache == nil {
+	if !robots.CacheExists() {
 		fourOhFour(w, r)
 		return
 	}
-	robotsCacheContent, err := robots.Cache.Get([]byte("robots"))
-	if err != nil {
-		Error(w, err)
-		return
-	}
 
-	w.Write(robotsCacheContent)
+	w.Write(robots.CacheBytes())
 }
 
 func (rh *RobotsHandler) Post(w http.ResponseWriter, r *http.Request) {}

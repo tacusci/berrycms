@@ -8,7 +8,7 @@ function onGetRender(args) {
         return {
             route: "/",
             code: 302
-        };
+        }
     }
 
     if (args[0] === "/recaptcha-test") {
@@ -33,4 +33,7 @@ function onPostRecieve(args) {
 
 function main() {
     InfoLog("Loaded plugin");
+
+    AddToRobots("Disallow: /cheesecake-test")
+    DelFromRobots("Disallow: /cheesecake-test")
 }

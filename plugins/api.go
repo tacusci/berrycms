@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/robertkrimen/otto"
+	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
 
@@ -63,7 +64,59 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 
 // ******** ROBOTS UTILS FUNCS ********
 
-func AddRobotsEntry(call otto.FunctionCall) {
+func AddRobotsEntry(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'AddToRobots', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'AddRobotsEntry' function expected string")
+		return otto.Value{}
+	}
+	val := []byte(valPassed.String())
+	err := robots.Add(&val)
+
+	if err != nil {
+		apiError(&call, err.Error())
+	}
+	return otto.Value{}
+}
+
+func DelRobotsEntry(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'DelFromRobots', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'DelFromRobots' function expected string")
+		return otto.Value{}
+	}
+	val := []byte(valPassed.String())
+
+	err := robots.Del(&val)
+	if err != nil {
+		apiError(&call, err.Error())
+	}
+
+	return otto.Value{}
 }
 
 // ******** END ROBOTS UTILS FUNCS ********
+
+// ******** MISC FUNCS ********
+
+func apiError(call *otto.FunctionCall, outputMessage string) otto.Value {
+	// unsafe, not confirming argument length
+	if uuid, err := call.Otto.Get("UUID"); err == nil {
+		if uuid.IsString() {
+			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", uuid.String(), outputMessage))
+		}
+	} else {
+		logging.Error(err.Error())
+	}
+	return otto.Value{}
+}
+
+// ******** END MISC FUNCS ********

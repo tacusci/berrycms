@@ -16,22 +16,57 @@ package robots
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 
-	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
 )
 
-var Cache *freecache.Cache
+var cache *bytes.Buffer
+
+func Add(val *[]byte) error {
+	if cache == nil {
+		return errors.New("Robots cache unmutable... User has likely disabled robots.txt")
+	}
+	//add newline to uri to add so caller doesn't have to
+	*val = append(*val, []byte("\n")...)
+	_, err := cache.Write(*val)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Del(val *[]byte) error {
+	if cache == nil {
+		return errors.New("Robots cache unmutable... User has likely disabled robots.txt")
+	}
+
+	//*OPTIMISATION* immediately return if there's nothing to delete from
+	if cache.Len() == 0 {
+		return nil
+	}
+
+	//add newline to uri to add so caller doesn't have to
+	*val = append(*val, []byte("\n")...)
+	existingVal := cache.Bytes()
+	cache.Reset()
+	cache.Write(bytes.Replace(existingVal, *val, []byte{}, -1))
+	return nil
+}
 
 func Generate() error {
-
-	sb := bytes.Buffer{}
-
-	sb.WriteString("User-agent: *\n")
+	Reset()
+	_, err := cache.WriteString("User-agent: *\n")
+	if err != nil {
+		return err
+	}
 	//block indexing admin pages
 	//NOTE: if the admin pages URI has been hidden, we're deliberately omitting this from robots.txt
-	sb.WriteString("Disallow: /admin\n")
+	_, err = cache.WriteString("Disallow: /admin\n")
+	if err != nil {
+		return err
+	}
 
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "route", "roleprotected = '1'")
@@ -48,37 +83,27 @@ func Generate() error {
 			return err
 		}
 
-		_, err = sb.WriteString(fmt.Sprintf("Disallow: %s\n", pageRouteToDisallow))
+		_, err = cache.WriteString(fmt.Sprintf("Disallow: %s\n", pageRouteToDisallow))
 		if err != nil {
 			return err
 		}
 	}
 
-	robotsToCache := sb.Bytes()
-	Set(&robotsToCache)
-
 	return nil
 }
 
-func Set(val *[]byte) error {
-	Cache = freecache.NewCache(len(*val))
-	key := []byte("robots")
-	err := Cache.Set(key, *val, 0)
-	if err != nil {
-		return err
-	}
-	return nil
+func CacheExists() bool {
+	return cache != nil
 }
 
-func Add(val *[]byte) error {
-	key := []byte("robots")
-	existingVal, err := Cache.Get(key)
-	if err != nil {
-		return err
+func CacheBytes() []byte {
+	return cache.Bytes()
+}
+
+func Reset() {
+	//we don't want to allocate memory each reset
+	if cache == nil {
+		cache = &bytes.Buffer{}
 	}
-	if len(existingVal) > 0 {
-		*val = append(*val, existingVal...)
-	}
-	Cache.Set(key, *val, 0)
-	return nil
+	cache.Reset()
 }
