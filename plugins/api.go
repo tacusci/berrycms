@@ -75,7 +75,11 @@ func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
-	robots.Add(&val)
+	err := robots.Add(&val)
+
+	if err != nil {
+		apiError(&call, err.Error())
+	}
 	return otto.Value{}
 }
 
@@ -90,7 +94,12 @@ func DelRobotsEntry(call otto.FunctionCall) otto.Value {
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
-	robots.Del(&val)
+
+	err := robots.Del(&val)
+	if err != nil {
+		apiError(&call, err.Error())
+	}
+
 	return otto.Value{}
 }
 

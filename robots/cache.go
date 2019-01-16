@@ -16,8 +16,8 @@ package robots
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/tacusci/berrycms/db"
 )
@@ -25,6 +25,10 @@ import (
 var cache *bytes.Buffer
 
 func Add(val *[]byte) error {
+	if cache == nil {
+		return errors.New("Robots cache unmutable... User has likely disabled robots.txt")
+	}
+	//add newline to uri to add so caller doesn't have to
 	*val = append(*val, []byte("\n")...)
 	_, err := cache.Write(*val)
 	if err != nil {
@@ -34,9 +38,20 @@ func Add(val *[]byte) error {
 }
 
 func Del(val *[]byte) error {
+	if cache == nil {
+		return errors.New("Robots cache unmutable... User has likely disabled robots.txt")
+	}
+
+	//*OPTIMISATION* immediately return if there's nothing to delete from
+	if cache.Len() == 0 {
+		return nil
+	}
+
+	//add newline to uri to add so caller doesn't have to
+	*val = append(*val, []byte("\n")...)
 	existingVal := cache.Bytes()
-	Reset()
-	cache.Write([]byte(strings.Replace(string(existingVal), string(*val), "", -1)))
+	cache.Reset()
+	cache.Write(bytes.Replace(existingVal, *val, []byte{}, -1))
 	return nil
 }
 
@@ -71,11 +86,16 @@ func Generate() error {
 	return nil
 }
 
-func Cache() *bytes.Buffer {
-	return cache
+func CacheExists() bool {
+	return cache != nil
+}
+
+func CacheBytes() []byte {
+	return cache.Bytes()
 }
 
 func Reset() {
+	//we don't want to allocate memory each reset
 	if cache == nil {
 		cache = &bytes.Buffer{}
 	}
