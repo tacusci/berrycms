@@ -19,21 +19,33 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coocood/freecache"
 	"github.com/tacusci/berrycms/db"
-	"github.com/tacusci/logging"
 )
 
-var Cache *freecache.Cache
+var cache *bytes.Buffer
+
+func Add(val *[]byte) error {
+	*val = append(*val, []byte("\n")...)
+	_, err := cache.Write(*val)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Del(val *[]byte) error {
+	existingVal := cache.Bytes()
+	Reset()
+	cache.Write([]byte(strings.Replace(string(existingVal), string(*val), "", -1)))
+	return nil
+}
 
 func Generate() error {
-
-	sb := bytes.Buffer{}
-
-	sb.WriteString("User-agent: *\n")
+	Reset()
+	cache.WriteString("User-agent: *\n")
 	//block indexing admin pages
 	//NOTE: if the admin pages URI has been hidden, we're deliberately omitting this from robots.txt
-	sb.WriteString("Disallow: /admin\n")
+	cache.WriteString("Disallow: /admin\n")
 
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "route", "roleprotected = '1'")
@@ -50,52 +62,22 @@ func Generate() error {
 			return err
 		}
 
-		_, err = sb.WriteString(fmt.Sprintf("Disallow: %s\n", pageRouteToDisallow))
+		_, err = cache.WriteString(fmt.Sprintf("Disallow: %s\n", pageRouteToDisallow))
 		if err != nil {
 			return err
 		}
 	}
 
-	robotsToCache := sb.Bytes()
-	Set(&robotsToCache)
-
 	return nil
 }
 
-func Set(val *[]byte) error {
-	Cache = freecache.NewCache(len(*val))
-	key := []byte("robots")
-	err := Cache.Set(key, *val, 0)
-	if err != nil {
-		logging.Error(err.Error())
-		return err
-	}
-	return nil
+func Cache() *bytes.Buffer {
+	return cache
 }
 
-func Add(val *[]byte) error {
-	key := []byte("robots")
-	*val = append(*val, []byte("\n")...)
-	existingVal, err := Cache.Get(key)
-	if err == nil && len(existingVal) > 0 {
-		if len(existingVal) > 0 {
-			*val = append(existingVal, *val...)
-		}
+func Reset() {
+	if cache == nil {
+		cache = &bytes.Buffer{}
 	}
-	Set(val)
-	return nil
-}
-
-func Del(val *[]byte) error {
-	key := []byte("robots")
-	existingVal, err := Cache.Get(key)
-	if err != nil {
-		logging.Error(err.Error())
-		return err
-	}
-	if len(existingVal) > 0 {
-		*val = []byte(strings.Replace(string(existingVal), string(*val), "", -1))
-	}
-	Cache.Set(key, *val, 0)
-	return nil
+	cache.Reset()
 }
