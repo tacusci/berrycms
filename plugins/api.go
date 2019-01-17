@@ -70,7 +70,7 @@ type robotsapi struct{}
 
 func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'AddToRobots', want (string)")
+		apiError(&call, "too many arguments to call 'Add', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
@@ -89,7 +89,7 @@ func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 
 func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'DelFromRobots', want (string)")
+		apiError(&call, "too many arguments to call 'Del', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
