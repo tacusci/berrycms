@@ -24,7 +24,9 @@ import (
 
 // ******** LOGGING FUNCS ********
 
-func PluginInfoLog(call otto.FunctionCall) otto.Value {
+type logapi struct{}
+
+func (l *logapi) Info(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {
@@ -36,7 +38,7 @@ func PluginInfoLog(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func PluginDebugLog(call otto.FunctionCall) otto.Value {
+func (l *logapi) Debug(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {
@@ -48,7 +50,7 @@ func PluginDebugLog(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func PluginErrorLog(call otto.FunctionCall) otto.Value {
+func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {

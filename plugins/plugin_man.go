@@ -144,9 +144,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		}
 
 		plugin.VM.Set("UUID", plugin.uuid)
-		plugin.VM.Set("InfoLog", PluginInfoLog)
-		plugin.VM.Set("DebugLog", PluginDebugLog)
-		plugin.VM.Set("ErrorLog", PluginErrorLog)
+		plugin.VM.Set("logging", &logapi{})
 		plugin.VM.Set("AddToRobots", AddRobotsEntry)
 		plugin.VM.Set("DelFromRobots", DelRobotsEntry)
 		plugin.VM.Run(plugin.src)

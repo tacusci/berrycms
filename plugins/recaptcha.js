@@ -22,7 +22,7 @@ function onGetRender(args) {
 
 function onPostRecieve(args) {
     if (args[0] === "/recaptcha-test") {
-        InfoLog("Recieved post request");
+        logging.Info("Recieved post request");
         formResponseData = args[1];
         console.log(formResponseData["g-recaptcha-response"])
         return {
@@ -32,7 +32,7 @@ function onPostRecieve(args) {
 }
 
 function main() {
-    InfoLog("Loaded plugin");
+    logging.Info("Loaded plugin")
 
     AddToRobots("Disallow: /cheesecake-test")
     DelFromRobots("Disallow: /cheesecake-test")
