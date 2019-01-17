@@ -104,7 +104,7 @@ func (m *Manager) Plugins() *[]Plugin {
 }
 
 func (m *Manager) loadFromDir(dir string) error {
-	files, err := ioutil.ReadDir(m.dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,9 @@ func (m *Manager) loadFromDir(dir string) error {
 		fileFullPath := fmt.Sprintf("%s%s%s", dir, string(os.PathSeparator), file.Name())
 		// if found directory, call this function to process that directory too
 		if file.IsDir() {
-			m.loadFromDir(fileFullPath)
+			if err = m.loadFromDir(fileFullPath); err != nil {
+				return err
+			}
 		}
 		fileNameParts := strings.Split(file.Name(), ".")
 		if len(fileNameParts) > 1 {
