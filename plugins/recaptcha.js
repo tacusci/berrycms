@@ -34,6 +34,6 @@ function onPostRecieve(args) {
 function main() {
     logging.Info("Loaded plugin")
 
-    AddToRobots("Disallow: /cheesecake-test")
-    DelFromRobots("Disallow: /cheesecake-test")
+    robots.Add("Disallow: /cheesecake-test")
+    //robots.Del("Disallow: /cheesecake-test")
 }

@@ -66,7 +66,9 @@ func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 
 // ******** ROBOTS UTILS FUNCS ********
 
-func AddRobotsEntry(call otto.FunctionCall) otto.Value {
+type robotsapi struct{}
+
+func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
 		apiError(&call, "too many arguments to call 'AddToRobots', want (string)")
 		return otto.Value{}
@@ -85,7 +87,7 @@ func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func DelRobotsEntry(call otto.FunctionCall) otto.Value {
+func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
 		apiError(&call, "too many arguments to call 'DelFromRobots', want (string)")
 		return otto.Value{}

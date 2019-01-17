@@ -145,8 +145,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 
 		plugin.VM.Set("UUID", plugin.uuid)
 		plugin.VM.Set("logging", &logapi{})
-		plugin.VM.Set("AddToRobots", AddRobotsEntry)
-		plugin.VM.Set("DelFromRobots", DelRobotsEntry)
+		plugin.VM.Set("robots", &robotsapi{})
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
