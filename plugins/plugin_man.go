@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/cornelk/hashmap"
 	"github.com/gofrs/uuid"
 	"github.com/tacusci/logging"
 
@@ -146,6 +147,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("UUID", plugin.uuid)
 		plugin.VM.Set("logging", &logapi{})
 		plugin.VM.Set("robots", &robotsapi{})
+		plugin.VM.Set("session", &hashmap.HashMap{})
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
