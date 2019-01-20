@@ -15,9 +15,11 @@
 package plugins
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/robertkrimen/otto"
+	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
@@ -63,6 +65,16 @@ func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 }
 
 // ******** END LOGGING FUNCS ********
+
+// ******** DATABASE FUNCS ********
+
+type databaseapi struct {
+	Conn       *sql.DB
+	PagesTable *db.PagesTable
+	UsersTable *db.UsersTable
+}
+
+// ******** END DATABASE FUNCS ********
 
 // ******** ROBOTS UTILS FUNCS ********
 

@@ -24,6 +24,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/cornelk/hashmap"
 	"github.com/gofrs/uuid"
+	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 
 	"github.com/robertkrimen/otto"
@@ -148,6 +149,10 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("logging", &logapi{})
 		plugin.VM.Set("robots", &robotsapi{})
 		plugin.VM.Set("session", &hashmap.HashMap{})
+		plugin.VM.Set("database", &databaseapi{
+			Conn:       db.Conn,
+			PagesTable: &db.PagesTable{},
+		})
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)
