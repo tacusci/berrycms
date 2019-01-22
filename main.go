@@ -62,10 +62,10 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.sqlUsername, "dbuser", "berryadmin", "Database server username, ignored if using sqlite")
 	flag.StringVar(&opts.sqlPassword, "dbpass", "", "Database server password, ignored if using sqlite")
 	flag.StringVar(&opts.sqlAddress, "dbaddr", "/", "Database server location, ignored if using sqlite")
-	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
+	flag.StringVar(&opts.activityLogLoc, "actlog", "", "Activity/access log file location")
 	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
 	flag.BoolVar(&opts.noRobots, "nrtxt", false, "Don't provide a robots.txt URI")
-	flag.StringVar(&opts.logFileName, "log", "", "Log file to output to")
+	flag.StringVar(&opts.logFileName, "log", "", "Server log file location")
 
 	flag.Parse()
 
