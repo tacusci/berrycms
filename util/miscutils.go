@@ -19,8 +19,8 @@ import (
 )
 
 var ProgressBarOptions = progressbar.OptionSetTheme(progressbar.Theme{
-	Saucer:        "▒",
-	SaucerHead:    "▒",
+	Saucer:        "█",
+	SaucerHead:    "█",
 	SaucerPadding: " ",
 	BarStart:      "|",
 	BarEnd:        "|",
