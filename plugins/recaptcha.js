@@ -4,6 +4,9 @@ var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
 // args is a list, it only currently contains the URI of the requested page 
 function onGetRender(args) {
+
+    logging.Info(session.Get("cheese")[0]);
+
     if (args[0] === "/redirect-test") {
         return {
             route: "/",
@@ -22,7 +25,7 @@ function onGetRender(args) {
 
 function onPostRecieve(args) {
     if (args[0] === "/recaptcha-test") {
-        InfoLog("Recieved post request");
+        logging.Info("Recieved post request");
         formResponseData = args[1];
         console.log(formResponseData["g-recaptcha-response"])
         return {
@@ -32,8 +35,15 @@ function onPostRecieve(args) {
 }
 
 function main() {
-    InfoLog("Loaded plugin");
+    logging.Info("Loaded plugin")
 
-    AddToRobots("Disallow: /cheesecake-test")
-    DelFromRobots("Disallow: /cheesecake-test")
+    for (var i = 0; i < 20; i++) {
+        robots.Add("Disallow: /cheesecake-test")
+    }
+
+    for (var j = 0; j < 20; j++) {
+        robots.Del("Disallow: /cheesecake-test")
+    }
+
+    session.Set("cheese", "cake");
 }

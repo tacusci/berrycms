@@ -15,16 +15,20 @@
 package plugins
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/robertkrimen/otto"
+	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/robots"
 	"github.com/tacusci/logging"
 )
 
 // ******** LOGGING FUNCS ********
 
-func PluginInfoLog(call otto.FunctionCall) otto.Value {
+type logapi struct{}
+
+func (l *logapi) Info(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {
@@ -36,7 +40,7 @@ func PluginInfoLog(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func PluginDebugLog(call otto.FunctionCall) otto.Value {
+func (l *logapi) Debug(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {
@@ -48,7 +52,7 @@ func PluginDebugLog(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func PluginErrorLog(call otto.FunctionCall) otto.Value {
+func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 	// unsafe, not confirming argument length
 	if uuid, err := call.Otto.Get("UUID"); err == nil {
 		if uuid.IsString() {
@@ -62,11 +66,23 @@ func PluginErrorLog(call otto.FunctionCall) otto.Value {
 
 // ******** END LOGGING FUNCS ********
 
+// ******** DATABASE FUNCS ********
+
+type databaseapi struct {
+	Conn       *sql.DB
+	PagesTable *db.PagesTable
+	UsersTable *db.UsersTable
+}
+
+// ******** END DATABASE FUNCS ********
+
 // ******** ROBOTS UTILS FUNCS ********
 
-func AddRobotsEntry(call otto.FunctionCall) otto.Value {
+type robotsapi struct{}
+
+func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'AddToRobots', want (string)")
+		apiError(&call, "too many arguments to call 'Add', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
@@ -83,9 +99,9 @@ func AddRobotsEntry(call otto.FunctionCall) otto.Value {
 	return otto.Value{}
 }
 
-func DelRobotsEntry(call otto.FunctionCall) otto.Value {
+func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'DelFromRobots', want (string)")
+		apiError(&call, "too many arguments to call 'Del', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)

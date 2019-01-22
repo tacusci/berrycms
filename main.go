@@ -44,6 +44,7 @@ type options struct {
 	activityLogLoc      string
 	adminHiddenPassword string
 	noRobots            bool
+	logFileName         string
 }
 
 var shuttingDown bool
@@ -64,6 +65,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.activityLogLoc, "al", "", "Activity/access log file location")
 	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
 	flag.BoolVar(&opts.noRobots, "nrtxt", false, "Don't provide a robots.txt URI")
+	flag.StringVar(&opts.logFileName, "log", "", "Log file to output to")
 
 	flag.Parse()
 
@@ -82,7 +84,14 @@ func parseCmdArgs() *options {
 func main() {
 	opts := parseCmdArgs()
 
-	fmt.Printf("🍓 Berry CMS %s 🍓\n", db.VERSION)
+	flushInitialised := make(chan bool)
+	if len(opts.logFileName) > 0 {
+		go logging.FlushLogs(opts.logFileName, &flushInitialised)
+		//halt main thread until creating file to flush logs to has initialised
+		<-flushInitialised
+	}
+
+	logging.WhiteOutput(fmt.Sprintf("🍓 Berry CMS %s 🍓\n", db.VERSION))
 
 	switch opts.sql {
 	case "sqlite":
@@ -158,6 +167,12 @@ func main() {
 	db.Close()
 
 	logging.Info("Shutting down... BYE! 👋")
+
+	//stop writing log lines to file
+	if logging.LoggingOutputReciever != nil {
+		close(logging.LoggingOutputReciever)
+	}
+	close(flushInitialised)
 }
 
 func askConfirmToWipe() bool {
