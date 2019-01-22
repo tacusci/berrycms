@@ -82,7 +82,9 @@ func parseCmdArgs() *options {
 func main() {
 	opts := parseCmdArgs()
 
-	fmt.Printf("🍓 Berry CMS %s 🍓\n", db.VERSION)
+	go logging.FlushLogs("berry.log")
+
+	logging.WhiteOutput(fmt.Sprintf("🍓 Berry CMS %s 🍓\n", db.VERSION))
 
 	switch opts.sql {
 	case "sqlite":
@@ -158,6 +160,9 @@ func main() {
 	db.Close()
 
 	logging.Info("Shutting down... BYE! 👋")
+
+	//stop writing log lines to file
+	close(logging.LoggingOutputReciever)
 }
 
 func askConfirmToWipe() bool {
