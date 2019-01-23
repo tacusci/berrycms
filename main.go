@@ -207,7 +207,7 @@ func listenForStopSig(srv *http.Server, wc *chan bool) {
 	//send a terminate command to the session clearing goroutine's channel
 	*wc <- true
 	shuttingDown = true
-	logging.Error(fmt.Sprintf("☠️  Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
+	logging.Error(fmt.Sprintf("☠️ Caught sig: %+v (Shutting down and cleaning up...) ☠️", sig))
 	logging.Info("Stopping HTTP server...")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
