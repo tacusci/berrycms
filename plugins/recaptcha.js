@@ -2,7 +2,6 @@
 
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
-// args is a list, it only currently contains the URI of the requested page 
 function onGetRender(uri) {
 
     logging.Info(session.Get("cheese")[0]);
