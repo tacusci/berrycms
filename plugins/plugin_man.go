@@ -52,7 +52,7 @@ func (p *Plugin) ParseFile() error {
 			return err
 		}
 		data = append(data, []byte("function on_get_render(args) { return onGetRender(args[0]); }\n")...)
-		data = append(data, []byte("function on_post_recieve(args) { return onPostRecieve(args); }\n")...)
+		data = append(data, []byte("function on_post_recieve(args) { return onPostRecieve(args[0], args[1]); }\n")...)
 		p.src = string(data)
 	}
 	return nil

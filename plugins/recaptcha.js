@@ -23,13 +23,12 @@ function onGetRender(uri) {
     return null;
 }
 
-function onPostRecieve(args) {
-    if (args[0] === "/recaptcha-test") {
+function onPostRecieve(uri, data) {
+    if (uri === "/recaptcha-test") {
         logging.Info("Recieved post request");
-        formResponseData = args[1];
-        console.log(formResponseData["g-recaptcha-response"])
+        console.log(data["g-recaptcha-response"])
         return {
-            route: "/recaptcha-test"
+            route: uri 
         }
     }
 }
