@@ -173,7 +173,8 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			break
 		}
 		plugin.VM.Set("document", plugin.Document)
-		val, err := plugin.Call("onGetRender", nil, &p.Route)
+		val, err := plugin.Call("on_get_render", nil, &p.Route)
+		//val, err := plugin.Call("onGetRender", nil, &p.Route)
 		if err != nil {
 			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 			continue
