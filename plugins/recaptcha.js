@@ -4,8 +4,6 @@ var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
 function onGetRender(uri) {
 
-    logging.Info(session.Get("cheese")[0]);
-
     if (uri === "/redirect-test") {
         return {
             route: "/",
@@ -42,6 +40,4 @@ function main() {
     for (var j = 0; j < 20; j++) {
         robots.Del("Disallow: /cheesecake-test")
     }
-
-    session.Set("cheese", "cake");
 }
