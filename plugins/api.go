@@ -121,6 +121,26 @@ func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 
 // ******** END ROBOTS UTILS FUNCS ********
 
+// ******** FILE FUNCS ********
+
+type filesapi struct{}
+
+func (f *filesapi) Read(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'files.Read', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'files.Read' function expected string")
+		return otto.Value{}
+	}
+
+	return otto.Value{}
+}
+
+// ******** END FILE FUNCS ********
+
 // ******** MISC FUNCS ********
 
 func apiError(call *otto.FunctionCall, outputMessage string) otto.Value {
