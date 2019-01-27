@@ -3,8 +3,7 @@
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
 function onGetRender(uri) {
-
-    if (uri === "/redirect-test") {
+if (uri === "/redirect-test") {
         return {
             route: "/",
             code: 302
@@ -15,6 +14,15 @@ function onGetRender(uri) {
         document.Find("head").AppendHtml("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
         document.Find("body").AppendHtml("<form action= \"" + uri + "\" method=\"post\"><input name=\"sometext\" type=\"text\"><button type=\"submit\">Send</button></form>")
         document.Find("form").AppendHtml("<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>")
+    }
+
+    if (uri === "/plugin-page-test") {
+        var data = files.Read("/main.go");
+        if (data !== undefined) {
+            if (typeof data === 'string') {
+                document.SetHtml("<h2>" + data + "</h2>")
+            }
+        }
     }
 
     return null;
@@ -40,6 +48,4 @@ function main() {
     for (var j = 0; j < 20; j++) {
         robots.Del("Disallow: /cheesecake-test")
     }
-
-    files.Read(484);
 }

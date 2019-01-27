@@ -17,6 +17,9 @@ package plugins
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tacusci/berrycms/db"
@@ -127,16 +130,48 @@ type filesapi struct{}
 
 func (f *filesapi) Read(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'files.Read', want (string)")
-		return otto.Value{}
+		return apiError(&call, "too many arguments to call 'files.Read', want (string)")
 	}
 	var valPassed otto.Value = call.Argument(0)
 	if !valPassed.IsString() {
-		apiError(&call, "'files.Read' function expected string")
-		return otto.Value{}
+		return apiError(&call, "'files.Read' function expected string")
 	}
 
-	return otto.Value{}
+	rootDir, err := os.Getwd()
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	absFilePath := fmt.Sprintf("%s%s%s", rootDir, string(os.PathSeparator), strings.TrimPrefix(valPassed.String(), string(os.PathSeparator)))
+
+	fileInfo, err := os.Stat(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	if fileInfo.IsDir() {
+		files, err := ioutil.ReadDir(absFilePath)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		val, err := call.Otto.ToValue(files)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		return val
+	}
+
+	data, err := ioutil.ReadFile(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	val, err := call.Otto.ToValue(string(data))
+
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+	return val
 }
 
 // ******** END FILE FUNCS ********
