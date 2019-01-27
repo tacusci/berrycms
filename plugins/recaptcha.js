@@ -23,7 +23,7 @@ function onGetRender(uri) {
 function onPostRecieve(uri, data) {
     if (uri === "/recaptcha-test") {
         logging.Info("Recieved post request");
-        console.log(data["g-recaptcha-response"])
+        console.log(data["g-recaptcha-response"]);
         return {
             route: uri 
         }
