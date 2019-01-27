@@ -40,4 +40,6 @@ function main() {
     for (var j = 0; j < 20; j++) {
         robots.Del("Disallow: /cheesecake-test")
     }
+
+    files.Read(484);
 }
