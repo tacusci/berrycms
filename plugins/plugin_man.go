@@ -150,6 +150,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("UUID", plugin.uuid)
 		plugin.VM.Set("logging", &logapi{})
 		plugin.VM.Set("robots", &robotsapi{})
+		plugin.VM.Set("files", &filesapi{})
 		plugin.VM.Set("session", &hashmap.HashMap{})
 		plugin.VM.Set("database", &databaseapi{
 			Conn:       db.Conn,
