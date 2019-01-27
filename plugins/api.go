@@ -82,12 +82,12 @@ type robotsapi struct{}
 
 func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'Add', want (string)")
+		apiError(&call, "too many arguments to call 'robots.Add', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
 	if !valPassed.IsString() {
-		apiError(&call, "'AddRobotsEntry' function expected string")
+		apiError(&call, "'robots.Add' function expected string")
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
@@ -101,12 +101,12 @@ func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 
 func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'Del', want (string)")
+		apiError(&call, "too many arguments to call 'robots.Del', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
 	if !valPassed.IsString() {
-		apiError(&call, "'DelFromRobots' function expected string")
+		apiError(&call, "'robots.Del' function expected string")
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
