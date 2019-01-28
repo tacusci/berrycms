@@ -142,7 +142,7 @@ func (f *filesapi) Read(call otto.FunctionCall) otto.Value {
 		return apiError(&call, err.Error())
 	}
 
-	absFilePath := fmt.Sprintf("%s%s%s", rootDir, string(os.PathSeparator), strings.TrimPrefix(valPassed.String(), string(os.PathSeparator)))
+	absFilePath := fmt.Sprintf("%s%s%s", rootDir, string(os.PathSeparator), strings.Replace(strings.TrimPrefix(valPassed.String(), string(os.PathSeparator)), "../", "", -1))
 
 	fileInfo, err := os.Stat(absFilePath)
 	if err != nil {
