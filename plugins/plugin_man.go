@@ -30,6 +30,8 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+var globalSession *hashmap.HashMap
+
 var manager = &Manager{
 	dir:     "./plugins",
 	plugins: []Plugin{},
@@ -77,8 +79,9 @@ func (p *Plugin) Error(err error) {
 // Manager contains plugin collection and add utility and concurrent protection for executing
 type Manager struct {
 	sync.Mutex
-	dir     string
-	plugins []Plugin
+	dir           string
+	plugins       []Plugin
+	globalSession *hashmap.HashMap
 }
 
 // NewManager retrieves pointer to only single instance plugin manager
@@ -101,6 +104,7 @@ func (m *Manager) Unload() {
 	m.Lock()
 	defer m.Unlock()
 	m.plugins = []Plugin{}
+	globalSession = &hashmap.HashMap{}
 }
 
 func (m *Manager) Plugins() *[]Plugin {
@@ -152,6 +156,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("robots", &robotsapi{})
 		plugin.VM.Set("files", &filesapi{})
 		plugin.VM.Set("session", &hashmap.HashMap{})
+		plugin.VM.Set("gsession", globalSession)
 		plugin.VM.Set("database", &databaseapi{
 			Conn:       db.Conn,
 			PagesTable: &db.PagesTable{},
