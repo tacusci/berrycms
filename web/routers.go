@@ -31,6 +31,7 @@ import (
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/berrycms/robots"
+	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
 
@@ -119,6 +120,7 @@ func (mr *MutableRouter) Reload() {
 			if val_interface, err := val.Export(); err == nil {
 				//try and convert list to slice of strings exclusively, if this fails don't continue
 				if routesToRegister, ok := val_interface.([]string); ok {
+					routesToRegister = util.RemoveDuplicates(routesToRegister)
 					//for each route/value from list, map the route to the db_pages handler
 					for _, value := range routesToRegister {
 						logging.Info(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
