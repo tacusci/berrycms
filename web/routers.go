@@ -114,7 +114,9 @@ func (mr *MutableRouter) Reload() {
 
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
-		plugin.Call("main", nil, nil)
+		if _, err := plugin.Call("main", nil, nil); err != nil {
+			logging.Error(err.Error())
+		}
 	}
 	pm.Unlock()
 
