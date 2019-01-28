@@ -113,7 +113,6 @@ func (mr *MutableRouter) Reload() {
 	}
 
 	pm.Lock()
-	sph := &SavedPageHandler{Router: mr}
 	for _, plugin := range *pm.Plugins() {
 		if val, err := plugin.VM.Get("routesToRegister"); err == nil {
 			//extract list value of 'routesToRegister' from plugin
@@ -123,8 +122,7 @@ func (mr *MutableRouter) Reload() {
 					//for each route/value from list, map the route to the db_pages handler
 					for _, value := range routesToRegister {
 						logging.Info(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
-						r.HandleFunc(value, sph.Get).Methods("GET")
-						r.HandleFunc(value, sph.Post).Methods("POST")
+						mr.mapPluginCreatedRoute(r, value)
 					}
 				}
 			}
@@ -171,6 +169,14 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 		r.HandleFunc(p.Route, savedPageHandler.Get).Methods("GET")
 		r.HandleFunc(p.Route, savedPageHandler.Post).Methods("POST")
 	}
+}
+
+func (mr *MutableRouter) mapPluginCreatedRoute(r *mux.Router, route string) {
+	r.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
+		ctx := plush.NewContext()
+		ctx.Set("pagecontent", "")
+		Render(w, r, &db.Page{Route: route, Content: ""}, ctx)
+	}).Methods("GET")
 }
 
 func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) error {
