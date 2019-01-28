@@ -104,6 +104,8 @@ func (mr *MutableRouter) Reload() {
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
+	mr.mapSavedPageRoutes(r)
+
 	pm := plugins.NewManager()
 
 	if err := pm.Load(); err != nil {
@@ -116,7 +118,6 @@ func (mr *MutableRouter) Reload() {
 	}
 	pm.Unlock()
 
-	mr.mapSavedPageRoutes(r)
 	if err := mr.mapStaticDir(r, "static"); err == nil {
 		go mr.monitorStatic("./static", mr.staticwatcher)
 	} else {
