@@ -128,7 +128,9 @@ func (m *Manager) loadFromDir(dir string) error {
 		fileNameParts := strings.Split(file.Name(), ".")
 		if len(fileNameParts) > 1 {
 			if fileNameParts[len(fileNameParts)-1] == "js" {
-				m.loadPlugin(fileFullPath)
+				if err := m.loadPlugin(fileFullPath); err != nil {
+					logging.Error(err.Error())
+				}
 			}
 		}
 	}
