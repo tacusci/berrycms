@@ -3,7 +3,7 @@
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
 function onGetRender(uri) {
-if (uri === "/redirect-test") {
+    if (uri === "/redirect-test") {
         return {
             route: "/",
             code: 302
