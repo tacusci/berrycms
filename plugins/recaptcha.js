@@ -38,6 +38,8 @@ function onPostRecieve(uri, data) {
     }
 }
 
+var routesToRegister = ["/plugin-page-test"];
+
 function main() {
     logging.Info("Loaded plugin")
 

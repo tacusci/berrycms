@@ -113,7 +113,22 @@ func (mr *MutableRouter) Reload() {
 	}
 
 	pm.Lock()
+	sph := &SavedPageHandler{Router: mr}
 	for _, plugin := range *pm.Plugins() {
+		if val, err := plugin.VM.Get("routesToRegister"); err == nil {
+			//extract list value of 'routesToRegister' from plugin
+			if val_interface, err := val.Export(); err == nil {
+				//try and convert list to slice of strings exclusively, if this fails don't continue
+				if routesToRegister, ok := val_interface.([]string); ok {
+					//for each route/value from list, map the route to the db_pages handler
+					for _, value := range routesToRegister {
+						logging.Info(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
+						r.HandleFunc(value, sph.Get).Methods("GET")
+						r.HandleFunc(value, sph.Post).Methods("POST")
+					}
+				}
+			}
+		}
 		if _, err := plugin.Call("main", nil, nil); err != nil {
 			logging.Error(err.Error())
 		}
