@@ -38,7 +38,8 @@ function onPostRecieve(uri, data) {
     }
 }
 
-var routesToRegister = ["/plugin-page-test"];
+//this list of routes gets mapped on plugin load, before main() is called
+var routesToRegister = ["/recaptcha-test", "/plugin-page-test", "/redirect-test"];
 
 function main() {
     logging.Info("Loaded plugin")
