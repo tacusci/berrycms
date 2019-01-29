@@ -190,27 +190,29 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 				continue
 			}
 
+			modifiedStatusCode, err := editedPage.Get("code")
+			if err != nil {
+				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+				continue
+			}
+
 			if editedPageRoute.IsString() {
 				//plugin has modified current page route, registering pending redirect
 				if editedPageRoute.String() != p.Route {
 					redirectRequested = true
 					//by default use status found
 					respCode = http.StatusFound
-					modifiedStatusCode, err := editedPage.Get("code")
-					if err != nil {
-						logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
-						continue
-					}
-					if modifiedStatusCode.IsNumber() {
-						modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
-						if err != nil {
-							logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
-							continue
-						}
-						respCode = int(modifiedStatusCodeInt)
-					}
 					p.Route = editedPageRoute.String()
 				}
+			}
+
+			if modifiedStatusCode.IsNumber() {
+				modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
+				if err != nil {
+					logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+					continue
+				}
+				respCode = int(modifiedStatusCodeInt)
 			}
 		}
 
@@ -233,6 +235,14 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	if redirectRequested {
 		http.Redirect(w, r, p.Route, respCode)
 		return nil
+	}
+
+	if respCode == http.StatusNotFound {
+		p, ctx, err := renderFourOhFour()
+		if err != nil {
+			return err
+		}
+		html = RenderStr(p, ctx)
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
