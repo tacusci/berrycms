@@ -123,7 +123,7 @@ func (mr *MutableRouter) Reload() {
 					routesToRegister = util.RemoveDuplicates(routesToRegister)
 					//for each route/value from list, map the route to the db_pages handler
 					for _, value := range routesToRegister {
-						logging.Info(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
+						logging.Debug(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
 						mr.mapPluginCreatedRoute(r, value)
 					}
 				}
