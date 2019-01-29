@@ -238,11 +238,11 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	}
 
 	if respCode == http.StatusNotFound {
-		p, ctx, err := renderFourOhFour()
+		ctx, err := renderFourOhFour()
 		if err != nil {
 			return err
 		}
-		html = RenderStr(p, ctx)
+		html = RenderStr(ctx)
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -253,7 +253,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 }
 
 //RenderStr uses plush rendering engine to read page content from the DB and create HTML content as string
-func RenderStr(p *db.Page, ctx *plush.Context) string {
+func RenderStr(ctx *plush.Context) string {
 	html, err := plush.Render("<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><%= pagecontent %></html>", ctx)
 	if err != nil {
 		logging.Error(err.Error())

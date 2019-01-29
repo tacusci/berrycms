@@ -410,15 +410,15 @@ func Error(w http.ResponseWriter, err error) {
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
 
-	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusInternalServerError)
+	WriteHTMLAndStatus(w, RenderStr(ctx), http.StatusInternalServerError)
 }
 
-func renderFourOhFour() (*db.Page, *plush.Context, error) {
+func renderFourOhFour() (*plush.Context, error) {
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", "[404]"))
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -433,16 +433,16 @@ func renderFourOhFour() (*db.Page, *plush.Context, error) {
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
 
-	return p, ctx, nil
+	return ctx, nil
 }
 
 func fourOhFour(w http.ResponseWriter, r *http.Request) {
-	p, ctx, err := renderFourOhFour()
+	ctx, err := renderFourOhFour()
 	if err != nil {
 		Error(w, err)
 		return
 	}
-	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusNotFound)
+	WriteHTMLAndStatus(w, RenderStr(ctx), http.StatusNotFound)
 }
 
 func WriteHTMLAndStatus(w http.ResponseWriter, error string, code int) {
