@@ -159,10 +159,11 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("files", &filesapi{})
 		plugin.VM.Set("session", &hashmap.HashMap{})
 		plugin.VM.Set("gsession", globalSession)
-		plugin.VM.Set("database", &databaseapi{
+		plugin.VM.Set("cmsdb", &cmsdatabaseapi{
 			Conn:       db.Conn,
 			PagesTable: &db.PagesTable{},
 		})
+		plugin.VM.Set("db", &databaseapi{})
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)

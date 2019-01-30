@@ -69,13 +69,23 @@ func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 
 // ******** END LOGGING FUNCS ********
 
-// ******** DATABASE FUNCS ********
+// ******** CMS DATABASE FUNCS ********
 
-type databaseapi struct {
+type cmsdatabaseapi struct {
 	Conn       *sql.DB
 	PagesTable *db.PagesTable
 	UsersTable *db.UsersTable
 }
+
+// ******** END CMS DATABASE FUNCS ********
+
+// ******** DATABASE FUNCS ********
+
+type databaseapi struct {
+	Conn *sql.DB
+}
+
+func (d *databaseapi) Connect(user string, password string, addr string) {}
 
 // ******** END DATABASE FUNCS ********
 
