@@ -17,6 +17,9 @@ package plugins
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tacusci/berrycms/db"
@@ -66,13 +69,23 @@ func (l *logapi) Error(call otto.FunctionCall) otto.Value {
 
 // ******** END LOGGING FUNCS ********
 
-// ******** DATABASE FUNCS ********
+// ******** CMS DATABASE FUNCS ********
 
-type databaseapi struct {
+type cmsdatabaseapi struct {
 	Conn       *sql.DB
 	PagesTable *db.PagesTable
 	UsersTable *db.UsersTable
 }
+
+// ******** END CMS DATABASE FUNCS ********
+
+// ******** DATABASE FUNCS ********
+
+type databaseapi struct {
+	Conn *sql.DB
+}
+
+func (d *databaseapi) Connect(user string, password string, addr string) {}
 
 // ******** END DATABASE FUNCS ********
 
@@ -82,12 +95,12 @@ type robotsapi struct{}
 
 func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'Add', want (string)")
+		apiError(&call, "too many arguments to call 'robots.Add', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
 	if !valPassed.IsString() {
-		apiError(&call, "'AddRobotsEntry' function expected string")
+		apiError(&call, "'robots.Add' function expected string")
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
@@ -101,12 +114,12 @@ func (r *robotsapi) Add(call otto.FunctionCall) otto.Value {
 
 func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 	if len(call.ArgumentList) != 1 {
-		apiError(&call, "too many arguments to call 'Del', want (string)")
+		apiError(&call, "too many arguments to call 'robots.Del', want (string)")
 		return otto.Value{}
 	}
 	var valPassed otto.Value = call.Argument(0)
 	if !valPassed.IsString() {
-		apiError(&call, "'DelFromRobots' function expected string")
+		apiError(&call, "'robots.Del' function expected string")
 		return otto.Value{}
 	}
 	val := []byte(valPassed.String())
@@ -120,6 +133,66 @@ func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 }
 
 // ******** END ROBOTS UTILS FUNCS ********
+
+// ******** FILE FUNCS ********
+
+type filesapi struct{}
+
+func (f *filesapi) Read(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		return apiError(&call, "too many arguments to call 'files.Read', want (string)")
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		return apiError(&call, "'files.Read' function expected string")
+	}
+
+	//get the current running/working directory abs path
+	rootDir, err := os.Getwd()
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	//append the running/working directory abs path to the passed path
+	//we want to remove the leading path seperator to guarentee there's only the one
+	//also want to remove '../' chars so reverse directory traversal is impossible
+	absFilePath := fmt.Sprintf("%s%s%s", rootDir, string(os.PathSeparator), strings.Replace(strings.TrimPrefix(valPassed.String(), string(os.PathSeparator)), "../", "", -1))
+
+	//get passed file info
+	fileInfo, err := os.Stat(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	//if the file passed is a directory return list of files in directory
+	if fileInfo.IsDir() {
+		files, err := ioutil.ReadDir(absFilePath)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		//convert file slice to otto value
+		val, err := call.Otto.ToValue(files)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		return val
+	}
+
+	//read the byte data from the file passed and return it as a string
+	data, err := ioutil.ReadFile(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+	//convert file data string to otto value
+	val, err := call.Otto.ToValue(string(data))
+
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+	return val
+}
+
+// ******** END FILE FUNCS ********
 
 // ******** MISC FUNCS ********
 

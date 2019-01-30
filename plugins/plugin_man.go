@@ -30,6 +30,8 @@ import (
 	"github.com/robertkrimen/otto"
 )
 
+var globalSession *hashmap.HashMap
+
 var manager = &Manager{
 	dir:     "./plugins",
 	plugins: []Plugin{},
@@ -51,6 +53,8 @@ func (p *Plugin) ParseFile() error {
 		if err != nil {
 			return err
 		}
+		data = append(data, []byte("function on_get_render(args) { return onGetRender(args[0]); }\n")...)
+		data = append(data, []byte("function on_post_recieve(args) { return onPostRecieve(args[0], args[1]); }\n")...)
 		p.src = string(data)
 	}
 	return nil
@@ -75,8 +79,9 @@ func (p *Plugin) Error(err error) {
 // Manager contains plugin collection and add utility and concurrent protection for executing
 type Manager struct {
 	sync.Mutex
-	dir     string
-	plugins []Plugin
+	dir           string
+	plugins       []Plugin
+	globalSession *hashmap.HashMap
 }
 
 // NewManager retrieves pointer to only single instance plugin manager
@@ -99,6 +104,7 @@ func (m *Manager) Unload() {
 	m.Lock()
 	defer m.Unlock()
 	m.plugins = []Plugin{}
+	globalSession = &hashmap.HashMap{}
 }
 
 func (m *Manager) Plugins() *[]Plugin {
@@ -122,7 +128,9 @@ func (m *Manager) loadFromDir(dir string) error {
 		fileNameParts := strings.Split(file.Name(), ".")
 		if len(fileNameParts) > 1 {
 			if fileNameParts[len(fileNameParts)-1] == "js" {
-				m.loadPlugin(fileFullPath)
+				if err := m.loadPlugin(fileFullPath); err != nil {
+					logging.Error(err.Error())
+				}
 			}
 		}
 	}
@@ -148,11 +156,14 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("UUID", plugin.uuid)
 		plugin.VM.Set("logging", &logapi{})
 		plugin.VM.Set("robots", &robotsapi{})
+		plugin.VM.Set("files", &filesapi{})
 		plugin.VM.Set("session", &hashmap.HashMap{})
-		plugin.VM.Set("database", &databaseapi{
+		plugin.VM.Set("gsession", globalSession)
+		plugin.VM.Set("cmsdb", &cmsdatabaseapi{
 			Conn:       db.Conn,
 			PagesTable: &db.PagesTable{},
 		})
+		plugin.VM.Set("db", &databaseapi{})
 		plugin.VM.Run(plugin.src)
 
 		m.plugins = append(m.plugins, plugin)

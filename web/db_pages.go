@@ -96,7 +96,7 @@ func (sph *SavedPageHandler) Post(w http.ResponseWriter, r *http.Request) {
 			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 			continue
 		}
-		val, err := plugin.Call("onPostRecieve", nil, &p.Route, r.PostForm)
+		val, err := plugin.Call("on_post_recieve", nil, &p.Route, r.PostForm)
 		if err != nil {
 			plugin.Error(err)
 			continue

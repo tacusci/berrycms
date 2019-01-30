@@ -173,7 +173,8 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			break
 		}
 		plugin.VM.Set("document", plugin.Document)
-		val, err := plugin.Call("onGetRender", nil, &p.Route)
+		val, err := plugin.Call("on_get_render", nil, &p.Route)
+		//val, err := plugin.Call("onGetRender", nil, &p.Route)
 		if err != nil {
 			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 			continue
@@ -189,27 +190,29 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 				continue
 			}
 
+			modifiedStatusCode, err := editedPage.Get("code")
+			if err != nil {
+				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+				continue
+			}
+
 			if editedPageRoute.IsString() {
 				//plugin has modified current page route, registering pending redirect
 				if editedPageRoute.String() != p.Route {
 					redirectRequested = true
 					//by default use status found
 					respCode = http.StatusFound
-					modifiedStatusCode, err := editedPage.Get("code")
-					if err != nil {
-						logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
-						continue
-					}
-					if modifiedStatusCode.IsNumber() {
-						modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
-						if err != nil {
-							logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
-							continue
-						}
-						respCode = int(modifiedStatusCodeInt)
-					}
 					p.Route = editedPageRoute.String()
 				}
+			}
+
+			if modifiedStatusCode.IsNumber() {
+				modifiedStatusCodeInt, err := modifiedStatusCode.ToInteger()
+				if err != nil {
+					logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+					continue
+				}
+				respCode = int(modifiedStatusCodeInt)
 			}
 		}
 
@@ -234,6 +237,14 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 		return nil
 	}
 
+	if respCode == http.StatusNotFound {
+		ctx, err := renderFourOhFour()
+		if err != nil {
+			return err
+		}
+		html = RenderStr(ctx)
+	}
+
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.WriteHeader(respCode)
@@ -242,7 +253,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 }
 
 //RenderStr uses plush rendering engine to read page content from the DB and create HTML content as string
-func RenderStr(p *db.Page, ctx *plush.Context) string {
+func RenderStr(ctx *plush.Context) string {
 	html, err := plush.Render("<html><head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head><%= pagecontent %></html>", ctx)
 	if err != nil {
 		logging.Error(err.Error())

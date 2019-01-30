@@ -31,6 +31,7 @@ import (
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/berrycms/robots"
+	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
 
@@ -104,6 +105,8 @@ func (mr *MutableRouter) Reload() {
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
+	mr.mapSavedPageRoutes(r)
+
 	pm := plugins.NewManager()
 
 	if err := pm.Load(); err != nil {
@@ -112,11 +115,26 @@ func (mr *MutableRouter) Reload() {
 
 	pm.Lock()
 	for _, plugin := range *pm.Plugins() {
-		plugin.Call("main", nil, nil)
+		if val, err := plugin.VM.Get("routesToRegister"); err == nil {
+			//extract list value of 'routesToRegister' from plugin
+			if val_interface, err := val.Export(); err == nil {
+				//try and convert list to slice of strings exclusively, if this fails don't continue
+				if routesToRegister, ok := val_interface.([]string); ok {
+					routesToRegister = util.RemoveDuplicates(routesToRegister)
+					//for each route/value from list, map the route to the db_pages handler
+					for _, value := range routesToRegister {
+						logging.Debug(fmt.Sprintf("PLUGIN {%s} -> Mapping page route '%s'", plugin.UUID(), value))
+						mr.mapPluginCreatedRoute(r, value)
+					}
+				}
+			}
+		}
+		if _, err := plugin.Call("main", nil, nil); err != nil {
+			logging.Error(err.Error())
+		}
 	}
 	pm.Unlock()
 
-	mr.mapSavedPageRoutes(r)
 	if err := mr.mapStaticDir(r, "static"); err == nil {
 		go mr.monitorStatic("./static", mr.staticwatcher)
 	} else {
@@ -153,6 +171,14 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 		r.HandleFunc(p.Route, savedPageHandler.Get).Methods("GET")
 		r.HandleFunc(p.Route, savedPageHandler.Post).Methods("POST")
 	}
+}
+
+func (mr *MutableRouter) mapPluginCreatedRoute(r *mux.Router, route string) {
+	r.HandleFunc(route, func(w http.ResponseWriter, r *http.Request) {
+		ctx := plush.NewContext()
+		ctx.Set("pagecontent", "")
+		Render(w, r, &db.Page{Route: route, Content: ""}, ctx)
+	}).Methods("GET")
 }
 
 func (mr *MutableRouter) mapStaticDir(r *mux.Router, sd string) error {
@@ -384,15 +410,15 @@ func Error(w http.ResponseWriter, err error) {
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
 
-	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusInternalServerError)
+	WriteHTMLAndStatus(w, RenderStr(ctx), http.StatusInternalServerError)
 }
 
-func fourOhFour(w http.ResponseWriter, r *http.Request) {
+func renderFourOhFour() (*plush.Context, error) {
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "content", fmt.Sprintf("route = '%s'", "[404]"))
 
 	if err != nil {
-		Error(w, err)
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -407,7 +433,16 @@ func fourOhFour(w http.ResponseWriter, r *http.Request) {
 	ctx := plush.NewContext()
 	ctx.Set("pagecontent", template.HTML(p.Content))
 
-	WriteHTMLAndStatus(w, RenderStr(p, ctx), http.StatusNotFound)
+	return ctx, nil
+}
+
+func fourOhFour(w http.ResponseWriter, r *http.Request) {
+	ctx, err := renderFourOhFour()
+	if err != nil {
+		Error(w, err)
+		return
+	}
+	WriteHTMLAndStatus(w, RenderStr(ctx), http.StatusNotFound)
 }
 
 func WriteHTMLAndStatus(w http.ResponseWriter, error string, code int) {
