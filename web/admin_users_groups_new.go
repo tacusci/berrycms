@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gobuffalo/plush"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/logging"
 )
@@ -31,20 +30,7 @@ type AdminUserGroupsNewHandler struct {
 }
 
 //Get handles get requests to URI
-func (augnh *AdminUserGroupsNewHandler) Get(w http.ResponseWriter, r *http.Request) {
-	pctx := plush.NewContext()
-	pctx.Set("title", "New Group")
-	pctx.Set("submitroute", r.RequestURI)
-	pctx.Set("pagetitle", "")
-	pctx.Set("pageroute", "")
-	pctx.Set("pagecontent", "")
-	pctx.Set("adminhiddenpassword", "")
-	if augnh.Router.AdminHidden {
-		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", augnh.Router.AdminHiddenPassword))
-	}
-	pctx.Set("quillenabled", false)
-	RenderDefault(w, "admin.users.groups.new.html", pctx)
-}
+func (augnh *AdminUserGroupsNewHandler) Get(w http.ResponseWriter, r *http.Request) {}
 
 //Post handles post requests to URI
 func (augnh *AdminUserGroupsNewHandler) Post(w http.ResponseWriter, r *http.Request) {
@@ -75,8 +61,6 @@ func (augnh *AdminUserGroupsNewHandler) Post(w http.ResponseWriter, r *http.Requ
 		http.Redirect(w, r, r.RequestURI, http.StatusFound)
 	}
 
-	augnh.Router.Reload()
-
 	var redirectURI = "/admin/users/groups/edit/%s"
 
 	if augnh.Router.AdminHidden {
@@ -90,7 +74,7 @@ func (augnh *AdminUserGroupsNewHandler) Post(w http.ResponseWriter, r *http.Requ
 func (augnh *AdminUserGroupsNewHandler) Route() string { return augnh.route }
 
 //HandlesGet retrieve whether this handler handles get requests
-func (augnh *AdminUserGroupsNewHandler) HandlesGet() bool { return true }
+func (augnh *AdminUserGroupsNewHandler) HandlesGet() bool { return false }
 
 //HandlesPost retrieve whether this handler handles post requests
 func (augnh *AdminUserGroupsNewHandler) HandlesPost() bool { return true }

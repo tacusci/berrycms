@@ -1,7 +1,7 @@
-<body>
+"%s -> %s", string(key), val<body>
     <div class="container">
         <%= contentOf("navdashboardheader") %>
-        <li class="navbar-item"><a class="navbar-link" href="<%= adminhiddenpassword %>/admin/users/groups/new">New</a></li>
+        <li class="navbar-item"><button id="create-new-group" class="navbar-input" style="margin-right: 35px;">New</button></li>
         <li class="navbar-item"><button id="" class="navbar-input">Delete</button></li>
         <%= contentOf("navdashboardfooter") %>
         <table id="group-list" class="u-full-width">
@@ -24,5 +24,58 @@
                 <% } %>
             </tbody>
         </table>
+
+        <div id="group-create-form-modal" class="modal">
+            <div class="modal-content">
+                <div>
+                    <span class="close">&times;</span>
+                </div>
+
+                <div style="max-height: 45em; overflow: auto;">
+                    <form id="newgroupform" style="margin-bottom: 0rem;" action="<%= newgroupformaction %>" method="POST">
+                        <div class="row">
+                            <h4 class="u-full-width">Create New Group</h4>
+                            <div class="row">
+                                <div class="twelve columns">
+                                    <label>Name</label><input required class="u-full-width" name="title" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="twelve columns">
+                                <input style="margin-bottom: 0rem;" class="button-primary u-full-width" type="submit" value="OK">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+    <script>
+        // Get the modal
+        var modal = document.getElementById('group-create-form-modal');
+        
+        // Get the button that opens the modal
+        var showModalButton = document.getElementById('create-new-group');
+        
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+        
+        // When the user clicks the button, open the modal 
+        showModalButton.onclick = function() {
+            modal.style.display = "flex";
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+        
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>

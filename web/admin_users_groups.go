@@ -58,11 +58,12 @@ func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	pctx.Set("unixtostring", UnixToTimeString)
 	pctx.Set("title", "Groups")
 	pctx.Set("adminhiddenpassword", "")
+	pctx.Set("quillenabled", false)
+	pctx.Set("newgroupformaction", "/admin/users/groups/new")
+	pctx.Set("groups", groups)
 	if ugh.Router.AdminHidden {
 		pctx.Set("adminhiddenpassword", fmt.Sprintf("/%s", ugh.Router.AdminHiddenPassword))
 	}
-	pctx.Set("quillenabled", false)
-	pctx.Set("groups", groups)
 
 	RenderDefault(w, "admin.users.groups.html", pctx)
 }
