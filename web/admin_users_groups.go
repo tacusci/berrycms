@@ -30,7 +30,7 @@ type AdminUserGroupsHandler struct {
 }
 
 func (ugh *AdminUserGroupsHandler) Get(w http.ResponseWriter, r *http.Request) {
-	groups := make([]db.Group, 0)
+	groups := []db.Group{}
 
 	groupTable := db.GroupTable{}
 	rows, err := groupTable.Select(db.Conn, "createddatetime, uuid, title", "")
