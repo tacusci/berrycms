@@ -2,7 +2,7 @@
     <div class="container">
         <%= contentOf("navdashboardheader") %>
         <li class="navbar-item"><button id="create-new-group" class="navbar-input" style="margin-right: 35px;">New</button></li>
-        <li class="navbar-item"><button id="" class="navbar-input">Delete</button></li>
+        <li class="navbar-item"><button id="groupsdelete" class="navbar-input">Delete</button></li>
         <%= contentOf("navdashboardfooter") %>
         <table id="group-list" class="u-full-width">
             <thead>
@@ -32,7 +32,7 @@
                 </div>
 
                 <div style="max-height: 45em; overflow: auto;">
-                    <form id="newgroupform" style="margin-bottom: 0rem;" action="<%= newgroupformaction %>" method="POST">
+                    <form id="newgroupform" style="margin-bottom: 0rem;" action="<%= adminhiddenpassword %><%= newgroupformaction %>" method="POST">
                         <div class="row">
                             <h4 class="u-full-width">Create New Group</h4>
                             <div class="row">
