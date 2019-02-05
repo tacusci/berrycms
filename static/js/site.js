@@ -146,6 +146,36 @@ $(document).ready(function() {
       }
     })
 
+    $("#groupsdelete").click(function() {
+
+      var groupsToDeleteUUIDs = [];
+
+      $("#group-list tr").each(function(){
+        collectAllCheckedBoxIDs(this, groupsToDeleteUUIDs);
+      })
+
+      if (groupsToDeleteUUIDs.length > 0) {
+        if (confirm("Delete " + String(groupsToDeleteUUIDs.length) + " group" + ((groupsToDeleteUUIDs.length > 1) ? "s?" : "?"))) {
+          var form = document.createElement("form");
+          form.setAttribute("id", "deleteform");
+          form.setAttribute("method", "POST");
+          form.setAttribute("action", window.location.pathname + "/delete");
+
+          form._submit_function_ = form.submit;
+
+          for (var i = 0; i < groupsToDeleteUUIDs.length; i++) {
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", String(i));
+            hiddenField.setAttribute("value", groupsToDeleteUUIDs[i]);
+            form.appendChild(hiddenField);
+          }
+          document.body.appendChild(form);
+          form._submit_function_();
+        }
+      }
+    })
+
     $("#adduserstogroup").click(function() {
 
       var usesrToAddUUIDs = [];
