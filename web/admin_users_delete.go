@@ -45,7 +45,6 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 	err := r.ParseForm()
 
 	if err != nil {
-		logging.Error(err.Error())
 		Error(w, err)
 	}
 
@@ -70,12 +69,6 @@ func (audh *AdminUsersDeleteHandler) Post(w http.ResponseWriter, r *http.Request
 
 		//don't allow deletion of the root user account
 		if db.UsersRoleFlag(userToDelete.UserroleId) != db.ROOT_USER {
-
-			if err != nil {
-				logging.Error(err.Error())
-				Error(w, err)
-			}
-
 			//make sure that the logged in user is not the same as user to delete
 			//the first condition evals before the second, that way no nil pointer exception occurs
 			if (loggedInUser != nil) && (loggedInUser.UUID != userToDelete.UUID) {
