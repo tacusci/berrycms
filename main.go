@@ -198,6 +198,7 @@ func askConfirmToWipe() bool {
 	}
 }
 
+//fires on Ctrl+C/SIGTERM send to process
 func listenForStopSig(srv *http.Server, wc *chan bool) {
 	var gracefulStop = make(chan os.Signal)
 	signal.Notify(gracefulStop, syscall.SIGTERM)

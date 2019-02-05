@@ -1151,12 +1151,18 @@ func buildValuesList(m Model) string {
 func buildFieldsFromModel(m Model) []Field {
 	fields := make([]Field, 0)
 
+	//reference passed struct definition
 	val := reflect.ValueOf(m).Elem()
 
+	//for each field value of struct
 	for i := 0; i < val.NumField(); i++ {
+		//get specific struct field value
 		valueField := val.Field(i)
+		//get specific struct field value type
 		typeField := val.Type().Field(i)
+		//get specific struct tag (the text inside '' at side of fields)
 		tag := typeField.Tag
+		//create DB field struct with values derived from passed struct
 		newField := Field{
 			kind:     valueField.Kind(),
 			fieldTag: tag,
@@ -1164,7 +1170,9 @@ func buildFieldsFromModel(m Model) []Field {
 			Type:     typeField.Type.String(),
 			Value:    reflect.Value(valueField),
 		}
+		//read the tag string and set relevant flags
 		newField.parseFlagTags()
+		//convert golang data types to equivilent SQLite data types
 		newField.translateTypes()
 		fields = append(fields, newField)
 	}
@@ -1196,9 +1204,11 @@ func buildFieldsFromTable(t Table) []Field {
 }
 
 func createStatement(t Table) string {
+	//using 'strings' buffer struct as more efficient than concatination
 	var stringBulder bytes.Buffer
 	stringBulder.WriteString(fmt.Sprintf("CREATE TABLE IF NOT EXISTS `%s` (", t.Name()))
 
+	//generate field struct instances from table
 	tableFields := t.buildFields()
 	tableFieldsCount := len(tableFields)
 
@@ -1210,8 +1220,10 @@ func createStatement(t Table) string {
 
 	for j := 0; j < tableFieldsCount; j++ {
 		field := tableFields[j]
+		//add SQL field name and type to create statement
 		stringBulder.WriteString(fmt.Sprintf("`%s` %s", field.Name, field.Type))
 		if field.PrimaryKey {
+			//TODO: Change this check structure to care about PK > 1 for any DB type...
 			if Type == MySQL {
 				pkFieldCount++
 				if pkFieldCount > 1 {
@@ -1222,6 +1234,7 @@ func createStatement(t Table) string {
 			}
 			pkField = field
 		}
+		//apply field DB attributes like: 'not null', 'auto increment', 'unique' etc., previously derived from struct field tags
 		if field.AutoIncrement {
 			if Type == MySQL {
 				stringBulder.WriteString(" AUTO_INCREMENT")
