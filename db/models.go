@@ -448,6 +448,50 @@ func (gt *GroupTable) SelectByTitle(db *sql.DB, groupTitle string) (*Group, erro
 	return g, nil
 }
 
+func (gt *GroupTable) SelectByUUID(db *sql.DB, groupUUID string) (*Group, error) {
+
+	g := &Group{}
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE uuid = '%s'", gt.Name(), groupUUID))
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		err = rows.Scan(&g.Groupid, &g.CreatedDateTime, &g.UUID, &g.Title)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g, nil
+}
+
+func (gt *GroupTable) DeleteByUUID(db *sql.DB, groupUUID string) (int64, error) {
+
+	gmt := GroupMembershipTable{}
+	numDeleted, err := gmt.DeleteAllUsersFromGroup(db, &Group{UUID: groupUUID})
+
+	if err != nil {
+		logging.Error(fmt.Sprintf("Error removing user memberships from group of UUID %s -> %s", groupUUID, err.Error()))
+	}
+
+	res, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE uuid = ?", gt.Name()), groupUUID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	numDeleted, err = res.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return numDeleted, nil
+}
+
 func (gt *GroupTable) buildFields() []Field {
 	return buildFieldsFromTable(gt)
 }
