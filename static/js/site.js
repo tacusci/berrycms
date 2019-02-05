@@ -234,6 +234,13 @@ $(document).ready(function() {
       })
     });
 
+    $("#selectallgroups").change(function() {
+      var selectAll = this.checked;
+      $("#group-list tr").each(function(){
+        selectAllCheckboxes(this, selectAll)
+      })
+    });
+
     function selectAllCheckboxes(row, selectAll) {
       $(row).find("td").each(function(){
         $(this).find("input").each(function(){
