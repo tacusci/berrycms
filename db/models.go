@@ -509,6 +509,26 @@ func (gmt *GroupMembershipTable) AddUserToGroup(db *sql.DB, u *User, groupTitle 
 	return nil
 }
 
+func (gmt *GroupMembershipTable) DeleteAllUsersFromGroup(db *sql.DB, g *Group) (int64, error) {
+	var res sql.Result
+	var err error
+
+	//if group UUID is a wildcard instead just delete all group memberships (in this case, deletes all users from all groups!)
+	if g.UUID == "*" {
+		res, err = db.Exec(fmt.Sprintf("DELETE FROM %s", gmt.Name()))
+	} else {
+		res, err = db.Exec(fmt.Sprintf("DELETE FROM %s WHERE groupuuid = ?", gmt.Name()), g.UUID)
+	}
+
+	numDeleted, err := res.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return numDeleted, nil
+}
+
 func (gmt *GroupMembershipTable) DeleteUserFromGroup(db *sql.DB, u *User, g *Group) (int64, error) {
 	var res sql.Result
 	var err error
