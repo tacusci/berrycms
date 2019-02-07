@@ -130,7 +130,7 @@ func (mr *MutableRouter) Reload() {
 			}
 		}
 		if _, err := plugin.Call("main", nil, nil); err != nil {
-			logging.Error(err.Error())
+			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 		}
 	}
 	pm.Unlock()
