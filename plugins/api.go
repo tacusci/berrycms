@@ -192,6 +192,61 @@ func (f *filesapi) Read(call otto.FunctionCall) otto.Value {
 	return val
 }
 
+func (f *filesapi) ReadBytes(call otto.FunctionCall) otto.Value {
+	//TODO: Break this function up, to share between Read and ReadBytes func definitions
+	if len(call.ArgumentList) != 1 {
+		return apiError(&call, "too many arguments to call 'files.ReadBytes', want (string)")
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		return apiError(&call, "'files.ReadBytes' function expected string")
+	}
+
+	//get the current running/working directory abs path
+	rootDir, err := os.Getwd()
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	//append the running/working directory abs path to the passed path
+	//we want to remove the leading path seperator to guarentee there's only the one
+	//also want to remove '../' chars so reverse directory traversal is impossible
+	absFilePath := fmt.Sprintf("%s%s%s", rootDir, string(os.PathSeparator), strings.Replace(strings.TrimPrefix(valPassed.String(), string(os.PathSeparator)), "../", "", -1))
+
+	//get passed file info
+	fileInfo, err := os.Stat(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	//if the file passed is a directory return list of files in directory
+	if fileInfo.IsDir() {
+		files, err := ioutil.ReadDir(absFilePath)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		//convert file slice to otto value
+		val, err := call.Otto.ToValue(files)
+		if err != nil {
+			return apiError(&call, err.Error())
+		}
+		return val
+	}
+
+	//read the byte data from the file passed and return it as a string
+	data, err := ioutil.ReadFile(absFilePath)
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+	//convert file data string to otto value
+	val, err := call.Otto.ToValue(data)
+
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+	return val
+}
+
 // ******** END FILE FUNCS ********
 
 // ******** MISC FUNCS ********
