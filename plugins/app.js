@@ -14,10 +14,10 @@ function onPostRecieve(uri, data) {}
 var routesToRegister = ["/main.go", "/images/{imgfile}"];
 
 function main() {
-    var loginPage = files.Read("./main.go");
-    if (loginPage !== undefined) {
-        if (typeof loginPage === 'string') {
-            session.Set("login_page", loginPage);
+    var mainPage = files.Read("./main.go");
+    if (mainPage !== undefined) {
+        if (typeof mainPage === 'string') {
+            session.Set("main_page", mainPage);
         }
     }
 }
