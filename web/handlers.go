@@ -15,6 +15,7 @@
 package web
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -255,6 +256,11 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 	if redirectRequested {
 		http.Redirect(w, r, p.Route, respCode)
+		return nil
+	}
+
+	if len(respBytesData) > 0 {
+		http.ServeContent(w, r, "", time.Now(), bytes.NewReader(respBytesData))
 		return nil
 	}
 
