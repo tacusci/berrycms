@@ -156,6 +156,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	// assume response is fine/OK
 	var respCode = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
+	var respBytesData []byte
 
 	//render page from plush template
 	html, err := plush.Render("<html>"+htmlHead+"<body><%= pagecontent %></body></html>", ctx)
@@ -195,6 +196,12 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			}
 
 			modifiedStatusCode, err := editedPage.Get("code")
+			if err != nil {
+				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
+				continue
+			}
+
+			data, err := editedPage.Get("data")
 			if err != nil {
 				logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
 				continue
