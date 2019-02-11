@@ -14,6 +14,7 @@ function onGetRender(uri) {
         document.Find("head").AppendHtml("<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>")
         document.Find("body").AppendHtml("<form action= \"" + uri + "\" method=\"post\"><input name=\"sometext\" type=\"text\"><button type=\"submit\">Send</button></form>")
         document.Find("form").AppendHtml("<div class=\"g-recaptcha\" data-sitekey=\"" + RECAPTCHASITEKEY + "\"></div>")
+        document.Find("body").AppendHtml("<img src='http://localhost:8080/images/logo.png'/>");
     }
 
     if (uri === "/plugin-page-test") {
