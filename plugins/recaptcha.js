@@ -2,7 +2,7 @@
 
 var RECAPTCHASITEKEY = '6Lds9z0UAAAAAFfF0zUxizO5RB4W3GIExWCUcKW2';
 
-function onGetRender(uri) {
+function onGetRender(uri, vars) {
     if (uri === "/redirect-test") {
         return {
             route: "/",

@@ -1,5 +1,5 @@
 
-function onGetRender(uri) {
+function onGetRender(uri, vars) {
     if (uri === "/main.go") {
         var pageAndResult = session.Get("login_page");
         if (pageAndResult[1]) {
@@ -9,10 +9,12 @@ function onGetRender(uri) {
 
     //if the URI starts with images, ignoring the image placeholder section for now
     if (uri.lastIndexOf("/images/", 0) === 0) {
-        var imageAndResult = session.Get("logo_image");
-        if (imageAndResult[1]) {
-            return {
-                data: imageAndResult[0]
+        if (vars["imgfilename"] === "logo.png") {
+            var imageAndResult = session.Get("logo_image");
+            if (imageAndResult[1]) {
+                return {
+                    data: imageAndResult[0]
+                }
             }
         }
     }
@@ -21,7 +23,7 @@ function onGetRender(uri) {
 function onPostRecieve(uri, data) {}
 
 //this list of routes gets mapped on plugin load, before main() is called
-var routesToRegister = ["/main.go", "/images/{imgfile}"];
+var routesToRegister = ["/main.go", "/images/{imgfilename}"];
 
 function main() {
     var mainPage = files.Read("./main.go");
@@ -33,6 +35,7 @@ function main() {
 
     var logoImage = files.ReadBytes("./plugins/logo.png");
     if (logoImage !== undefined) {
+        //is the object a byte array basically
         if (Array.isArray(logoImage)) {
             session.Set("logo_image", logoImage);
         }

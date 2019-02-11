@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/gorilla/mux"
 	"github.com/tacusci/berrycms/plugins"
 
 	"github.com/gobuffalo/plush"
@@ -158,6 +159,7 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 	var respCode = http.StatusOK
 	var htmlHead = "<head><link rel=\"stylesheet\" href=\"/css/berry-default.css\"><link rel=\"stylesheet\" href=\"/css/font.css\"></head>"
 	var respBytesData []byte
+	var uriVars map[string]string = mux.Vars(r)
 
 	//render page from plush template
 	html, err := plush.Render("<html>"+htmlHead+"<body><%= pagecontent %></body></html>", ctx)
@@ -179,7 +181,8 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 			break
 		}
 		plugin.VM.Set("document", plugin.Document)
-		val, err := plugin.Call("on_get_render", nil, &p.Route)
+		//call intermediary on get render, with the uri and all the corresponding uri vars
+		val, err := plugin.Call("on_get_render", nil, &p.Route, uriVars)
 		//val, err := plugin.Call("onGetRender", nil, &p.Route)
 		if err != nil {
 			logging.Error(fmt.Sprintf("PLUGIN {%s} -> %s", plugin.UUID(), err.Error()))
