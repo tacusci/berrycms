@@ -225,6 +225,16 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 				}
 				respCode = int(modifiedStatusCodeInt)
 			}
+
+			//if it's a golang slice it comes back as an object
+			if data.IsObject() {
+				if val_interface, err := data.Export(); err == nil {
+					if dataBytes, ok := val_interface.([]byte); ok {
+						respBytesData = dataBytes
+						break
+					}
+				}
+			}
 		}
 
 		//no point in running other plugins
