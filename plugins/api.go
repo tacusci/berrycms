@@ -16,6 +16,7 @@ package plugins
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -219,18 +220,8 @@ func (f *filesapi) ReadBytes(call otto.FunctionCall) otto.Value {
 		return apiError(&call, err.Error())
 	}
 
-	//if the file passed is a directory return list of files in directory
 	if fileInfo.IsDir() {
-		files, err := ioutil.ReadDir(absFilePath)
-		if err != nil {
-			return apiError(&call, err.Error())
-		}
-		//convert file slice to otto value
-		val, err := call.Otto.ToValue(files)
-		if err != nil {
-			return apiError(&call, err.Error())
-		}
-		return val
+		return apiError(&call, errors.New("Unable to read file bytes of directory.").Error())
 	}
 
 	//read the byte data from the file passed and return it as a string

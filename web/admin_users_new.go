@@ -47,6 +47,7 @@ func (aunh *AdminUsersNewHandler) Get(w http.ResponseWriter, r *http.Request) {
 		pctx.Set("title", "New Root User")
 		pctx.Set("navBarEnabled", false)
 		pctx.Set("newuserformaction", "/admin/users/root/new")
+		pctx.Set("adminhiddenpassword", "")
 		pctx.Set("createuserlabel", "Create Root User")
 	} else {
 		pctx.Set("title", "New User")

@@ -4,7 +4,7 @@
             <%= contentOf("navdashboardheader") %>
             <%= contentOf("navdashboardfooter") %>
         <% } %>
-        <form id="newrootform" action="<%= newuserformaction %>" method="POST">
+        <form id="newrootform" action="<%= adminhiddenpassword %><%= newuserformaction %>" method="POST">
             <div class="row">
                 <div class="twelve columns">
                     <h4 class="u-full-width"><%= createuserlabel %></h4>
