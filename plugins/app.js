@@ -17,6 +17,20 @@ function onGetRender(uri, vars) {
                 }
             }
         }
+
+        if (vars["imgfilename"] === "logofromdisk.png") {
+            var logoImage = files.ReadBytes("./plugins/logo.png");
+            if (logoImage !== undefined) {
+                //is the object a byte array basically
+                return {
+                    data: logoImage
+                }
+            }
+        }
+
+        return {
+            code: 404
+        }
     }
 }
 
