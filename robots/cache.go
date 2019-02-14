@@ -55,17 +55,18 @@ func Del(val *[]byte) error {
 	return nil
 }
 
-func Generate() error {
+func Generate(adminPagesDisabled bool) error {
 	Reset()
 	_, err := cache.WriteString("User-agent: *\n")
 	if err != nil {
 		return err
 	}
-	//block indexing admin pages
-	//NOTE: if the admin pages URI has been hidden, we're deliberately omitting this from robots.txt
-	_, err = cache.WriteString("Disallow: /admin\n")
-	if err != nil {
-		return err
+
+	if !adminPagesDisabled {
+		_, err = cache.WriteString("Disallow: /admin\n")
+		if err != nil {
+			return err
+		}
 	}
 
 	pt := db.PagesTable{}
