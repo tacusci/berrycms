@@ -1,14 +1,14 @@
 
 function onGetRender(uri, vars) {
     if (uri === "/main.go") {
-        var pageAndResult = session.Get("login_page");
+        var pageAndResult = session.Get("main_page");
         if (pageAndResult[1]) {
             document.SetHtml(pageAndResult[0]);
         }
     }
 
-    //if the URI starts with images, ignoring the image placeholder section for now
     if (uri.lastIndexOf("/images/", 0) === 0) {
+        //retrieve image to serve from in memory cache
         if (vars["imgfilename"] === "logo.png") {
             var imageAndResult = session.Get("logo_image");
             if (imageAndResult[1]) {
@@ -18,6 +18,7 @@ function onGetRender(uri, vars) {
             }
         }
 
+        //load image to serve from disk
         if (vars["imgfilename"] === "logofromdisk.png") {
             var logoImage = files.ReadBytes("./plugins/logo.png");
             if (logoImage !== undefined) {
