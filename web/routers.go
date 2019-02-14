@@ -40,6 +40,7 @@ type MutableRouter struct {
 	Server              *http.Server
 	mu                  sync.Mutex
 	Root                *mux.Router
+	AdminOff            bool
 	AdminHidden         bool
 	AdminHiddenPassword string
 	ActivityLogLoc      string
@@ -62,7 +63,7 @@ func (mr *MutableRouter) Reload() {
 
 	if !mr.NoRobots {
 		//creates a robot string and loads into in-memory cache
-		err := robots.Generate()
+		err := robots.Generate(mr.AdminOff)
 		if err != nil {
 			logging.Error(err.Error())
 		}
@@ -79,29 +80,43 @@ func (mr *MutableRouter) Reload() {
 	mr.pluginswatcher = watcher.New()
 
 	r := mux.NewRouter()
-	logging.Debug("Mapping default admin routes...")
 
-	for _, handler := range GetDefaultHandlers(mr) {
-		if handler.HandlesGet() {
-			logging.Debug(fmt.Sprintf("Mapping default GET route %s", handler.Route()))
-			r.HandleFunc(handler.Route(), handler.Get).Methods("GET")
+	if !mr.AdminOff {
+		logging.Debug("Mapping default admin routes...")
+
+		for _, handler := range GetDefaultHandlers(mr) {
+			if handler.HandlesGet() {
+				logging.Debug(fmt.Sprintf("Mapping default GET route %s", handler.Route()))
+				r.HandleFunc(handler.Route(), handler.Get).Methods("GET")
+			}
+
+			if handler.HandlesPost() {
+				logging.Debug(fmt.Sprintf("Mapping default POST route %s", handler.Route()))
+				r.HandleFunc(handler.Route(), handler.Post).Methods("POST")
+			}
 		}
 
-		if handler.HandlesPost() {
-			logging.Debug(fmt.Sprintf("Mapping default POST route %s", handler.Route()))
-			r.HandleFunc(handler.Route(), handler.Post).Methods("POST")
+		ut := db.UsersTable{}
+		if !ut.RootUserExists() {
+			aunh := AdminUsersNewHandler{
+				Router: mr,
+			}
+			//add explicit mapping of root user creation handler routes
+			r.HandleFunc("/admin/users/root/new", aunh.Get).Methods("GET")
+			r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")
 		}
+	} else {
+		logging.Warn("ADMIN PAGES HAVE BEEN DISABLED!")
 	}
 
-	ut := db.UsersTable{}
-	if !ut.RootUserExists() {
-		aunh := AdminUsersNewHandler{
-			Router: mr,
-		}
-		//add explicit mapping of root user creation handler routes
-		r.HandleFunc("/admin/users/root/new", aunh.Get).Methods("GET")
-		r.HandleFunc("/admin/users/root/new", aunh.Post).Methods("POST")
+	//do really need to map this even if the robots.txt cache hasn't been initialised
+	robotsHandler := &RobotsHandler{
+		route:  "/robots.txt",
+		Router: mr,
 	}
+
+	logging.Debug(fmt.Sprintf("Mapping default GET route %s", robotsHandler.Route()))
+	r.HandleFunc(robotsHandler.Route(), robotsHandler.Get).Methods("GET")
 
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
