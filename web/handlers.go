@@ -51,10 +51,6 @@ func GetDefaultHandlers(router *MutableRouter) []Handler {
 	}
 
 	return []Handler{
-		&RobotsHandler{
-			route:  "/robots.txt",
-			Router: router,
-		},
 		&LoginHandler{
 			route:  adminHiddenPrefix + "/login",
 			Router: router,
