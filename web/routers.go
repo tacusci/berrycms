@@ -117,9 +117,9 @@ func (mr *MutableRouter) Reload() {
 	for _, plugin := range *pm.Plugins() {
 		if val, err := plugin.VM.Get("routesToRegister"); err == nil {
 			//extract list value of 'routesToRegister' from plugin
-			if val_interface, err := val.Export(); err == nil {
+			if valInterface, err := val.Export(); err == nil {
 				//try and convert list to slice of strings exclusively, if this fails don't continue
-				if routesToRegister, ok := val_interface.([]string); ok {
+				if routesToRegister, ok := valInterface.([]string); ok {
 					routesToRegister = util.RemoveDuplicates(routesToRegister)
 					//for each route/value from list, map the route to the db_pages handler
 					for _, value := range routesToRegister {
