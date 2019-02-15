@@ -32,6 +32,7 @@ import (
 )
 
 type options struct {
+	cpuProfile          bool
 	testData            bool
 	wipe                bool
 	yesToAll            bool
@@ -66,6 +67,7 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
 	flag.BoolVar(&opts.noRobots, "nrtxt", false, "Don't provide a robots.txt URI")
 	flag.StringVar(&opts.logFileName, "log", "", "Server log file location")
+	flag.BoolVar(&opts.cpuProfile, "cpuprofile", false, "Enable CPU profiling")
 
 	flag.Parse()
 
@@ -145,6 +147,7 @@ func main() {
 		AdminHidden:         len(opts.adminHiddenPassword) > 0,
 		AdminHiddenPassword: opts.adminHiddenPassword,
 		NoRobots:            opts.noRobots,
+		CpuProfile:          opts.cpuProfile,
 	}
 	rs.Reload()
 
