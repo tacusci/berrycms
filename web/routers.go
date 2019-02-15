@@ -20,6 +20,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"strings"
 	"sync"
@@ -44,6 +45,7 @@ type MutableRouter struct {
 	AdminHiddenPassword string
 	ActivityLogLoc      string
 	NoRobots            bool
+	CpuProfile          bool
 	staticwatcher       *watcher.Watcher
 	pluginswatcher      *watcher.Watcher
 	pm                  *plugins.Manager
@@ -79,8 +81,24 @@ func (mr *MutableRouter) Reload() {
 	mr.pluginswatcher = watcher.New()
 
 	r := mux.NewRouter()
-	logging.Debug("Mapping default admin routes...")
 
+	if mr.CpuProfile {
+		logging.Warn("Mapping CPU profiling URIs...")
+		r.HandleFunc("/debug/pprof/", pprof.Index)
+		r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+		r.Handle("/debug/pprof/allocs", pprof.Handler("allocs"))
+		r.Handle("/debug/pprof/block", pprof.Handler("block"))
+		r.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+		r.Handle("/debug/pprof/heap", pprof.Handler("heap"))
+		r.Handle("/debug/pprof/mutex", pprof.Handler("mutex"))
+		r.Handle("/debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+	}
+
+	logging.Debug("Mapping default admin routes...")
 	for _, handler := range GetDefaultHandlers(mr) {
 		if handler.HandlesGet() {
 			logging.Debug(fmt.Sprintf("Mapping default GET route %s", handler.Route()))
