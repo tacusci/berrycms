@@ -118,6 +118,14 @@ func (mr *MutableRouter) Reload() {
 	logging.Debug(fmt.Sprintf("Mapping default GET route %s", robotsHandler.Route()))
 	r.HandleFunc(robotsHandler.Route(), robotsHandler.Get).Methods("GET")
 
+	sitemapHandler := &SitemapHandler{
+		route:  "/sitemap.xml",
+		Router: mr,
+	}
+
+	logging.Debug(fmt.Sprintf("Mapping default GET route %s", sitemapHandler.Route()))
+	r.HandleFunc(sitemapHandler.Route(), sitemapHandler.Get).Methods("GET")
+
 	r.NotFoundHandler = http.HandlerFunc(fourOhFour)
 
 	mr.mapSavedPageRoutes(r)
