@@ -42,8 +42,15 @@ func Generate(adminPagesDisabled bool) error {
 			return err
 		}
 
-		_, err := cache.WriteString(fmt.Sprintf("<url>%s"))
+		_, err = cache.WriteString(fmt.Sprintf("\t<url>\n\t<loc>%s</loc>\n</url>\n", pageRouteToAdd))
+		if err != nil {
+			return err
+		}
 	}
+
+	cache.WriteString("</urlset>")
+
+	return nil
 }
 
 func CacheExists() bool {
