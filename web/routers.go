@@ -31,6 +31,7 @@ import (
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/berrycms/robots"
+	"github.com/tacusci/berrycms/sitemap"
 	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
@@ -67,6 +68,11 @@ func (mr *MutableRouter) Reload() {
 		if err != nil {
 			logging.Error(err.Error())
 		}
+	}
+
+	err := sitemap.Generate()
+	if err != nil {
+		logging.Error(err.Error())
 	}
 
 	if mr.staticwatcher != nil {
