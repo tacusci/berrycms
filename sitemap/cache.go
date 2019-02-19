@@ -1,8 +1,7 @@
-package main
+package sitemap
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 
 	"github.com/tacusci/berrycms/db"
@@ -10,19 +9,9 @@ import (
 
 var cache *bytes.Buffer
 
-func Add(val *[]byte) error {
-	if cache == nil {
-		return errors.New("Sitemap cache immutable... User has likely disabled sitemap.xml")
-	}
-}
-
-func Del(val *[]byte) error {
-	return nil
-}
-
-func Generate(adminPagesDisabled bool) error {
+func Generate() error {
 	Reset()
-	_, err := cache.WriteString("<?xml version\"1.0\" encoding\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n\t")
+	_, err := cache.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
 	if err != nil {
 		return err
 	}
