@@ -52,4 +52,9 @@ function main() {
     for (var j = 0; j < 20; j++) {
         robots.Del("Disallow: /cheesecake-test")
     }
+
+    //it's only possible to add routes to the sitemap within a plugin's main function
+    for (var i = 0; i < routesToRegister.length; i++) {
+        sitemap.Add(routesToRegister[i]);
+    }
 }

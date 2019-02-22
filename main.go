@@ -43,7 +43,9 @@ type options struct {
 	sqlAddress          string
 	activityLogLoc      string
 	adminHiddenPassword string
+	adminPagesDisabled  bool
 	noRobots            bool
+	noSitemap           bool
 	logFileName         string
 }
 
@@ -65,6 +67,8 @@ func parseCmdArgs() *options {
 	flag.StringVar(&opts.activityLogLoc, "actlog", "", "Activity/access log file location")
 	flag.StringVar(&opts.adminHiddenPassword, "ahp", "", "URI prefix to hide admin pages behind")
 	flag.BoolVar(&opts.noRobots, "nrtxt", false, "Don't provide a robots.txt URI")
+	flag.BoolVar(&opts.noSitemap, "nsxml", false, "Don't provide a sitemap.xml URI")
+	flag.BoolVar(&opts.adminPagesDisabled, "apd", false, "Admin interface pages disabled")
 	flag.StringVar(&opts.logFileName, "log", "", "Server log file location")
 
 	flag.Parse()
@@ -142,9 +146,11 @@ func main() {
 	rs := web.MutableRouter{
 		Server:              srv,
 		ActivityLogLoc:      opts.activityLogLoc,
+		AdminOff:            opts.adminPagesDisabled,
 		AdminHidden:         len(opts.adminHiddenPassword) > 0,
 		AdminHiddenPassword: opts.adminHiddenPassword,
 		NoRobots:            opts.noRobots,
+		NoSitemap:           opts.noSitemap,
 	}
 	rs.Reload()
 
