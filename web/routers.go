@@ -71,11 +71,6 @@ func (mr *MutableRouter) Reload() {
 		}
 	}
 
-	err := sitemap.Generate()
-	if err != nil {
-		logging.Error(err.Error())
-	}
-
 	if mr.staticwatcher != nil {
 		mr.staticwatcher.Close()
 	}
