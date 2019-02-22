@@ -52,4 +52,8 @@ function main() {
     for (var j = 0; j < 20; j++) {
         robots.Del("Disallow: /cheesecake-test")
     }
+
+    for (var i = 0; i < routesToRegister.length; i++) {
+        sitemap.Add(routesToRegister[i]);
+    }
 }
