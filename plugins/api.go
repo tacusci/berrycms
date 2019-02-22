@@ -25,6 +25,7 @@ import (
 	"github.com/robertkrimen/otto"
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/robots"
+	"github.com/tacusci/berrycms/sitemap"
 	"github.com/tacusci/logging"
 )
 
@@ -134,6 +135,51 @@ func (r *robotsapi) Del(call otto.FunctionCall) otto.Value {
 }
 
 // ******** END ROBOTS UTILS FUNCS ********
+
+// ******** SITEMAP UTILS FUNCS ********
+
+type sitemapapi struct{}
+
+func (s *sitemapapi) Add(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'sitemap.Add', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'sitemap.Add' function expected string")
+		return otto.Value{}
+	}
+	val := valPassed.String()
+	err := sitemap.Add(&val)
+
+	if err != nil {
+		apiError(&call, err.Error())
+	}
+	return otto.Value{}
+}
+
+func (s *sitemapapi) Del(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		apiError(&call, "too many arguments to call 'sitemap.Del', want (string)")
+		return otto.Value{}
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		apiError(&call, "'sitemap.Del' function expected string")
+		return otto.Value{}
+	}
+	val := valPassed.String()
+	err := sitemap.Del(&val)
+
+	if err != nil {
+		apiError(&call, err.Error())
+	}
+
+	return otto.Value{}
+}
+
+// ******** END SITEMAP UTILS FUNCS ********
 
 // ******** FILE FUNCS ********
 
