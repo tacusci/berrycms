@@ -46,6 +46,7 @@ type MutableRouter struct {
 	AdminHiddenPassword string
 	ActivityLogLoc      string
 	NoRobots            bool
+	NoSitemap           bool
 	staticwatcher       *watcher.Watcher
 	pluginswatcher      *watcher.Watcher
 	pm                  *plugins.Manager
