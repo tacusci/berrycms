@@ -64,9 +64,27 @@ func Generate(httpScheme string, urlDomainPrefix string) error {
 			return err
 		}
 
-		_, err = cache.WriteString(fmt.Sprintf("\t<url>\n\t<loc>%s</loc>\n</url>\n", pageRouteToAdd))
+		var alreadyExists bool
+		for _, v := range *additionalRoutes {
+			if pageRouteToAdd == v {
+				alreadyExists = true
+				break
+			}
+		}
+
+		if alreadyExists {
+			continue
+		}
+
+		_, err = cache.WriteString(fmt.Sprintf("\t<url>\n\t\t<loc>%s://%s%s</loc>\n\t</url>\n", httpScheme, urlDomainPrefix, pageRouteToAdd))
 		if err != nil {
 			return err
+		}
+	}
+
+	if additionalRoutes != nil {
+		for _, v := range *additionalRoutes {
+			_, err = cache.WriteString(fmt.Sprintf("\t<url>\n\t\t<loc>%s://%s%s</loc>\n\t</url>\n", httpScheme, urlDomainPrefix, v))
 		}
 	}
 
