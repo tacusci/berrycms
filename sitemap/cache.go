@@ -5,12 +5,45 @@ import (
 	"fmt"
 
 	"github.com/tacusci/berrycms/db"
+	"github.com/tacusci/berrycms/util"
 )
 
 var cache *bytes.Buffer
+var additionalRoutes *[]string
 
-func Generate() error {
+func Add(val *string) error {
+	if additionalRoutes == nil {
+		additionalRoutes = &[]string{}
+	}
+
+	for _, v := range *additionalRoutes {
+		if *val == v {
+			return nil
+		}
+	}
+
+	*additionalRoutes = append(*additionalRoutes, *val)
+
+	return nil
+}
+
+func Del(val *string) error {
+	if additionalRoutes == nil {
+		return nil
+	}
+
+	*additionalRoutes = util.RemoveStringFromSlice(*additionalRoutes, *val)
+
+	return nil
+}
+
+func Generate(httpScheme string, urlDomainPrefix string) error {
 	Reset()
+
+	if httpScheme == "" {
+		httpScheme = "http"
+	}
+
 	_, err := cache.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
 	if err != nil {
 		return err
