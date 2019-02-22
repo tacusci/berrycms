@@ -31,7 +31,6 @@ import (
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/plugins"
 	"github.com/tacusci/berrycms/robots"
-	"github.com/tacusci/berrycms/sitemap"
 	"github.com/tacusci/berrycms/util"
 	"github.com/tacusci/logging"
 )
@@ -120,6 +119,7 @@ func (mr *MutableRouter) Reload() {
 	logging.Debug(fmt.Sprintf("Mapping default GET route %s", robotsHandler.Route()))
 	r.HandleFunc(robotsHandler.Route(), robotsHandler.Get).Methods("GET")
 
+	//do really need to map this even if the sitemap.xml cache hasn't been initialised
 	sitemapHandler := &SitemapHandler{
 		route:  "/sitemap.xml",
 		Router: mr,
