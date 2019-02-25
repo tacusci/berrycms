@@ -142,7 +142,7 @@ func main() {
 		Addr:         fmt.Sprintf("%s:%d", opts.addr, opts.port),
 		WriteTimeout: time.Second * 60,
 		ReadTimeout:  time.Second * 60,
-		IdleTimeout:  time.Second * 60,
+		IdleTimeout:  time.Second * 120,
 	}
 
 	rs := web.MutableRouter{
