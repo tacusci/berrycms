@@ -32,6 +32,7 @@ import (
 )
 
 type options struct {
+	cpuProfile          bool
 	testData            bool
 	wipe                bool
 	yesToAll            bool
@@ -70,6 +71,7 @@ func parseCmdArgs() *options {
 	flag.BoolVar(&opts.noSitemap, "nsxml", false, "Don't provide a sitemap.xml URI")
 	flag.BoolVar(&opts.adminPagesDisabled, "apd", false, "Admin interface pages disabled")
 	flag.StringVar(&opts.logFileName, "log", "", "Server log file location")
+	flag.BoolVar(&opts.cpuProfile, "cpuprofile", false, "Enable CPU profiling")
 
 	flag.Parse()
 
@@ -138,8 +140,8 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", opts.addr, opts.port),
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
+		WriteTimeout: time.Second * 60,
+		ReadTimeout:  time.Second * 60,
 		IdleTimeout:  time.Second * 60,
 	}
 
@@ -151,6 +153,7 @@ func main() {
 		AdminHiddenPassword: opts.adminHiddenPassword,
 		NoRobots:            opts.noRobots,
 		NoSitemap:           opts.noSitemap,
+		CpuProfile:          opts.cpuProfile,
 	}
 	rs.Reload()
 
