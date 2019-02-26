@@ -17,14 +17,18 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"os/user"
 	"strings"
 	"syscall"
 	"time"
+
+	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/tacusci/berrycms/db"
 	"github.com/tacusci/berrycms/web"
@@ -48,6 +52,7 @@ type options struct {
 	noRobots            bool
 	noSitemap           bool
 	logFileName         string
+	autoCertDomain      string
 }
 
 var shuttingDown bool
@@ -72,6 +77,7 @@ func parseCmdArgs() *options {
 	flag.BoolVar(&opts.adminPagesDisabled, "apd", false, "Admin interface pages disabled")
 	flag.StringVar(&opts.logFileName, "log", "", "Server log file location")
 	flag.BoolVar(&opts.cpuProfile, "cpuprofile", false, "Enable CPU profiling")
+	flag.StringVar(&opts.autoCertDomain, "autocert", "", "Domain/web address to serve HTTPS against")
 
 	flag.Parse()
 
@@ -138,11 +144,28 @@ func main() {
 
 	go db.Heartbeat()
 
+	var certManager *autocert.Manager
+
+	if opts.autoCertDomain != "" {
+		certManager = &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(opts.autoCertDomain),
+			Cache:      autocert.DirCache(cacheDir()),
+		}
+	}
+
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", opts.addr, opts.port),
 		WriteTimeout: time.Second * 60,
 		ReadTimeout:  time.Second * 60,
 		IdleTimeout:  time.Second * 120,
+	}
+
+	if certManager != nil {
+		srv.Addr = fmt.Sprintf("%s:%d", opts.addr, 443)
+		srv.TLSConfig = &tls.Config{
+			GetCertificate: certManager.GetCertificate,
+		}
 	}
 
 	rs := web.MutableRouter{
@@ -163,7 +186,13 @@ func main() {
 	go listenForStopSig(srv, &clearOldSessionsStop)
 
 	logging.Info(fmt.Sprintf("Starting http server @ %s 🌏 ...", srv.Addr))
-	err := srv.ListenAndServe()
+
+	var err error
+	if srv.TLSConfig == nil {
+		err = srv.ListenAndServe()
+	} else {
+		err = srv.ListenAndServeTLS("", "")
+	}
 
 	if !shuttingDown {
 		if err != nil {
@@ -205,6 +234,17 @@ func askConfirmToWipe() bool {
 			return false
 		}
 	}
+}
+
+func cacheDir() (dir string) {
+	if u, _ := user.Current(); u != nil {
+		dir = fmt.Sprintf("%s%scache-autocert-%s", os.TempDir(), string(os.PathSeparator), u.Username)
+		logging.Info(fmt.Sprintf("Using cache: %s", dir))
+		if err := os.MkdirAll(dir, 0700); err == nil {
+			return dir
+		}
+	}
+	return ""
 }
 
 //fires on Ctrl+C/SIGTERM send to process
