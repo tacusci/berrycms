@@ -162,7 +162,7 @@ func main() {
 	}
 
 	if certManager != nil {
-		srv.Addr = fmt.Sprintf("%s:%d", opts.addr, 443)
+		srv.Addr = ":https"
 		srv.TLSConfig = &tls.Config{
 			GetCertificate: certManager.GetCertificate,
 		}
