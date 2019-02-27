@@ -161,9 +161,7 @@ func main() {
 
 	if certManager != nil {
 		srv.Addr = ":https"
-		srv.TLSConfig = &tls.Config{
-			GetCertificate: certManager.GetCertificate,
-		}
+		srv.TLSConfig = certManager.TLSConfig()
 	}
 
 	rs := web.MutableRouter{
