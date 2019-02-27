@@ -17,13 +17,11 @@ package main
 import (
 	"bufio"
 	"context"
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"os/user"
 	"strings"
 	"syscall"
 	"time"
@@ -150,7 +148,7 @@ func main() {
 		certManager = &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist(opts.autoCertDomain),
-			Cache:      autocert.DirCache(cacheDir()),
+			Cache:      autocert.DirCache(cacheDir(opts.autoCertDomain)),
 		}
 	}
 
@@ -236,13 +234,15 @@ func askConfirmToWipe() bool {
 	}
 }
 
-func cacheDir() (dir string) {
-	if u, _ := user.Current(); u != nil {
-		dir = fmt.Sprintf("%s%scache-autocert-%s", os.TempDir(), string(os.PathSeparator), u.Username)
-		logging.Info(fmt.Sprintf("Using cache: %s", dir))
-		if err := os.MkdirAll(dir, 0700); err == nil {
+func cacheDir(domain string) (dir string) {
+	if domain != "" {
+		dir = fmt.Sprintf("%s%scache-autocert-%s", os.TempDir(), string(os.PathSeparator), domain)
+		logging.Info(fmt.Sprintf("Saving acquired SSL cert to cache: %s", dir))
+		var err error
+		if err = os.MkdirAll(dir, 0700); err == nil {
 			return dir
 		}
+		logging.Error(fmt.Sprintf("Error creating SSL cert cache folder: %s", err.Error()))
 	}
 	return ""
 }
