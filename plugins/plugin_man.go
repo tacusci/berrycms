@@ -111,6 +111,14 @@ func (m *Manager) Plugins() *[]Plugin {
 	return &m.plugins
 }
 
+func (m *Manager) RecievePlugins(pluginReciever chan Plugin) {
+	for i := 0; i < len(m.plugins); i++ {
+		pluginCopy := m.plugins[i]
+		pluginReciever <- pluginCopy
+	}
+	close(pluginReciever)
+}
+
 func (m *Manager) loadFromDir(dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {

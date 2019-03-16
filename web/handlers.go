@@ -168,9 +168,10 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 
 	pm := plugins.NewManager()
 
-	//have to lock as unfortunately do not support calling any plugin function twice at the exact same time
-	pm.Lock()
-	for _, plugin := range *pm.Plugins() {
+	pluginsToRun := make(chan plugins.Plugin)
+
+	go pm.RecievePlugins(pluginsToRun)
+	for plugin := range pluginsToRun {
 		plugin.Document, err = goquery.NewDocumentFromReader(strings.NewReader(html))
 		if err != nil {
 			logging.Error(err.Error())
@@ -251,7 +252,6 @@ func Render(w http.ResponseWriter, r *http.Request, p *db.Page, ctx *plush.Conte
 		//only set the returned HTML if retrieving it hasn't errored
 		html = htmlFromDocument
 	}
-	pm.Unlock()
 
 	if redirectRequested {
 		http.Redirect(w, r, p.Route, respCode)
