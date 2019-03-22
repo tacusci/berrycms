@@ -16,11 +16,13 @@ package plugins
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
+
+	"github.com/cornelk/hashmap"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tacusci/berrycms/db"
@@ -285,6 +287,57 @@ func (f *filesapi) ReadBytes(call otto.FunctionCall) otto.Value {
 }
 
 // ******** END FILE FUNCS ********
+
+// ******** SESSION FUNCS ********
+
+type sessionapi struct {
+	mu           sync.Mutex
+	sessionStore hashmap.HashMap
+}
+
+func (s *sessionapi) Set(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		return apiError(&call, "too many arguments to call 'session.Set', want (string)")
+	}
+
+	var keyNameParsed otto.Value = call.Argument(0)
+	if !keyNameParsed.IsString() {
+		return apiError(&call, "'session.Set' function expected string")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.sessionStore.Set(keyNameParsed.String(), nil)
+	return otto.Value{}
+}
+
+func (s *sessionapi) Get(call otto.FunctionCall) otto.Value {
+	if len(call.ArgumentList) != 1 {
+		return apiError(&call, "too many arguments to call 'session.Get', want (string)")
+	}
+	var valPassed otto.Value = call.Argument(0)
+	if !valPassed.IsString() {
+		return apiError(&call, "'session.Get' function expected string")
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	mapVal, ok := s.sessionStore.GetStringKey(valPassed.String())
+	if !ok {
+		return apiError(&call, "key does not exist inside hashmap")
+	}
+
+	val, err := call.Otto.ToValue(mapVal)
+
+	if err != nil {
+		return apiError(&call, err.Error())
+	}
+
+	return val
+}
+
+// ******** END SESSION FUNCS ********
 
 // ******** MISC FUNCS ********
 
