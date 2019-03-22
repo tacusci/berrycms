@@ -166,7 +166,7 @@ func (m *Manager) loadPlugin(fileFullPath string) error {
 		plugin.VM.Set("robots", &robotsapi{})
 		plugin.VM.Set("sitemap", &sitemapapi{})
 		plugin.VM.Set("files", &filesapi{})
-		plugin.VM.Set("session", &hashmap.HashMap{})
+		plugin.VM.Set("session", &sessionapi{})
 		plugin.VM.Set("gsession", globalSession)
 		plugin.VM.Set("cmsdb", &cmsdatabaseapi{
 			Conn:       db.Conn,
