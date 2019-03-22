@@ -269,7 +269,7 @@ func (f *filesapi) ReadBytes(call otto.FunctionCall) otto.Value {
 	}
 
 	if fileInfo.IsDir() {
-		return apiError(&call, errors.New("Unable to read file bytes of directory.").Error())
+		return apiError(&call, "unable to read file bytes of directory")
 	}
 
 	//read the byte data from the file passed and return it as a string
