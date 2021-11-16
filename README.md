@@ -1,4 +1,6 @@
+# NOTICE: THIS PROJECT IS NOW BEING WORKED ON AGAIN, REFACTOR/RE-WRITE IN PROGRESS
 # berrycms - A Modern Extendible CMS
+
 [![GoReportCard](https://goreportcard.com/badge/github.com/tacusci/berrycms)](https://goreportcard.com/badge/github.com/tacusci/berrycms)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![HitCount](http://hits.dwyl.io/tacusci/berrycms.svg)](http://hits.dwyl.io/tacusci/berrycms)
