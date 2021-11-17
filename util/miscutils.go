@@ -14,18 +14,6 @@
 
 package util
 
-import (
-	"github.com/schollz/progressbar"
-)
-
-var ProgressBarOptions = progressbar.OptionSetTheme(progressbar.Theme{
-	Saucer:        "█",
-	SaucerHead:    "█",
-	SaucerPadding: " ",
-	BarStart:      "|",
-	BarEnd:        "|",
-})
-
 func RemoveDuplicates(elements []string) []string {
 	encountered := map[string]bool{}
 	result := []string{}

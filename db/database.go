@@ -93,9 +93,8 @@ func CreateTestData() {
 
 	usersTable := UsersTable{}
 
-	bar := progressbar.NewOptions(
-		numTestUsers,
-		progressbar.OptionSetDescription("Creating test users...     "), util.ProgressBarOptions)
+	bar := progressbar.New(numTestUsers)
+	bar.SetTheme([]string{"█", "█", "|", "|"})
 
 	var usersToInsert []*User
 
@@ -157,9 +156,8 @@ func Setup() {
 func createTables(db *sql.DB) {
 	tablesToCreate := getTables()
 
-	bar := progressbar.NewOptions(
-		len(tablesToCreate),
-		progressbar.OptionSetDescription("Creating database tables..."), util.ProgressBarOptions)
+	bar := progressbar.New(len(tablesToCreate))
+	bar.SetTheme([]string{"█", "█", "|", "|"})
 
 	for _, tableToCreate := range tablesToCreate {
 		bar.Add(1)

@@ -19,5 +19,8 @@ access.log
 activity.log
 .activity.log
 
+# VSCode
+.vscode
+
 # Temp files created by VIM
 *.swp
