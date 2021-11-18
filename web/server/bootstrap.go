@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -11,29 +12,37 @@ import (
 	"github.com/tacusci/logging"
 )
 
-func Bootup(opts config.Options) {
+func Bootup(opts config.Options) <-chan struct{} {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 
 	ctx, cancelBootup := context.WithCancel(context.Background())
 	proc := process{}
-	go proc.run(ctx, opts)
+
+	startupErr := make(chan error)
+	go proc.run(ctx, opts, startupErr)
 
 	killsig := <-interrupt
 	fmt.Print("\r")
 	logging.Error(fmt.Sprintf("Received signal: %s", killsig))
 
 	cancelBootup()
-	<-proc.stop()
+	return proc.stop()
 }
 
 type process struct {
 	svr *Server
 }
 
-func (p *process) run(ctx context.Context, opts config.Options) {
+func (p *process) run(ctx context.Context, opts config.Options, err chan<- error) {
 	p.svr = New(opts)
-	p.svr.Start(ctx)
+	select {
+	case <-ctx.Done():
+		err <- errors.New("startup cancelled")
+		return
+	default:
+		err <- p.svr.Start(ctx)
+	}
 }
 
 func (p *process) stop() <-chan struct{} {
