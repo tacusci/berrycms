@@ -564,8 +564,11 @@ func (gmt *GroupMembershipTable) DeleteAllUsersFromGroup(db *sql.DB, g *Group) (
 		res, err = db.Exec(fmt.Sprintf("DELETE FROM %s WHERE groupuuid = ?", gmt.Name()), g.UUID)
 	}
 
-	numDeleted, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
 
+	numDeleted, err := res.RowsAffected()
 	if err != nil {
 		return 0, err
 	}

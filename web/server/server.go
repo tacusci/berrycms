@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 
 type Server struct {
 	opts   config.Options
+	dbConn *sql.DB
 	router web.MutableRouter
 }
 
@@ -32,6 +34,13 @@ func (s *Server) Start(ctx context.Context) error {
 		return errors.New("unable to start berrycms: bootup cancelled")
 	default:
 		displayInitStartupMsg()
+
+		db, err := connectDB()
+		if err != nil {
+			return err
+		}
+		s.dbConn = db
+
 		httpSvr, err := newHttpServer(ctx, s.opts)
 		if err != nil {
 			return err
@@ -79,6 +88,10 @@ func (s *Server) initRouter(ctx context.Context, svr *http.Server) error {
 	}
 }
 
+func connectDB() (*sql.DB, error) {
+	return db.Connect(db.SQLITE, "", "berrycms")
+}
+
 func newHttpServer(ctx context.Context, opts config.Options) (*http.Server, error) {
 	select {
 	case <-ctx.Done():
@@ -101,7 +114,7 @@ func newHttpServer(ctx context.Context, opts config.Options) (*http.Server, erro
 			httpSvr.TLSConfig = c.TLSConfig()
 		}
 
-		return &httpSvr
+		return &httpSvr, nil
 	}
 }
 

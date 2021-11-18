@@ -54,7 +54,7 @@ func (dt *DBType) DriverName() string {
 }
 
 //Connect connects to database
-func Connect(dbType DBType, dbRoute string, schemaName string) {
+func Connect(dbType DBType, dbRoute string, schemaName string) (*sql.DB, error) {
 	SchemaName = schemaName
 	Type = dbType
 	var dbLoc string
@@ -74,11 +74,11 @@ func Connect(dbType DBType, dbRoute string, schemaName string) {
 	}
 	err = db.Ping()
 	if err != nil {
-		logging.ErrorAndExit((fmt.Sprintf(" Error connecting to DB: %s", err.Error())))
-		return
+		return nil, fmt.Errorf("unable to connect to DB: %w", err)
 	}
 	logging.GreenOutput(" Connected...\n")
 	Conn = db
+	return Conn, nil
 }
 
 func Close() {

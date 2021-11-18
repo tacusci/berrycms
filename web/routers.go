@@ -202,7 +202,9 @@ func (mr *MutableRouter) mapSavedPageRoutes(r *mux.Router) {
 
 	pt := db.PagesTable{}
 	rows, err := pt.Select(db.Conn, "route", "")
-	defer rows.Close()
+	if rows != nil {
+		defer rows.Close()
+	}
 	if err != nil {
 		logging.Error(err.Error())
 		return
